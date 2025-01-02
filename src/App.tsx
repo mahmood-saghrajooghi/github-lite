@@ -13,7 +13,7 @@ type Notification = RestEndpointMethodTypes["activity"]["listNotificationsForAut
 
 async function fetchNotifications() {
   try {
-    const res = await github.issues.list({
+    const res = await github.activity.listNotificationsForAuthenticatedUser({
       page: 1,
       all: true,
       headers: {
