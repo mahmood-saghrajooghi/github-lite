@@ -2,62 +2,65 @@ import { AutomaticBaseChangeSucceededEvent, ClosedEvent, CommentDeletedEvent, Co
 import { CheckCircleIcon, GitCommitIcon, CrossReferenceIcon, EyeIcon, GitBranchIcon, GitMergeIcon, GitPullRequestClosedIcon, GitPullRequestDraftIcon, IssueClosedIcon, IssueReopenedIcon, PencilIcon, RepoPushIcon, SkipIcon, TagIcon, XIcon } from '@primer/octicons-react';
 import { useContext } from 'react';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { PullRequestContext } from './PullRequest';
 import { CommentCard, CommentBody, Reactions } from './CommentCard';
 import { Card, BranchName, GithubLabel, Icon, User, IssueStatus, Avatar, Status } from './components';
 import { CommentForm } from './CommentForm';
 
-export function Timeline({items}: {items: (IssueTimelineItems | PullRequestTimelineItems | null)[]}) {
-  return <>
-    {items.map((item, i) => {
-      switch (item?.__typename) {
-        case 'IssueComment':
-          return <CommentCard key={item.id} data={item} />;
-        case 'AutomaticBaseChangeSucceededEvent':
-          return <BaseChanged key={item.id} data={item} />;
-        case 'PullRequestCommit':
-          return <Committed key={item.id} data={item} />;
-        case 'HeadRefForcePushedEvent':
-          return <ForcePushed key={item.id} data={item} />;
-        case 'PullRequestReview':
-          return <Reviewed key={item.id} data={item} />;
-        case 'ReviewDismissedEvent':
-          return <ReviewDismissed key={item.id} data={item} />;
-        case 'RenamedTitleEvent':
-          return <Renamed key={item.id} data={item} />;
-        case 'LabeledEvent':
-          return <Labeled key={item.id} data={item} />;
-        case 'UnlabeledEvent':
-          return <Unlabeled key={item.id} data={item} />;
-        case 'ClosedEvent':
-          return <Closed key={item.id} data={item} />;
-        case 'ReopenedEvent':
-          return <Reopened key={item.id} data={item} />;
-        case 'MergedEvent':
-          return <Merged key={item.id} data={item} />;
-        case 'HeadRefDeletedEvent':
-          return <BranchDeleted key={item.id} data={item} />;
-        case 'CrossReferencedEvent':
-          return <CrossReferenced key={item.id} data={item} />;
-        case 'ReferencedEvent':
-          return <Referenced key={item.id} data={item} />;
-        case 'ReviewRequestedEvent':
-          return <ReviewRequested key={item.id} data={item} />;
-        case 'ConvertToDraftEvent':
-          return <ConvertToDraft key={item.id} data={item} />;
-        case 'ReadyForReviewEvent':
-          return <ReadyForReview key={item.id} data={item} />;
-        case 'CommentDeletedEvent':
-          return <CommentDeleted key={item.id} data={item} />;
-        case 'MentionedEvent':
-        case 'SubscribedEvent':
-          return null;
-        default:
-          return <p key={i}>Unknown event <code className="break-all">{JSON.stringify(item)}</code></p>;
-      }
-    })}
-  </>;
+export function Timeline({ items }: { items: (IssueTimelineItems | PullRequestTimelineItems | null)[] }) {
+  return (
+    <div className="relative flex flex-col gap-6 text-sm">
+      <div className="h-[calc(100%-30px)] w-[1px] bg-daw-gray-300 absolute left-3.5 top-[10px] bg-zinc-600 -z-10" />
+      {items.map((item, i) => {
+        switch (item?.__typename) {
+          case 'IssueComment':
+            return <CommentCard key={item.id} data={item} />;
+          case 'AutomaticBaseChangeSucceededEvent':
+            return <BaseChanged key={item.id} data={item} />;
+          case 'PullRequestCommit':
+            return <Committed key={item.id} data={item} />;
+          case 'HeadRefForcePushedEvent':
+            return <ForcePushed key={item.id} data={item} />;
+          case 'PullRequestReview':
+            return <Reviewed key={item.id} data={item} />;
+          case 'ReviewDismissedEvent':
+            return <ReviewDismissed key={item.id} data={item} />;
+          case 'RenamedTitleEvent':
+            return <Renamed key={item.id} data={item} />;
+          case 'LabeledEvent':
+            return <Labeled key={item.id} data={item} />;
+          case 'UnlabeledEvent':
+            return <Unlabeled key={item.id} data={item} />;
+          case 'ClosedEvent':
+            return <Closed key={item.id} data={item} />;
+          case 'ReopenedEvent':
+            return <Reopened key={item.id} data={item} />;
+          case 'MergedEvent':
+            return <Merged key={item.id} data={item} />;
+          case 'HeadRefDeletedEvent':
+            return <BranchDeleted key={item.id} data={item} />;
+          case 'CrossReferencedEvent':
+            return <CrossReferenced key={item.id} data={item} />;
+          case 'ReferencedEvent':
+            return <Referenced key={item.id} data={item} />;
+          case 'ReviewRequestedEvent':
+            return <ReviewRequested key={item.id} data={item} />;
+          case 'ConvertToDraftEvent':
+            return <ConvertToDraft key={item.id} data={item} />;
+          case 'ReadyForReviewEvent':
+            return <ReadyForReview key={item.id} data={item} />;
+          case 'CommentDeletedEvent':
+            return <CommentDeleted key={item.id} data={item} />;
+          case 'MentionedEvent':
+          case 'SubscribedEvent':
+            return null;
+          default:
+            return <p key={i}>Unknown event <code className="break-all">{JSON.stringify(item)}</code></p>;
+        }
+      })}
+    </div>
+  );
 }
 
 Timeline.issueFragment = () => `
@@ -116,7 +119,7 @@ ${ConvertToDraft.fragment}
 ${ReadyForReview.fragment}
 `;
 
-function Labeled({data}: {data: LabeledEvent}) {
+function Labeled({ data }: { data: LabeledEvent }) {
   return (
     <div className="flex items-center gap-2">
       <Icon className="bg-daw-gray-300 text-daw-gray-800"><TagIcon /></Icon>
@@ -138,7 +141,7 @@ fragment LabeledEventFragment on LabeledEvent {
 }
 `;
 
-function Unlabeled({data}: {data: UnlabeledEvent}) {
+function Unlabeled({ data }: { data: UnlabeledEvent }) {
   return (
     <div className="flex items-center gap-2">
       <Icon className="bg-daw-gray-300 text-daw-gray-800"><TagIcon /></Icon>
@@ -160,7 +163,7 @@ fragment UnlabeledEventFragment on UnlabeledEvent {
 }
 `;
 
-function Closed({data}: {data: ClosedEvent}) {
+function Closed({ data }: { data: ClosedEvent }) {
   return (
     <div className="flex items-center gap-2">
       {data.stateReason === "NOT_PLANNED" ? (
@@ -183,7 +186,7 @@ fragment ClosedEventFragment on ClosedEvent {
 }
 `;
 
-function Reopened({data}: {data: ReopenedEvent}) {
+function Reopened({ data }: { data: ReopenedEvent }) {
   return (
     <div className="flex items-center gap-2">
       <Icon className="bg-green-600 text-white"><IssueReopenedIcon /></Icon>
@@ -201,7 +204,7 @@ fragment ReopenedEventFragment on ReopenedEvent {
 }
 `;
 
-function Merged({data}: {data: MergedEvent}) {
+function Merged({ data }: { data: MergedEvent }) {
   return (
     <div className="flex items-center gap-2">
       <Icon className="bg-purple-600 text-white"><GitMergeIcon /></Icon>
@@ -224,11 +227,11 @@ fragment MergedEventFragment on MergedEvent {
 }
 `;
 
-function CommitLink({commit}: {commit: Commit}) {
+function CommitLink({ commit }: { commit: Commit }) {
   return <Link target="_blank" to={commit.url} className="text-sm hover:underline"><code>{commit.abbreviatedOid}</code></Link>;
 }
 
-function BranchDeleted({data}: {data: HeadRefDeletedEvent}) {
+function BranchDeleted({ data }: { data: HeadRefDeletedEvent }) {
   return (
     <div className="flex items-center gap-2">
       <Icon className="bg-daw-gray-300 text-daw-gray-800"><GitBranchIcon /></Icon>
@@ -247,7 +250,7 @@ fragment BranchDeletedEventFragment on HeadRefDeletedEvent {
 }
 `;
 
-function Renamed({data}: {data: RenamedTitleEvent}) {
+function Renamed({ data }: { data: RenamedTitleEvent }) {
   return (
     <div className="flex items-center gap-2">
       <Icon className="bg-daw-gray-300 text-daw-gray-800"><PencilIcon /></Icon>
@@ -267,7 +270,7 @@ fragment RenamedTitleFragment on RenamedTitleEvent {
 }
 `;
 
-function Reviewed({data}: {data: PullRequestReview}) {
+function Reviewed({ data }: { data: PullRequestReview }) {
   let pr = useContext(PullRequestContext);
   let threadsById = new Map();
   for (let thread of pr?.reviewThreads.nodes!) {
@@ -287,11 +290,11 @@ function Reviewed({data}: {data: PullRequestReview}) {
       {data.state === 'CHANGES_REQUESTED'
         ? <Icon className="bg-red-600 text-white"><GitPullRequestClosedIcon /></Icon>
         : data.state === 'APPROVED'
-        ? <Icon className="bg-green-600 text-white"><CheckCircleIcon /></Icon>
-        : <Icon className="bg-daw-gray-300 text-daw-gray-800"><EyeIcon /></Icon>}
-      <div style={{gridArea: 'description'}}><User actor={data.author!} />  {data.state === 'CHANGES_REQUESTED' ? 'requested changes' : data.state === 'APPROVED' ? 'approved' : 'reviewed'}</div>
+          ? <Icon className="bg-green-600 text-white"><CheckCircleIcon /></Icon>
+          : <Icon className="bg-daw-gray-300 text-daw-gray-800"><EyeIcon /></Icon>}
+      <div style={{ gridArea: 'description' }}><User actor={data.author!} />  {data.state === 'CHANGES_REQUESTED' ? 'requested changes' : data.state === 'APPROVED' ? 'approved' : 'reviewed'}</div>
       {(data.body || !!data.comments?.nodes?.length) && (
-        <div style={{gridArea: 'issue'}} className="flex flex-col gap-2">
+        <div style={{ gridArea: 'issue' }} className="flex flex-col gap-2">
           {data.body &&
             <Card>
               <CommentBody>{data.body}</CommentBody>
@@ -329,14 +332,16 @@ fragment ReviewedEventFragment on PullRequestReview {
 }
 `;
 
-function PullRequestThread({data}: {data: PullRequestReviewThread}) {
-  let df = useDateFormatter({
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric'
-  });
+function PullRequestThread({ data }: { data: PullRequestReviewThread }) {
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric'
+    });
+  };
 
   return (
     <Card>
@@ -350,9 +355,9 @@ function PullRequestThread({data}: {data: PullRequestReviewThread}) {
               <div>
                 <User actor={comment!.author!} />
                 {' • '}
-                <span className="text-xs text-daw-gray-600" style={{gridArea: 'date'}}>{df.format(new Date(comment!.createdAt))}</span>
+                <span className="text-xs text-daw-gray-600" style={{ gridArea: 'date' }}>{formatDate(comment!.createdAt)}</span>
               </div>
-              <div style={{gridArea: 'body'}}>
+              <div style={{ gridArea: 'body' }}>
                 <CommentBody>{comment!.body}</CommentBody>
               </div>
               {comment!.reactionGroups && <Reactions id={comment!.id} data={comment!.reactionGroups} />}
@@ -404,7 +409,7 @@ fragment PullRequestThreadFragment on PullRequestReviewThread {
 }
 `;
 
-function ReviewDismissed({data}: {data: ReviewDismissedEvent}) {
+function ReviewDismissed({ data }: { data: ReviewDismissedEvent }) {
   return (
     <div
       className="grid items-center gap-2"
@@ -448,7 +453,7 @@ fragment ReviewDismissedFragment on ReviewDismissedEvent {
 }
 `;
 
-function CrossReferenced({data}: {data: CrossReferencedEvent}) {
+function CrossReferenced({ data }: { data: CrossReferencedEvent }) {
   return (
     <div
       className="grid items-center gap-2"
@@ -523,7 +528,7 @@ fragment CrossReferencedEventFragment on CrossReferencedEvent {
 }
 `;
 
-function Referenced({data}: {data: ReferencedEvent}) {
+function Referenced({ data }: { data: ReferencedEvent }) {
   return (
     <div
       className="grid items-center gap-2"
@@ -536,7 +541,7 @@ function Referenced({data}: {data: ReferencedEvent}) {
       }}>
       <Icon className="bg-daw-gray-300 text-daw-gray-800"><CrossReferenceIcon /></Icon>
       <span><User actor={data.actor!} /> referenced this pull request</span>
-      <div style={{gridArea: 'commit'}} className="flex gap-2">
+      <div style={{ gridArea: 'commit' }} className="flex gap-2">
         <span className="flex-1 line-clamp-2 text-sm"><Link to={data.commit!.commitUrl} target="_blank" className="hover:underline">{data.commit!.message}</Link></span>
         {data.commit!.statusCheckRollup && <Status state={data.commit!.statusCheckRollup.state} />}
         <CommitLink commit={data.commit!} />
@@ -570,12 +575,12 @@ fragment ReferencedEventFragment on ReferencedEvent {
 }
 `;
 
-function Committed({data}: {data: PullRequestCommit}) {
+function Committed({ data }: { data: PullRequestCommit }) {
   return (
     <div className="flex gap-2 items-center">
-      <Icon className="text-daw-gray-800"><GitCommitIcon /></Icon>
+      <Icon className="text-zinc-300 bg-background h-5"><GitCommitIcon /></Icon>
       <Avatar src={data.commit.author!.avatarUrl} />
-      <span className="flex-1 line-clamp-2 text-sm"><Link to={data.commit.commitUrl} target="_blank" className="hover:underline">{data.commit.message}</Link></span>
+      <span className="flex-1 line-clamp-2"><Link to={data.commit.commitUrl} target="_blank" className="hover:underline">{data.commit.message}</Link></span>
       {data.commit.statusCheckRollup && <Status state={data.commit.statusCheckRollup.state} />}
       <CommitLink commit={data.commit} />
     </div>
@@ -603,7 +608,7 @@ fragment CommittedEventFragment on PullRequestCommit {
 }
 `;
 
-function ForcePushed({data}: {data: HeadRefForcePushedEvent}) {
+function ForcePushed({ data }: { data: HeadRefForcePushedEvent }) {
   return (
     <div className="flex items-center gap-2">
       <Icon className="bg-daw-gray-300 text-daw-gray-800"><RepoPushIcon /></Icon>
@@ -632,7 +637,7 @@ fragment ForcePushedEventFragment on HeadRefForcePushedEvent {
 }
 `;
 
-function BaseChanged({data}: {data: AutomaticBaseChangeSucceededEvent}) {
+function BaseChanged({ data }: { data: AutomaticBaseChangeSucceededEvent }) {
   return (
     <div className="flex items-center gap-2">
       <Icon className="bg-green-600 text-white"><GitBranchIcon /></Icon>
@@ -649,7 +654,7 @@ fragment BaseChangeEventFragment on AutomaticBaseChangeSucceededEvent {
 }
 `;
 
-function ReviewRequested({data}: {data: ReviewRequestedEvent}) {
+function ReviewRequested({ data }: { data: ReviewRequestedEvent }) {
   return (
     <div className="flex items-center gap-2">
       <Icon className="bg-green-600 text-white"><EyeIcon /></Icon>
@@ -672,10 +677,10 @@ fragment ReviewRequestedEventFragment on ReviewRequestedEvent {
 }
 `;
 
-function ConvertToDraft({data}: {data: ConvertToDraftEvent}) {
+function ConvertToDraft({ data }: { data: ConvertToDraftEvent }) {
   return (
     <div className="flex items-center gap-2">
-      <Icon className="bg-daw-gray-300 text-daw-gray-800"><GitPullRequestDraftIcon /></Icon>
+      <Icon className="bg-zinc-800 text-zinc-300 outline outline-background outline-2"><GitPullRequestDraftIcon /></Icon>
       <span><User actor={data.actor!} /> marked this pull request as a draft</span>
     </div>
   );
@@ -689,7 +694,7 @@ fragment ConvertToDraftEventFragment on ConvertToDraftEvent {
 }
 `;
 
-function ReadyForReview({data}: {data: ReadyForReviewEvent}) {
+function ReadyForReview({ data }: { data: ReadyForReviewEvent }) {
   return (
     <div className="flex items-center gap-2">
       <Icon className="bg-daw-gray-300 text-daw-gray-800"><EyeIcon /></Icon>
@@ -706,7 +711,7 @@ fragment ReadyForReviewEventFragment on ReadyForReviewEvent {
 }
 `;
 
-function CommentDeleted({data}: {data: CommentDeletedEvent}) {
+function CommentDeleted({ data }: { data: CommentDeletedEvent }) {
   return (
     <div className="flex items-center gap-2">
       <Icon className="bg-daw-gray-300 text-daw-gray-800"><XIcon /></Icon>

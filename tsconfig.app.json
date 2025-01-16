@@ -29,5 +29,5 @@
       ]
     }
   },
-  "include": ["src"]
+  "include": ["src", "src/routes/pulls/$owner/$repo/$number/.tsx"]
 }

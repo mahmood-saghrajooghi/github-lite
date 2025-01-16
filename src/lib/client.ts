@@ -2,7 +2,7 @@ import { graphql as githubGraphql } from '@octokit/graphql';
 import { Octokit } from '@octokit/rest';
 import useSWR, { SWRResponse, preload as swrPreload } from 'swr';
 
-const CLIENT_ID = '07a30b365ca6f9eb8c5f';
+const CLIENT_ID = 'Iv23liKSgTuckq1LavWJ';
 
 export const github = new Octokit({
   auth: localStorage.token
@@ -20,7 +20,6 @@ function runQuery<T>([query, options]: [string, Record<string, unknown>]): Promi
 }
 
 export function useQuery<T>(query: string, options: Record<string, unknown>): SWRResponse<T> {
-  console.log('useQuery', query, options);
   return useSWR([query, options], runQuery as typeof runQuery<T>);
 }
 
@@ -36,7 +35,7 @@ export async function login() {
     redirect.searchParams.set('client_id', CLIENT_ID);
     redirect.searchParams.set('scope', 'repo notifications read:user');
     if (process.env.NODE_ENV !== 'production') {
-      redirect.searchParams.set('redirect_uri', `https://github-lite.pages.dev/login?redirect=${location.href}`);
+      redirect.searchParams.set('redirect_uri', `http://localhost:3000/login?redirect=${location.href}`);
     }
     location.replace(redirect);
     return;

@@ -1,32 +1,64 @@
-import { Link } from 'react-router-dom';
 import { PullRequest, PullRequestReviewDecision, Repository } from '@octokit/graphql-schema';
+import { Link } from '@tanstack/react-router';
 import { Fragment, createContext } from 'react';
 import { Button, } from '@/components/ui/button';
 import { Header } from '@/app/Issue';
 import { useQuery } from '@/lib/client';
 import { CommentCard } from '@/app/CommentCard';
-import { Timeline } from '@/app/Timeline';
+import { Timeline } from '@/app/TimeLine';
 import { IssueCommentForm } from '@/app/CommentForm';
 import { Card, Status, User } from '@/app/components';
+import useSWR from 'swr';
+import { github } from '@/lib/client';
+import { parseDiff, Diff as DiffView, Hunk } from 'react-diff-view';
+import 'react-diff-view/style/index.css';
+
 
 export const PullRequestContext = createContext<PullRequest | null>(null);
 
-export function PullRequestPage({owner, repo, number}: {owner: string, repo: string, number: number}) {
-  let { data: res } = useQuery<{repository: Repository}>(PullRequestPage.query(), {owner, repo, number});
-  let data = res?.repository.pullRequest;
-  if (!data) {
+export function PullRequestPage({ owner, repo, number }: { owner: string, repo: string, number: number }) {
+}
+
+const getDiff = async (owner: string, repo: string, number: number) => {
+  const res = await github.pulls.get({
+    owner,
+    repo,
+    pull_number: number,
+    headers: {
+      accept: "application/vnd.github.v3.diff", // Request diff format
+    },
+  });
+  return res.data;
+}
+
+
+function renderFile({ oldRevision, newRevision, type, hunks }: any) {
+  return (
+    <DiffView
+      key={oldRevision + '-' + newRevision}
+      viewType="split"
+      diffType={type}
+      hunks={hunks}
+    >
+      {hunks => hunks.map(hunk => <Hunk key={hunk.content} hunk={hunk} />)}
+    </DiffView>
+  );
+}
+
+
+function Diff({ data }: { data: PullRequest }) {
+  const { data: diff } = useSWR(`/repos/${data.repository.owner.login}/${data.repository.name}/pulls/${data.number}/files`, () => getDiff(data.repository.owner.login, data.repository.name, data.number));
+
+
+  if (!diff) {
     return null;
   }
 
+  const files = parseDiff(diff);
+
   return (
-    <div className="flex flex-col gap-4 my-4 max-w-3xl mx-auto">
-      <PullRequestContext.Provider value={data}>
-        <Header data={data} />
-        <CommentCard data={data} />
-        <PullHeader data={data} />
-        <Timeline items={data.timelineItems.nodes!} />
-        <IssueCommentForm issue={data} />
-      </PullRequestContext.Provider>
+    <div className="text-xs font-mono">
+      {files.map(file => renderFile(file))}
     </div>
   );
 }
@@ -83,28 +115,6 @@ query issueTimeline($owner: String!, $repo: String!, $number: Int!) {
             statusCheckRollup {
               state
             }
-            checkSuites(first:100) {
-              nodes {
-                id
-                app {
-                  name
-                  logoUrl
-                  logoBackgroundColor
-                }
-                status
-                conclusion
-                checkRuns(first:100) {
-                  nodes {
-                    id
-                    name
-                    detailsUrl
-                    status
-                    conclusion
-                    isRequired(pullRequestNumber:$number)
-                  }
-                }
-              }
-            }
           }
         }
       }
@@ -123,6 +133,22 @@ query issueTimeline($owner: String!, $repo: String!, $number: Int!) {
           ...PullRequestThreadFragment
         }
       }
+      reviewRequests(first:100) {
+        nodes {
+          requestedReviewer {
+            __typename
+            ... on User {
+              login
+              avatarUrl
+              url
+            }
+            ... on Team {
+              name
+              url
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -130,7 +156,7 @@ query issueTimeline($owner: String!, $repo: String!, $number: Int!) {
 ${Timeline.pullRequestFragment()}
 `;
 
-function PullHeader({data}: {data: PullRequest}) {
+export function PullHeader({ data }: { data: PullRequest }) {
   return (
     <Card>
       <div className="flex flex-col gap-4 text-sm">
@@ -152,7 +178,7 @@ let reviewDecisionMessages: Record<PullRequestReviewDecision, string> = {
   CHANGES_REQUESTED: 'Changes requested'
 };
 
-function Reviews({data}: {data: PullRequest}) {
+function Reviews({ data }: { data: PullRequest }) {
   let reviews = data.reviews?.nodes?.filter(node => node?.author?.login !== data.author?.login);
   if (!reviews || !reviews.length) {
     return <div>No reviews.</div>;
@@ -181,7 +207,7 @@ function Reviews({data}: {data: PullRequest}) {
   )
 }
 
-function Checks({data}: {data: PullRequest}) {
+function Checks({ data }: { data: PullRequest }) {
   let status = data.commits.nodes?.[0]?.commit.statusCheckRollup?.state;
   let checks = data.commits.nodes?.[0]?.commit.checkSuites?.nodes;
 
@@ -204,7 +230,7 @@ function Checks({data}: {data: PullRequest}) {
           let summary = (
             <div className="flex gap-2 items-center">
               <div className="w-5 flex justify-center"><Status state={check!.conclusion!} /></div>
-              <img src={check!.app?.logoUrl} className="w-8 h-8 rounded" style={{backgroundColor: '#' + check!.app?.logoBackgroundColor}} alt="" />
+              <img src={check!.app?.logoUrl} className="w-8 h-8 rounded" style={{ backgroundColor: '#' + check!.app?.logoBackgroundColor }} alt="" />
               <div className="flex flex-col">
                 <span>{check!.app?.name}</span>
                 {check!.conclusion === 'ACTION_REQUIRED' && <span className="text-daw-gray-500 text-xs">Awaiting approval</span>}
@@ -248,7 +274,7 @@ function Checks({data}: {data: PullRequest}) {
               {check?.checkRuns?.nodes?.map(node => (
                 <li key={node!.id} className="flex gap-2 items-center">
                   <div className="w-5 flex justify-center"><Status state={node!.conclusion!} /></div>
-                  <img src={check!.app?.logoUrl} className="w-8 h-8 rounded" style={{backgroundColor: '#' + check!.app?.logoBackgroundColor}} alt="" />
+                  <img src={check!.app?.logoUrl} className="w-8 h-8 rounded" style={{ backgroundColor: '#' + check!.app?.logoBackgroundColor }} alt="" />
                   <div className="flex flex-col">
                     <Link target="_blank" href={node!.detailsUrl}>{node!.name}</Link>
                     <span className="text-daw-gray-500 text-xs">{node!.isRequired ? 'Required' : 'Not required'}</span>
@@ -263,7 +289,7 @@ function Checks({data}: {data: PullRequest}) {
   );
 }
 
-function Merge({data}: {data: PullRequest}) {
+function Merge({ data }: { data: PullRequest }) {
   if (data.mergeable !== 'MERGEABLE') {
     return (
       <div className="flex gap-2 items-center justify-space-between">

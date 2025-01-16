@@ -1,15 +1,17 @@
 import { Issue, PullRequest, Repository } from '@octokit/graphql-schema';
 import { ArrowRightIcon } from '@primer/octicons-react';
 import Markdown from 'markdown-to-jsx';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { useQuery } from '@/lib/client';
 import { Timeline } from './TimeLine';
 import { CommentCard } from './CommentCard';
 import { Avatar, BranchName, IssueStatus } from './components';
 import { IssueCommentForm } from './CommentForm';
+import { Button } from '@/components/ui/button';
+import { MarkGithubIcon } from "@primer/octicons-react"
 
-export function IssuePage({owner, repo, number}: {owner: string, repo: string, number: number}) {
-  let { data: res } = useQuery<{repository: Repository}>(IssuePage.query(), {owner, repo, number});
+export function IssuePage({ owner, repo, number }: { owner: string, repo: string, number: number }) {
+  let { data: res } = useQuery<{ repository: Repository }>(IssuePage.query(), { owner, repo, number });
   let data = res?.repository.issue;
   if (!data) {
     return null;
@@ -63,24 +65,20 @@ query IssueTimeline($owner: String!, $repo: String!, $number: Int!) {
 ${Timeline.issueFragment()}
 `;
 
-export function Header({data}: {data: Issue | PullRequest}) {
+export function Header({ data }: { data: Issue | PullRequest }) {
   return (
-    <div className="flex flex-col gap-2 mb-2">
-      <div className="flex gap-2">
-        <div className="flex gap-2 items-center">
-          <Avatar src={data.repository.owner.avatarUrl} />
-          <span className="text-daw-gray-700">{data.repository.owner.login}/{data.repository.name} <Link target="_blank" href={data.url}>#{data.number}</Link></span>
-        </div>
-        <IssueStatus data={data} />
-      </div>
-      <h1 className="text-2xl font-semibold"><Markdown>{data.title}</Markdown></h1>
-      {'headRef' in data && data.headRef && <>
+    <header className="flex items-center h-12 gap-2 mb-2 px-4  border-b">
+      <MarkGithubIcon className="size-5 text-zinc-500" />
+      <h1 className="text-sm">
+        <Markdown>{data.title}</Markdown>
+      </h1>
+      {/* {'headRef' in data && data.headRef && <>
         <div className="flex items-center gap-2">
           <BranchName>{data.headRef!.name}</BranchName>
           <ArrowRightIcon className="text-daw-gray-700" />
           <BranchName>{data.baseRef!.name}</BranchName>
         </div>
-      </>}
-    </div>
+      </>} */}
+    </header>
   );
 }

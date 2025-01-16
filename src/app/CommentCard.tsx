@@ -5,11 +5,11 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { Link } from "react-router-dom"
+import { Link } from "@tanstack/react-router"
 import { Avatar, Card } from './components';
 import { graphql } from '@/lib/client';
 
-export function CommentCard({data}: {data: Issue | PullRequest | IssueComment | PullRequestReviewComment}) {
+export function CommentCard({ data }: { data: Issue | PullRequest | IssueComment | PullRequestReviewComment }) {
   const formatDate = (date: string) => {
     return new Date(date).toLocaleString(undefined, {
       year: 'numeric',
@@ -21,32 +21,29 @@ export function CommentCard({data}: {data: Issue | PullRequest | IssueComment | 
   };
 
   return (
-    <Card>
+    <div className="border-b border-daw-gray-200 pb-4">
       <div
-        className="grid gap-x-2"
+        className="grid gap-x-2 mb-4 border-b border-daw-gray-200 pb-4"
         style={{
           gridTemplateAreas: `
             "avatar    username"
             "avatar    date"
-            ".         ."
-            "body      body"
-            ".         ."
-            "reactions reactions"
           `,
-          gridTemplateRows: 'auto auto 8px auto 8px auto',
+          gridTemplateRows: 'auto auto',
           gridTemplateColumns: '40px 1fr'
         }}>
         <Avatar size="l" className="[grid-area:avatar]" src={data.author!.avatarUrl} />
-        <span className="font-medium text-sm" style={{gridArea: 'username'}}>{data.author!.login}</span>
-        <span className="text-xs text-daw-gray-600" style={{gridArea: 'date'}}>
+        <span className="font-medium text-sm" style={{ gridArea: 'username' }}>{data.author!.login}</span>
+        <span className="text-xs text-daw-gray-600" style={{ gridArea: 'date' }}>
           {formatDate(data.createdAt)}
         </span>
-        <div style={{gridArea: 'body'}}>
-          <CommentBody>{data.body}</CommentBody>
-        </div>
-        {data.reactionGroups && <Reactions id={data.id} data={data.reactionGroups} />}
       </div>
-    </Card>
+      <div style={{ gridArea: 'body' }} className="text-sm">
+        <CommentBody>{data.body}</CommentBody>
+      </div>
+      {data.reactionGroups && <Reactions id={data.id} data={data.reactionGroups} />}
+    </div>
+
   );
 }
 
@@ -64,50 +61,56 @@ fragment IssueCommentFragment on IssueComment {
 }
 `;
 
-export function CommentBody({children}: {children: string}) {
+export function CommentBody({ children }: { children: string }) {
   return (
     <Markdown className="[word-break:break-word]" options={{
       overrides: {
-        img: {props: {style: {maxWidth: '100%'}}},
+        img: { props: { style: { maxWidth: '100%' } } },
         pre: {
           props: {
-            className: 'border border-daw-gray-200 rounded p-2 bg-daw-gray-50',
+            className: 'mb-4',
             style: {
               whiteSpace: 'pre-wrap'
             }
           }
         },
         h1: {
-          props: {className: 'text-3xl font-semibold my-3 pb-1 border-b-2 border-daw-gray-200'}
+          props: { className: 'text-3xl font-semibold my-3 pb-1 border-b-2 border-daw-gray-200' }
         },
         h2: {
-          props: {className: 'text-2xl font-semibold my-3'}
+          props: { className: 'text-2xl font-semibold my-3' }
         },
         h3: {
-          props: {className: 'text-xl font-semibold my-3'}
+          props: { className: 'text-xl font-semibold my-3' }
+        },
+        li: {
+          props: { className: 'mb-1 ml-6 list-disc' }
+        },
+        ul: {
+          props: { className: 'mb-4' }
         },
         a: {
           component: (props: any) => (
-            <Link
+            <a
               {...props}
               className="underline hover:text-blue-600"
               target="_blank"
             >
               {props.children}
-            </Link>
+            </a>
           )
         },
         p: {
           props: {
-            className: 'my-2',
+            className: 'mb-4',
             style: {
               wordBreak: 'break-word'
             }
           }
         }
-      }
+      },
     }}>
-    {children}
+      {children}
     </Markdown>
   );
 }
@@ -125,11 +128,11 @@ const emojis: Record<ReactionContent, string> = {
 
 const reactionClass = "rounded-full text-sm bg-daw-gray-100 border border-daw-gray-200 hover:border-daw-gray-300 pressed:border-daw-gray-300 selected:bg-daw-blue-100 selected:border-daw-blue-200 selected:hover:border-daw-blue-300 selected:pressed:border-daw-blue-300 cursor-default flex items-center justify-center outline-none focus-visible:outline-blue-600 outline-offset-2";
 
-export function Reactions({id, data: initialData}: {id: string, data: ReactionGroup[]}) {
-  let [data, setData] = useState(initialData);
-  let toggleReaction = async (emoji: ReactionContent, isSelected: boolean) => {
+export function Reactions({ id, data: initialData }: { id: string, data: ReactionGroup[] }) {
+  const [data, setData] = useState(initialData);
+  const toggleReaction = async (emoji: ReactionContent, isSelected: boolean) => {
     if (isSelected) {
-      let data = graphql<{addReaction: {reactionGroups: ReactionGroup[]}}>(`
+      const data = graphql<{ addReaction: { reactionGroups: ReactionGroup[] } }>(`
         mutation AddReaction($input: AddReactionInput!) {
           addReaction(input: $input) {
             reactionGroups {
@@ -139,10 +142,10 @@ export function Reactions({id, data: initialData}: {id: string, data: ReactionGr
         }
 
         ${Reactions.fragment}
-      `, {input: {subjectId: id, content: emoji}});
+      `, { input: { subjectId: id, content: emoji } });
       setData((await data).addReaction.reactionGroups);
     } else {
-      let data = await graphql<{removeReaction: {reactionGroups: ReactionGroup[]}}>(`
+      const data = await graphql<{ removeReaction: { reactionGroups: ReactionGroup[] } }>(`
       mutation RemoveReaction($input: RemoveReactionInput!) {
         removeReaction(input: $input) {
           reactionGroups {
@@ -152,13 +155,13 @@ export function Reactions({id, data: initialData}: {id: string, data: ReactionGr
       }
 
       ${Reactions.fragment}
-    `, {input: {subjectId: id, content: emoji}});
+    `, { input: { subjectId: id, content: emoji } });
       setData(data.removeReaction.reactionGroups);
     }
   };
 
   return (
-    <div className="flex gap-2" style={{gridArea: 'reactions'}}>
+    <div className="flex gap-2" style={{ gridArea: 'reactions' }}>
       <Popover>
         <PopoverTrigger asChild>
           <Button variant="outline" size="icon" className="h-8 w-8">

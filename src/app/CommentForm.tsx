@@ -1,3 +1,4 @@
+import { GitPullRequestClosedIcon } from '@primer/octicons-react';
 import { Issue, PullRequest } from "@octokit/graphql-schema";
 import { IssuePage } from "./Issue";
 import { PullRequestPage } from "./PullRequest";
@@ -11,7 +12,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 
-export function IssueCommentForm({issue}: {issue: Issue | PullRequest}) {
+export function IssueCommentForm({ issue }: { issue: Issue | PullRequest }) {
   const onSubmit = async (comment: string) => {
     await github.issues.createComment({
       owner: issue.repository.owner.login,
@@ -32,12 +33,17 @@ export function IssueCommentForm({issue}: {issue: Issue | PullRequest}) {
 
   return (
     <CommentForm onSubmit={onSubmit}>
-      {issue.viewerCanClose && issue.state === 'OPEN' && <Button className="px-4 py-2 rounded-md bg-purple-500 pressed:bg-purple-600 border border-purple-400 pressed:border-purple-500 text-white text-sm font-medium cursor-default outline-none focus-visible:ring-2 ring-offset-2 ring-blue-600">Close</Button>}
+      {issue.viewerCanClose && issue.state === 'OPEN' &&
+        <Button variant="outline" className="px-2 py-2 rounded-md text-white text-sm font-medium cursor-default">
+          <GitPullRequestClosedIcon className="text-red-500" />
+          Close pull request
+        </Button>
+      }
     </CommentForm>
   );
 }
 
-export function CommentForm({children, className, onSubmit}: {children: ReactNode, className?: string, onSubmit?: (comment: string) => Promise<void>}) {
+export function CommentForm({ children, className, onSubmit }: { children: ReactNode, className?: string, onSubmit?: (comment: string) => Promise<void> }) {
   const formSchema = z.object({
     comment: z.string().min(1)
   })
@@ -64,16 +70,20 @@ export function CommentForm({children, className, onSubmit}: {children: ReactNod
           name="comment"
           render={({ field }) => (
             <FormItem className="w-full">
-              <FormLabel>Comment</FormLabel>
               <FormControl>
-                <Textarea {...field} rows={4} />
+                <Textarea {...field} rows={4} placeholder="Add a comment..." />
               </FormControl>
             </FormItem>
           )}
         />
         <div className="flex gap-2">
           {children}
-          <Button type="submit" className="px-4 py-2 rounded-md bg-green-600 pressed:bg-green-700 border border-green-700 pressed:border-green-800 dark:border-green-500 dark:pressed:border-green-600 text-white text-sm font-medium cursor-default outline-none focus-visible:ring-2 ring-offset-2 ring-blue-600">Comment</Button>
+          <Button
+            type="submit"
+            className="rounded-md text-sm font-medium cursor-default outline-none"
+          >
+            Comment
+          </Button>
         </div>
       </form>
     </Form>
