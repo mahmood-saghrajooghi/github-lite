@@ -1,23 +1,42 @@
-import { Link } from "@tanstack/react-router";
+import { useRegisterHotkey } from '@/contexts/hotkey-context';
+import { Link, useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
+import { forwardRef, useRef } from 'react';
+import { composeRefs } from '@/hooks/compose-refs';
 
-export function TabLink({
+type TabLinkProps = React.ComponentProps<typeof Link> & {
+  hotKey?: string
+}
+
+export const TabLink = forwardRef<HTMLAnchorElement, TabLinkProps>(({
   children,
   className,
+  hotKey,
+  to,
   ...props
-}: React.ComponentProps<typeof Link>) {
+}, ref) => {
+  const navigate = useNavigate()
+  const internalRef = useRef<HTMLAnchorElement>(null)
+
+  useRegisterHotkey(hotKey, () => {
+    navigate({ to })
+    internalRef.current?.focus()
+  })
+
   return (
     <Link
       className={clsx(
-        'flex items-center gap-1.5 h-7 px-2 rounded-md border border-transparent hover:border-input data-[status=active]:border-input shadow-sm text-muted-foreground hover:bg-accent/50 data-[status=active]:bg-accent/50 hover:text-accent-foreground data-[status=active]:text-foreground group duration-200',
+        'flex items-center gap-1.5 h-7 px-2 rounded-md border border-transparent hover:border-input data-[status=active]:border-input shadow-sm text-muted-foreground hover:bg-accent/50 data-[status=active]:bg-accent/50 hover:text-accent-foreground data-[status=active]:text-foreground group duration-200 outline-none',
         className,
       )}
+      to={to}
+      ref={composeRefs(ref, internalRef)}
       {...props}
     >
       {children}
     </Link>
   )
-}
+})
 
 export function TabLinkIcon({
   children,

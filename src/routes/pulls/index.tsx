@@ -40,7 +40,7 @@ function RouteComponent() {
         <Breadcrumb>
           <BreadcrumbList className="gap-2 sm:gap-2">
             <BreadcrumbItem className="text-foreground">
-              My Pull Requests
+              Pull Requests
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

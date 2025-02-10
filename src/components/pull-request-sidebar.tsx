@@ -13,6 +13,7 @@ import {
   CommandEmpty,
   CommandList,
   CommandItem,
+  CommandInput,
 } from '@/components/ui/command'
 import { getPrURL } from '@/lib/pull-request'
 import useSWR from 'swr'
@@ -23,8 +24,8 @@ import { Repository } from '@octokit/graphql-schema'
 import { CircleCheck, X, Clock3 } from 'lucide-react'
 import { GitPullRequestDraftIcon, GitPullRequestIcon } from '@primer/octicons-react'
 import { Avatar } from '@/app/components'
-import { HotkeyProvider } from './hotkey'
-
+import { useRegisterHotkey } from '@/contexts/hotkey-context'
+import { useRef } from 'react'
 type PullRequest =
   RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][0]
 
@@ -43,18 +44,27 @@ type Props = {
 export function PullRequestsSidebar({ swrKey }: Props) {
   const { data } = useSWR(swrKey)
   const navigate = useNavigate()
+  const ref = useRef<HTMLInputElement>(null)
+
+  useRegisterHotkey('/', () => {
+    ref.current?.focus()
+  })
+
   return (
     <SidebarProvider
       style={{ '--sidebar-width': '360px' } as React.CSSProperties}
       className="min-h-[unset]"
     >
-      <Sidebar collapsible="none" className="bg-color-unset border-r">
-        <SidebarHeader className="border-b text-sm flex flex-row items-center h-12 pl-4 py-0">
-          Pull Requests
-        </SidebarHeader>
-        <SidebarContent className="p-2">
-          <SidebarMenu>
-            <Command className="bg-color-unset">
+      <Command className="bg-color-unset rounded-none" onValueChange={(e) => {
+        console.log(e)
+      }}>
+        <Sidebar collapsible="none" className="bg-color-unset border-r">
+          <SidebarHeader className="text-sm flex flex-row items-center h-12 p-0">
+            <CommandInput placeholder="Search pull requests" wrapperClassName="w-full h-full" ref={ref} autoFocus />
+          </SidebarHeader>
+          <SidebarContent className="p-2">
+            <SidebarMenu>
+
               <CommandList className="max-h-[unset]">
                 <CommandEmpty>No results found.</CommandEmpty>
                 {data?.items.map((item: PullRequest) => (
@@ -69,17 +79,19 @@ export function PullRequestsSidebar({ swrKey }: Props) {
                     asChild
                   >
                     {/* TODO: add bg when user has input */}
-                    <SidebarMenuItem className="p-0 data-[selected=true]:bg-unset">
+                    <SidebarMenuItem className="p-0 data-[selected=true]:bg-accent/50">
                       <PullRequestItem item={item} />
                     </SidebarMenuItem>
                   </CommandItem>
                 ))}
               </CommandList>
-            </Command>
-          </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter />
-      </Sidebar>
+
+            </SidebarMenu>
+          </SidebarContent>
+          <SidebarFooter />
+        </Sidebar>
+      </Command>
+
     </SidebarProvider>
   )
 }

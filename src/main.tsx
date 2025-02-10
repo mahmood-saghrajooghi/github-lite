@@ -5,6 +5,7 @@ import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
 
 import './main.css'
+import { HotkeyProvider } from './contexts/hotkey-context'
 
 // Create a new router instance
 const router = createRouter({ routeTree })
@@ -18,6 +19,8 @@ declare module '@tanstack/react-router' {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <HotkeyProvider>
+      <RouterProvider router={router} />
+    </HotkeyProvider>
   </StrictMode>,
 )

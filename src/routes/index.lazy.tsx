@@ -1,6 +1,5 @@
 import { RestEndpointMethodTypes } from '@octokit/rest';
 import { github } from '@/lib/client';
-import { PullRequestPage } from '@/app/PullRequest';
 import { LoginPage } from '@/app/login/page';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 import { mutate } from 'swr';
