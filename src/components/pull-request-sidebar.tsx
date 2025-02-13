@@ -103,7 +103,7 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
               <AuthorFilter value={author} onChange={onAuthorChange} />
             </div>
             <SidebarMenu>
-              <CommandList>
+              <CommandList className="max-h-[unset] overflow-y-auto">
                 <CommandEmpty>No results found.</CommandEmpty>
                 {data?.items.map((item: PullRequest) => (
                   <CommandItem
