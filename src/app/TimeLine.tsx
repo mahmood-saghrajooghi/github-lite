@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Link } from '@tanstack/react-router';
 import { PullRequestContext } from './PullRequest';
 import { CommentCard, CommentBody, Reactions } from './CommentCard';
-import { Card, BranchName, GithubLabel, Icon, User, IssueStatus, Avatar, Status } from './components';
+import { BranchName, GithubLabel, Icon, User, IssueStatus, Avatar, Status } from './components';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { CommentForm } from './CommentForm';
 
 export function Timeline({ items }: { items: (IssueTimelineItems | PullRequestTimelineItems | null)[] }) {
@@ -273,6 +274,11 @@ fragment RenamedTitleFragment on RenamedTitleEvent {
 function Reviewed({ data }: { data: PullRequestReview }) {
   let pr = useContext(PullRequestContext);
   let threadsById = new Map();
+
+  if (!pr?.reviewThreads.nodes) {
+    return;
+  }
+
   for (let thread of pr?.reviewThreads.nodes!) {
     threadsById.set(thread?.comments.nodes?.[0]?.id, thread);
   }
@@ -345,31 +351,42 @@ function PullRequestThread({ data }: { data: PullRequestReviewThread }) {
 
   return (
     <Card>
-      <details open={!data.isCollapsed}>
-        <summary className="font-mono text-xs cursor-default">
-          {data.path}
-        </summary>
-        <div className="flex flex-col gap-4 pt-3 mt-3 border-t border-daw-gray-200">
+      <div className="text-sm cursor-default p-3">
+        {data.path}
+      </div>
+      <div>
+        <div className="flex flex-col gap-3 p-3 border-t border-daw-gray-200">
           {data.comments.nodes?.map(comment => (
-            <div key={comment!.id} className="flex flex-col gap-2 pb-4 border-b border-daw-gray-200">
+            <div className="flex gap-2">
               <div>
-                <User actor={comment!.author!} />
-                {' • '}
-                <span className="text-xs text-daw-gray-600" style={{ gridArea: 'date' }}>{formatDate(comment!.createdAt)}</span>
+                <span className="inline-flex items-center align-bottom">
+                  <Avatar src={comment!.author!.avatarUrl} className="inline mr-2" />
+                </span>
               </div>
-              <div style={{ gridArea: 'body' }}>
-                <CommentBody>{comment!.body}</CommentBody>
+              <div key={comment!.id} className="flex-1 flex flex-col gap-2">
+                <div>
+                  <Link href={comment!.author!.url} target="_blank" className="font-semibold hover:underline">{comment!.author!.login}</Link>
+                  <span className="text-xs text-muted-foreground" style={{ gridArea: 'date' }}>
+                    {' • '}
+                    {formatDate(comment!.createdAt)}
+                  </span>
+                </div>
+                <div>
+                  <CommentBody>{comment!.body}</CommentBody>
+                </div>
+                {comment!.reactionGroups && <Reactions id={comment!.id} data={comment!.reactionGroups} />}
               </div>
-              {comment!.reactionGroups && <Reactions id={comment!.id} data={comment!.reactionGroups} />}
             </div>
           ))}
+        </div>
+        <div className="p-3 border-t border-input">
           <CommentForm>
             {data.viewerCanResolve &&
               <Button className="flex-shrink-0 px-4 py-2 rounded-md bg-daw-gray-300 pressed:bg-daw-gray-400 border border-daw-gray-400 pressed:border-daw-gray-500 text-daw-gray-800 text-sm font-medium cursor-default outline-none focus-visible:ring-2 ring-offset-2 ring-blue-600">Resolve conversation</Button>
             }
           </CommentForm>
         </div>
-      </details>
+      </div>
     </Card>
   );
 }

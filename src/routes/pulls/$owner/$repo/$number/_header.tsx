@@ -13,7 +13,7 @@ import {
 import { CommentDiscussionIcon, FileDiffIcon } from '@primer/octicons-react'
 import { AppHeader } from '@/components/app-header'
 import { TabLink, TabLinkIcon } from '@/components/tab-link'
-import { Link } from '@/components/Link'
+import { Link } from '@/components/link'
 import { github } from '@/lib/client'
 import useSWR from 'swr'
 
@@ -21,11 +21,18 @@ export const Route = createFileRoute('/pulls/$owner/$repo/$number/_header')({
   component: RouteComponent,
 })
 
-async function fetchRepoPullRequests(owner: string, repo: string) {
+
+async function fetchRepoPullRequests(owner: string, repo: string, search: any) {
   try {
+    let query = `is:pr is:open repo:${owner}/${repo}`
+
+    if (search.author) {
+      query += ` author:${search.author}`
+    }
+
     const res = await github.search.issuesAndPullRequests({
-      q: `is:pr is:open author:@me repo:${owner}/${repo}`,
-      per_page: 10,
+      q: query,
+      per_page: 200,
       sort: 'updated',
       order: 'desc',
     })
@@ -39,8 +46,19 @@ async function fetchRepoPullRequests(owner: string, repo: string) {
 
 function RouteComponent() {
   const { owner, repo, number } = useParams({ from: Route.id })
+  const search = Route.useSearch()
 
-  useSWR(`pull-requests-${owner}-${repo}`, () => fetchRepoPullRequests(owner, repo))
+  function getSwrKey(params: { author?: string }) {
+    let key = `pull-requests-${owner}-${repo}`
+    Object.entries(params).forEach(([paramKey, value]) => {
+      if (value) {
+        key += `?${paramKey}=${value}`
+      }
+    })
+    return key
+  }
+
+  useSWR(getSwrKey({ author: search.author }), () => fetchRepoPullRequests(owner, repo, search))
 
   return (
     <>

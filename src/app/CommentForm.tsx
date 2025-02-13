@@ -71,7 +71,7 @@ export function CommentForm({ children, className, onSubmit }: { children: React
           render={({ field }) => (
             <FormItem className="w-full">
               <FormControl>
-                <Textarea {...field} rows={4} placeholder="Add a comment..." />
+                <Textarea {...field} rows={1} placeholder="Reply..." />
               </FormControl>
             </FormItem>
           )}

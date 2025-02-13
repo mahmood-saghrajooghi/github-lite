@@ -1,12 +1,18 @@
 import { AppHeader } from '@/components/app-header'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbSeparator, BreadcrumbLink } from '@/components/ui/breadcrumb'
-import { createFileRoute, Link, useParams } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import { PullRequestsSidebar } from '@/components/pull-request-sidebar'
 import { github } from '@/lib/client'
 import useSWR from 'swr'
+import { z } from 'zod'
+
+const searchSchema = z.object({
+  author: z.string().optional(),
+})
 
 export const Route = createFileRoute('/pulls/$owner/$repo/')({
   component: RouteComponent,
+  validateSearch: (search) => searchSchema.parse(search),
 })
 
 async function fetchRepoPullRequests(owner: string, repo: string) {
@@ -28,6 +34,9 @@ async function fetchRepoPullRequests(owner: string, repo: string) {
 function RouteComponent() {
   const { owner, repo } = useParams({ from: Route.id })
 
+  const searchParams = useSearch({ from: Route.id })
+  const navigate = Route.useNavigate()
+
   useSWR(`pull-requests-${owner}-${repo}`, () => fetchRepoPullRequests(owner, repo))
 
   return (
@@ -48,7 +57,12 @@ function RouteComponent() {
         </Breadcrumb>
       </AppHeader>
       <div className="grid grid-cols-[auto_1fr] grid-rows-[1fr]">
-        <PullRequestsSidebar swrKey={`pull-requests-${owner}-${repo}`} />
+        <PullRequestsSidebar
+          owner={owner}
+          repo={repo}
+          searchParams={searchParams}
+          navigate={navigate}
+        />
       </div>
     </>
   )

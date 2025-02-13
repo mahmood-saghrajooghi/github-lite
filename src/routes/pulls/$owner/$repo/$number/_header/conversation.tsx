@@ -12,7 +12,6 @@ import { IssueCommentForm } from '@/app/CommentForm'
 import { Header } from '@/app/Issue'
 import { ErrorBoundary } from 'react-error-boundary'
 import { IssueStatus } from '@/app/components'
-import useSWR from 'swr'
 import { PullRequestsSidebar } from '@/components/pull-request-sidebar'
 
 export const Route = createFileRoute(
@@ -54,6 +53,9 @@ function PullRequestContent({
     { owner, repo, number: Number(number) },
   )
 
+  const navigate = Route.useNavigate()
+  const searchParams = Route.useSearch()
+
   const data = res?.repository.pullRequest
 
   if (!data) {
@@ -62,7 +64,12 @@ function PullRequestContent({
 
   return (
     <div className="grid grid-cols-[auto_1fr] grid-rows-[1fr]">
-      <PullRequestsSidebar swrKey={`pull-requests-${owner}-${repo}`} />
+      <PullRequestsSidebar
+        owner={owner}
+        repo={repo}
+        searchParams={searchParams}
+        navigate={navigate}
+      />
       <div className="flex flex-col gap-4 ">
         <PullRequestContext.Provider value={data}>
           <Header data={data} />

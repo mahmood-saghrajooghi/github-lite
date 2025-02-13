@@ -1,6 +1,5 @@
-import { useEffect, useRef } from 'react'
-import { isHotkey } from 'is-hotkey'
-import { motion, useAnimate } from 'motion/react'
+import { useRef } from 'react'
+import { motion } from 'motion/react'
 import { Link, useNavigate, } from '@tanstack/react-router'
 import { SidebarMenuItem } from '@/components/ui/sidebar'
 import {
@@ -19,7 +18,7 @@ import { Repository } from '@octokit/graphql-schema'
 import { CheckIcon } from 'lucide-react'
 import { GitPullRequestDraftIcon, GitPullRequestIcon } from '@primer/octicons-react'
 import { Avatar } from '@/app/components'
-import { useHotkey } from '@/contexts/hotkey-context'
+import { useHotkey, useRegisterHotkey } from '@/contexts/hotkey-context'
 
 type PullRequest =
   RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][0]
@@ -40,9 +39,9 @@ export function PullRequestsList({ swrKey }: Props) {
   const ref = useRef<HTMLInputElement>(null)
   const { data } = useSWR(swrKey)
   const navigate = useNavigate()
-  const { isMetaKeyPressed, registerHotkey } = useHotkey()
+  const { isMetaKeyPressed } = useHotkey()
 
-  registerHotkey('/', () => {
+  useRegisterHotkey('/', () => {
     ref.current?.focus()
   })
 

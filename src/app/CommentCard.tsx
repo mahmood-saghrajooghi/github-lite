@@ -2,7 +2,7 @@ import { Issue, IssueComment, PullRequest, PullRequestReviewComment, ReactionCon
 import { SmileyIcon } from '@primer/octicons-react';
 import Markdown from 'markdown-to-jsx';
 import { useState } from 'react';
-import { Button } from "@/components/ui/button"
+import { Button, ButtonIcon } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Link } from "@tanstack/react-router"
@@ -38,10 +38,14 @@ export function CommentCard({ data }: { data: Issue | PullRequest | IssueComment
           {formatDate(data.createdAt)}
         </span>
       </div>
-      <div style={{ gridArea: 'body' }} className="text-sm">
+      <div className="text-sm">
         <CommentBody>{data.body}</CommentBody>
       </div>
-      {data.reactionGroups && <Reactions id={data.id} data={data.reactionGroups} />}
+      {data.reactionGroups && (
+        <div className="mt-2">
+          <Reactions id={data.id} data={data.reactionGroups} />
+        </div>
+      )}
     </div>
 
   );
@@ -68,7 +72,15 @@ export function CommentBody({ children }: { children: string }) {
         img: { props: { style: { maxWidth: '100%' } } },
         pre: {
           props: {
-            className: 'mb-4',
+            className: 'mb-4 bg-accent rounded-md',
+            style: {
+              whiteSpace: 'pre-wrap'
+            }
+          }
+        },
+        code: {
+          props: {
+            className: 'bg-secondary text-[85%] px-1 py-0.5 rounded-md',
             style: {
               whiteSpace: 'pre-wrap'
             }
@@ -126,8 +138,6 @@ const emojis: Record<ReactionContent, string> = {
   ROCKET: '🚀'
 };
 
-const reactionClass = "rounded-full text-sm bg-daw-gray-100 border border-daw-gray-200 hover:border-daw-gray-300 pressed:border-daw-gray-300 selected:bg-daw-blue-100 selected:border-daw-blue-200 selected:hover:border-daw-blue-300 selected:pressed:border-daw-blue-300 cursor-default flex items-center justify-center outline-none focus-visible:outline-blue-600 outline-offset-2";
-
 export function Reactions({ id, data: initialData }: { id: string, data: ReactionGroup[] }) {
   const [data, setData] = useState(initialData);
   const toggleReaction = async (emoji: ReactionContent, isSelected: boolean) => {
@@ -161,19 +171,22 @@ export function Reactions({ id, data: initialData }: { id: string, data: Reactio
   };
 
   return (
-    <div className="flex gap-2" style={{ gridArea: 'reactions' }}>
+    <div className="flex gap-2">
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="icon" className="h-8 w-8">
-            <SmileyIcon />
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <ButtonIcon>
+              <SmileyIcon />
+            </ButtonIcon>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="flex gap-2 p-2" align="start">
+        <PopoverContent className="flex gap-2 p-1.5 w-auto" align="start">
           {Object.keys(emojis).map(emoji => (
             <Button
               key={emoji}
-              variant={data.find(r => r.content === emoji)?.viewerHasReacted ? "default" : "outline"}
+              variant={data.find(r => r.content === emoji)?.viewerHasReacted ? "default" : "ghost"}
               size="sm"
+              className="text-md"
               onClick={() => {
                 toggleReaction(
                   emoji as ReactionContent,
@@ -186,16 +199,17 @@ export function Reactions({ id, data: initialData }: { id: string, data: Reactio
           ))}
         </PopoverContent>
       </Popover>
-      <ToggleGroup type="multiple" variant="outline">
+      <ToggleGroup type="multiple" variant="ghost" size="sm">
         {data.filter(r => r.reactors.totalCount > 0).map(r => (
           <ToggleGroupItem
             key={r.content}
             value={r.content}
             pressed={r.viewerHasReacted}
             onPressedChange={pressed => toggleReaction(r.content, pressed)}
-            className="px-2 py-0.5"
+            className="h-8 min-w-8"
           >
-            {emojis[r.content]} {r.reactors.totalCount}
+            <span>{emojis[r.content]}</span>
+            {r.reactors.totalCount > 1 ? r.reactors.totalCount : ''}
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
