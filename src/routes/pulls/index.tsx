@@ -5,6 +5,7 @@ import {
   BreadcrumbItem,
   BreadcrumbList,
 } from '@/components/ui/breadcrumb'
+import { Link } from '@/components/link'
 import { github } from '@/lib/client'
 import { createFileRoute } from '@tanstack/react-router'
 import useSWR from 'swr'
@@ -40,7 +41,7 @@ function RouteComponent() {
         <Breadcrumb>
           <BreadcrumbList className="gap-2 sm:gap-2">
             <BreadcrumbItem className="text-foreground">
-              Pull Requests
+              <Link to="/pulls">Pull Requests</Link>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

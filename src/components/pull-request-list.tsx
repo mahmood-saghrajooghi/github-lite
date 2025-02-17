@@ -23,11 +23,11 @@ import { useHotkey, useRegisterHotkey } from '@/contexts/hotkey-context'
 type PullRequest =
   RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][0]
 
-function preloadPullRequest(item: PullRequest) {
+function preloadPullRequest({ owner, repo, number }: { owner: string, repo: string, number: number }) {
   preload(PullRequestPage.query(), {
-    owner: item.repository?.owner.login,
-    repo: item.repository?.name,
-    number: Number(item.url.split('/').pop()),
+    owner,
+    repo,
+    number,
   })
 }
 
@@ -41,7 +41,8 @@ export function PullRequestsList({ swrKey }: Props) {
   const navigate = useNavigate()
   const { isMetaKeyPressed } = useHotkey()
 
-  useRegisterHotkey('/', () => {
+  useRegisterHotkey('/', (event) => {
+    event?.preventDefault()
     ref.current?.focus()
   })
 
@@ -49,7 +50,6 @@ export function PullRequestsList({ swrKey }: Props) {
     <Command className="bg-color-unset">
       <CommandInput
         placeholder="Search pull requests"
-        autoFocus
         ref={ref}
         onKeyDown={(e) => {
           if (e.key >= '0' && e.key <= '9') {
@@ -114,7 +114,11 @@ function PullRequestItem({ item, index, isMetaKeyPressed }: PullRequestItemProps
       id={getPrURL(item)}
       to={getPrURL(item)}
       onMouseOver={() => {
-        preloadPullRequest(item)
+        preloadPullRequest({
+          owner,
+          repo,
+          number,
+        })
       }}
       className="overflow-hidden block flex-1 px-2 h-9 flex items-center rounded-md transition-colors group-data-[selected=true]:bg-muted/50"
       activeProps={{

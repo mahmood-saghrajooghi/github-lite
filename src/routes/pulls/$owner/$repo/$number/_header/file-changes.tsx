@@ -105,6 +105,11 @@ function Diff({ data }: { data: PullRequest }) {
     `/repos/${data.repository.owner.login}/${data.repository.name}/pulls/${data.number}/files`,
     () =>
       getDiff(data.repository.owner.login, data.repository.name, data.number),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: true,
+    }
   )
 
   if (!diff) {

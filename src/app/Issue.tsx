@@ -1,13 +1,9 @@
 import { Issue, PullRequest, Repository } from '@octokit/graphql-schema';
-import { ArrowRightIcon } from '@primer/octicons-react';
 import Markdown from 'markdown-to-jsx';
-import { Link } from '@tanstack/react-router';
 import { useQuery } from '@/lib/client';
 import { Timeline } from './TimeLine';
 import { CommentCard } from './CommentCard';
-import { Avatar, BranchName, IssueStatus } from './components';
 import { IssueCommentForm } from './CommentForm';
-import { Button } from '@/components/ui/button';
 import { MarkGithubIcon } from "@primer/octicons-react"
 
 export function IssuePage({ owner, repo, number }: { owner: string, repo: string, number: number }) {

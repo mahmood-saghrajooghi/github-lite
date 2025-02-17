@@ -2,7 +2,6 @@ import * as React from "react"
 import { type DialogProps } from "@radix-ui/react-dialog"
 import { Command as CommandPrimitive } from "cmdk"
 import { Search } from "lucide-react"
-import { useHotkey } from "@/contexts/hotkey-context"
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import isHotkey from 'is-hotkey'
@@ -40,7 +39,6 @@ const CommandInput = React.forwardRef<
     wrapperClassName?: string
   }
 >(({ className, wrapperClassName, ...props }, ref) => {
-  const { resetFocus } = useHotkey()
 
   return (
     <div className={cn("flex items-center border-b px-3", wrapperClassName)} cmdk-input-wrapper="">
@@ -54,7 +52,6 @@ const CommandInput = React.forwardRef<
         onKeyUp={(e) => {
           if (isHotkey('escape', e)) {
             e.stopPropagation()
-            resetFocus()
           }
         }}
         {...props}

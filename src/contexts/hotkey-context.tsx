@@ -1,4 +1,3 @@
-import { isHotkey } from 'is-hotkey'
 import {
   createContext,
   useContext,
@@ -7,41 +6,36 @@ import {
   useEffect,
   useCallback,
 } from 'react'
+import { Leaf, Trie } from './trie'
+import { SequenceTracker } from './sequence'
 
 type HotkeyContextType = {
   isMetaKeyPressed: boolean
-  registerHotkey: (hotkey: string, callback: () => void) => void
+  registerHotkey: (hotkey: string, callback: (event?: KeyboardEvent) => void) => void
   unregisterHotkey: (hotkey: string) => void
-  resetFocus: () => void
 }
 
-const HotkeyContext = createContext<HotkeyContextType>({
-  isMetaKeyPressed: false,
-  registerHotkey: () => { },
-  unregisterHotkey: () => { },
-  resetFocus: () => { },
-})
+const HotkeyContext = createContext<HotkeyContextType | null>(null)
 
 export function HotkeyProvider({ children }: { children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null)
   const [isMetaKeyPressed, setIsMetaKeyPressed] = useState(false)
-  const hotkeysRef = useRef<Record<string, () => void>>({})
+  const trie = useRef<Trie>(new Trie())
+  const sequenceTracker = useRef<SequenceTracker>(new SequenceTracker({
+    onReset: () => {
+      trie.current.reset()
+    }
+  }))
 
-  const registerHotkey = useCallback((hotkey: string, callback: () => void) => {
-    hotkeysRef.current[hotkey] = callback
+  const registerHotkey = useCallback((hotkey: string, callback: (event?: KeyboardEvent) => void) => {
+    trie.current.add(hotkey, callback)
+    // trie.current.render()
   }, [])
 
   const unregisterHotkey = useCallback((hotkey: string) => {
-    delete hotkeysRef.current[hotkey]
+    trie.current.remove(hotkey)
   }, [])
 
-  const resetFocus = useCallback(() => {
-    if (ref.current) {
-      ref.current.focus()
-    }
-  }, [])
-
-  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+  function handleKeyDown(event: KeyboardEvent) {
     if (event.metaKey) {
       setIsMetaKeyPressed(true)
     }
@@ -50,14 +44,17 @@ export function HotkeyProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
-    for (const hotkey in hotkeysRef.current) {
-      if (isHotkey(hotkey, event)) {
-        const callback = hotkeysRef.current[hotkey]
-        if (callback) {
-          callback()
-          event.preventDefault()
-        }
-      }
+    if (event.key === 'Escape') {
+      sequenceTracker.current.reset()
+      return
+    }
+
+    const node = trie.current.next(event.key);
+    sequenceTracker.current.registerKeypress(event)
+
+    if (node?.isLeaf()) {
+      (node as Leaf).getCallback()?.(event)
+      sequenceTracker.current.reset()
     }
   }
 
@@ -66,23 +63,24 @@ export function HotkeyProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    if (ref.current) {
-      ref.current.focus()
+    const controller = new AbortController()
+    document.addEventListener('keydown', handleKeyDown, { signal: controller.signal })
+    document.addEventListener('keyup', handleKeyUp, { signal: controller.signal })
+
+    return () => {
+      controller.abort()
     }
   }, [])
 
   return (
-    <div onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} ref={ref} tabIndex={0}>
-      <HotkeyContext.Provider
-        value={{
-          isMetaKeyPressed,
-          registerHotkey,
-          unregisterHotkey,
-          resetFocus
-        }}>
-        {children}
-      </HotkeyContext.Provider>
-    </div>
+    <HotkeyContext.Provider
+      value={{
+        isMetaKeyPressed,
+        registerHotkey,
+        unregisterHotkey,
+      }}>
+      {children}
+    </HotkeyContext.Provider>
   )
 }
 
@@ -94,7 +92,11 @@ export function useHotkey() {
   return context
 }
 
-export function useRegisterHotkey(hotkey?: string, callback?: () => void) {
+export function useRegisterHotkey(
+  hotkey?: string,
+  callback?: (event?: React.KeyboardEvent) => void,
+  deps: (string | number)[] = [],
+) {
   const { registerHotkey, unregisterHotkey } = useHotkey()
 
 
@@ -108,5 +110,6 @@ export function useRegisterHotkey(hotkey?: string, callback?: () => void) {
     return () => {
       unregisterHotkey(hotkey)
     }
-  }, [registerHotkey, unregisterHotkey, hotkey, callback])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [registerHotkey, unregisterHotkey, hotkey, callback, ...deps])
 }

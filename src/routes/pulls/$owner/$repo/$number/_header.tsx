@@ -58,7 +58,15 @@ function RouteComponent() {
     return key
   }
 
-  useSWR(getSwrKey({ author: search.author }), () => fetchRepoPullRequests(owner, repo, search))
+  useSWR(
+    getSwrKey({ author: search.author }),
+    () => fetchRepoPullRequests(owner, repo, search),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: true,
+    }
+  )
 
   return (
     <>
@@ -67,7 +75,7 @@ function RouteComponent() {
           <BreadcrumbList className="gap-2 sm:gap-2">
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link to={'/pulls'} hotKey="p">Pull requests</Link>
+                <Link to={'/pulls'} hotKey="g p">Pull requests</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -89,7 +97,7 @@ function RouteComponent() {
           <TabLink
             to="/pulls/$owner/$repo/$number/conversation"
             params={{ owner, repo, number }}
-            hotKey="c"
+            hotKey="g c"
           >
 
             <TabLinkIcon>
@@ -102,7 +110,7 @@ function RouteComponent() {
           <TabLink
             to="/pulls/$owner/$repo/$number/file-changes"
             params={{ owner, repo, number }}
-            hotKey="f"
+            hotKey="g f"
           >
             <TabLinkIcon>
               <FileDiffIcon className="!w-3.5 !h-3.5" />

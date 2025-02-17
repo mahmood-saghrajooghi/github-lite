@@ -11,55 +11,57 @@ import { CommentForm } from './CommentForm';
 
 export function Timeline({ items }: { items: (IssueTimelineItems | PullRequestTimelineItems | null)[] }) {
   return (
-    <div className="relative flex flex-col gap-6 text-sm">
-      <div className="h-[calc(100%-30px)] w-[1px] bg-daw-gray-300 absolute left-3.5 top-[10px] bg-zinc-600 -z-10" />
-      {items.map((item, i) => {
-        switch (item?.__typename) {
-          case 'IssueComment':
-            return <CommentCard key={item.id} data={item} />;
-          case 'AutomaticBaseChangeSucceededEvent':
-            return <BaseChanged key={item.id} data={item} />;
-          case 'PullRequestCommit':
-            return <Committed key={item.id} data={item} />;
-          case 'HeadRefForcePushedEvent':
-            return <ForcePushed key={item.id} data={item} />;
-          case 'PullRequestReview':
-            return <Reviewed key={item.id} data={item} />;
-          case 'ReviewDismissedEvent':
-            return <ReviewDismissed key={item.id} data={item} />;
-          case 'RenamedTitleEvent':
-            return <Renamed key={item.id} data={item} />;
-          case 'LabeledEvent':
-            return <Labeled key={item.id} data={item} />;
-          case 'UnlabeledEvent':
-            return <Unlabeled key={item.id} data={item} />;
-          case 'ClosedEvent':
-            return <Closed key={item.id} data={item} />;
-          case 'ReopenedEvent':
-            return <Reopened key={item.id} data={item} />;
-          case 'MergedEvent':
-            return <Merged key={item.id} data={item} />;
-          case 'HeadRefDeletedEvent':
-            return <BranchDeleted key={item.id} data={item} />;
-          case 'CrossReferencedEvent':
-            return <CrossReferenced key={item.id} data={item} />;
-          case 'ReferencedEvent':
-            return <Referenced key={item.id} data={item} />;
-          case 'ReviewRequestedEvent':
-            return <ReviewRequested key={item.id} data={item} />;
-          case 'ConvertToDraftEvent':
-            return <ConvertToDraft key={item.id} data={item} />;
-          case 'ReadyForReviewEvent':
-            return <ReadyForReview key={item.id} data={item} />;
-          case 'CommentDeletedEvent':
-            return <CommentDeleted key={item.id} data={item} />;
-          case 'MentionedEvent':
-          case 'SubscribedEvent':
-            return null;
-          default:
-            return <p key={i}>Unknown event <code className="break-all">{JSON.stringify(item)}</code></p>;
-        }
-      })}
+    <div className="relative">
+      <div className="h-[calc(100%-30px)] w-[1px] bg-zinc-600 absolute left-3.5 top-[10px]" />
+      <div className="z-10 flex flex-col gap-6 text-sm relative" >
+        {items.map((item, i) => {
+          switch (item?.__typename) {
+            case 'IssueComment':
+              return <CommentCard key={item.id} data={item} />;
+            case 'AutomaticBaseChangeSucceededEvent':
+              return <BaseChanged key={item.id} data={item} />;
+            case 'PullRequestCommit':
+              return <Committed key={item.id} data={item} />;
+            case 'HeadRefForcePushedEvent':
+              return <ForcePushed key={item.id} data={item} />;
+            case 'PullRequestReview':
+              return <Reviewed key={item.id} data={item} />;
+            case 'ReviewDismissedEvent':
+              return <ReviewDismissed key={item.id} data={item} />;
+            case 'RenamedTitleEvent':
+              return <Renamed key={item.id} data={item} />;
+            case 'LabeledEvent':
+              return <Labeled key={item.id} data={item} />;
+            case 'UnlabeledEvent':
+              return <Unlabeled key={item.id} data={item} />;
+            case 'ClosedEvent':
+              return <Closed key={item.id} data={item} />;
+            case 'ReopenedEvent':
+              return <Reopened key={item.id} data={item} />;
+            case 'MergedEvent':
+              return <Merged key={item.id} data={item} />;
+            case 'HeadRefDeletedEvent':
+              return <BranchDeleted key={item.id} data={item} />;
+            case 'CrossReferencedEvent':
+              return <CrossReferenced key={item.id} data={item} />;
+            case 'ReferencedEvent':
+              return <Referenced key={item.id} data={item} />;
+            case 'ReviewRequestedEvent':
+              return <ReviewRequested key={item.id} data={item} />;
+            case 'ConvertToDraftEvent':
+              return <ConvertToDraft key={item.id} data={item} />;
+            case 'ReadyForReviewEvent':
+              return <ReadyForReview key={item.id} data={item} />;
+            case 'CommentDeletedEvent':
+              return <CommentDeleted key={item.id} data={item} />;
+            case 'MentionedEvent':
+            case 'SubscribedEvent':
+              return null;
+            default:
+              return <p key={i}>Unknown event <code className="break-all">{JSON.stringify(item)}</code></p>;
+          }
+        })}
+      </div>
     </div>
   );
 }
@@ -123,7 +125,7 @@ ${ReadyForReview.fragment}
 function Labeled({ data }: { data: LabeledEvent }) {
   return (
     <div className="flex items-center gap-2">
-      <Icon className="bg-daw-gray-300 text-daw-gray-800"><TagIcon /></Icon>
+      <Icon className="bg-accent text-muted-foreground"><TagIcon /></Icon>
       <span><User actor={data.actor!} /> added the <GithubLabel color={data.label.color}>{data.label.name}</GithubLabel> label</span>
     </div>
   );
@@ -145,7 +147,7 @@ fragment LabeledEventFragment on LabeledEvent {
 function Unlabeled({ data }: { data: UnlabeledEvent }) {
   return (
     <div className="flex items-center gap-2">
-      <Icon className="bg-daw-gray-300 text-daw-gray-800"><TagIcon /></Icon>
+      <Icon className="bg-accent text-muted-foreground"><TagIcon /></Icon>
       <span><User actor={data.actor!} /> removed the <GithubLabel color={data.label.color}>{data.label.name}</GithubLabel> label</span>
     </div>
   );
@@ -168,7 +170,7 @@ function Closed({ data }: { data: ClosedEvent }) {
   return (
     <div className="flex items-center gap-2">
       {data.stateReason === "NOT_PLANNED" ? (
-        <Icon className="bg-daw-gray-300 text-daw-gray-800"><SkipIcon /></Icon>
+        <Icon className="bg-accent text-muted-foreground"><SkipIcon /></Icon>
       ) : (
         <Icon className="bg-purple-600 text-white"><IssueClosedIcon /></Icon>
       )}
@@ -235,7 +237,7 @@ function CommitLink({ commit }: { commit: Commit }) {
 function BranchDeleted({ data }: { data: HeadRefDeletedEvent }) {
   return (
     <div className="flex items-center gap-2">
-      <Icon className="bg-daw-gray-300 text-daw-gray-800"><GitBranchIcon /></Icon>
+      <Icon className="bg-accent text-muted-foreground"><GitBranchIcon /></Icon>
       <span><User actor={data.actor!} /> deleted the <BranchName>{data.headRefName}</BranchName> branch</span>
     </div>
   );
@@ -254,7 +256,7 @@ fragment BranchDeletedEventFragment on HeadRefDeletedEvent {
 function Renamed({ data }: { data: RenamedTitleEvent }) {
   return (
     <div className="flex items-center gap-2">
-      <Icon className="bg-daw-gray-300 text-daw-gray-800"><PencilIcon /></Icon>
+      <Icon className="bg-accent text-muted-foreground"><PencilIcon /></Icon>
       <span><User actor={data.actor!} /> changed the title from <del>{data.previousTitle}</del> to <ins>{data.currentTitle}</ins></span>
     </div>
   );
@@ -297,7 +299,7 @@ function Reviewed({ data }: { data: PullRequestReview }) {
         ? <Icon className="bg-red-600 text-white"><GitPullRequestClosedIcon /></Icon>
         : data.state === 'APPROVED'
           ? <Icon className="bg-green-600 text-white"><CheckCircleIcon /></Icon>
-          : <Icon className="bg-daw-gray-300 text-daw-gray-800"><EyeIcon /></Icon>}
+          : <Icon className="bg-accent text-muted-foreground"><EyeIcon /></Icon>}
       <div style={{ gridArea: 'description' }}><User actor={data.author!} />  {data.state === 'CHANGES_REQUESTED' ? 'requested changes' : data.state === 'APPROVED' ? 'approved' : 'reviewed'}</div>
       {(data.body || !!data.comments?.nodes?.length) && (
         <div style={{ gridArea: 'issue' }} className="flex flex-col gap-2">
@@ -355,7 +357,7 @@ function PullRequestThread({ data }: { data: PullRequestReviewThread }) {
         {data.path}
       </div>
       <div>
-        <div className="flex flex-col gap-3 p-3 border-t border-daw-gray-200">
+        <div className="flex flex-col gap-3 p-3 border-t border-input">
           {data.comments.nodes?.map(comment => (
             <div className="flex gap-2">
               <div>
@@ -382,7 +384,7 @@ function PullRequestThread({ data }: { data: PullRequestReviewThread }) {
         <div className="p-3 border-t border-input">
           <CommentForm>
             {data.viewerCanResolve &&
-              <Button className="flex-shrink-0 px-4 py-2 rounded-md bg-daw-gray-300 pressed:bg-daw-gray-400 border border-daw-gray-400 pressed:border-daw-gray-500 text-daw-gray-800 text-sm font-medium cursor-default outline-none focus-visible:ring-2 ring-offset-2 ring-blue-600">Resolve conversation</Button>
+              <Button className="flex-shrink-0 px-4 py-2 rounded-md bg-accent pressed:bg-accent/80 border border-accent pressed:border-accent/80 text-foreground text-sm font-medium cursor-default outline-none focus-visible:ring-2 ring-offset-2 ring-blue-600">Resolve conversation</Button>
             }
           </CommentForm>
         </div>
@@ -437,7 +439,7 @@ function ReviewDismissed({ data }: { data: ReviewDismissedEvent }) {
         `,
         gridTemplateColumns: 'min-content 1fr'
       }}>
-      <Icon className="bg-daw-gray-300 text-daw-gray-800"><XIcon /></Icon>
+      <Icon className="bg-accent text-muted-foreground"><XIcon /></Icon>
       <span><User actor={data.actor!} /> dismissed <Link to={data.review!.author!.url} target="_blank" className="font-semibold hover:underline">{data.review!.author!.login}</Link>'s stale review {data.pullRequestCommit && <>via <CommitLink commit={data.pullRequestCommit.commit} /></>}</span>
       {data.dismissalMessage && (
         <Card gridArea="issue">
@@ -481,7 +483,7 @@ function CrossReferenced({ data }: { data: CrossReferencedEvent }) {
         `,
         gridTemplateColumns: 'min-content 1fr'
       }}>
-      <Icon className="bg-daw-gray-300 text-daw-gray-800"><CrossReferenceIcon /></Icon>
+      <Icon className="bg-accent text-muted-foreground"><CrossReferenceIcon /></Icon>
       <span><User actor={data.actor!} /> referenced this</span>
       <Card gridArea="issue">
         <div className="flex gap-1 items-center">
@@ -490,10 +492,10 @@ function CrossReferenced({ data }: { data: CrossReferencedEvent }) {
             {data.isCrossRepository &&
               <div className="flex gap-1 items-center">
                 <Avatar src={data.source.repository.owner.avatarUrl} />
-                <Link to={data.source.url} target="_blank" className="text-daw-gray-700 outline-none hover:underline focus-visible:underline">{data.source.repository.owner.login}/{data.source.repository.name} #{data.source.number}</Link>
+                <Link to={data.source.url} target="_blank" className="text-gray-700 outline-none hover:underline focus-visible:underline">{data.source.repository.owner.login}/{data.source.repository.name} #{data.source.number}</Link>
               </div>
             }
-            {!data.isCrossRepository && <Link to={data.source.url} target="_blank" className="text-daw-gray-700 outline-none hover:underline focus-visible:underline">#{data.source.number}</Link>}
+            {!data.isCrossRepository && <Link to={data.source.url} target="_blank" className="text-gray-700 outline-none hover:underline focus-visible:underline">#{data.source.number}</Link>}
           </div>
           <IssueStatus data={data.source} />
         </div>
@@ -556,8 +558,10 @@ function Referenced({ data }: { data: ReferencedEvent }) {
         `,
         gridTemplateColumns: 'min-content 1fr'
       }}>
-      <Icon className="bg-daw-gray-300 text-daw-gray-800"><CrossReferenceIcon /></Icon>
-      <span><User actor={data.actor!} /> referenced this pull request</span>
+      <Icon className="bg-accent text-muted-foreground"><CrossReferenceIcon /></Icon>
+      <span className="text-muted-foreground">
+        <User actor={data.actor!} /> referenced this pull request
+      </span>
       <div style={{ gridArea: 'commit' }} className="flex gap-2">
         <span className="flex-1 line-clamp-2 text-sm"><Link to={data.commit!.commitUrl} target="_blank" className="hover:underline">{data.commit!.message}</Link></span>
         {data.commit!.statusCheckRollup && <Status state={data.commit!.statusCheckRollup.state} />}
@@ -597,7 +601,7 @@ function Committed({ data }: { data: PullRequestCommit }) {
     <div className="flex gap-2 items-center">
       <Icon className="text-zinc-300 bg-background h-5"><GitCommitIcon /></Icon>
       <Avatar src={data.commit.author!.avatarUrl} />
-      <span className="flex-1 line-clamp-2"><Link to={data.commit.commitUrl} target="_blank" className="hover:underline">{data.commit.message}</Link></span>
+      <span className="flex-1 line-clamp-2"><Link to={data.commit.commitUrl} target="_blank" className="hover:underline text-muted-foreground">{data.commit.message}</Link></span>
       {data.commit.statusCheckRollup && <Status state={data.commit.statusCheckRollup.state} />}
       <CommitLink commit={data.commit} />
     </div>
@@ -628,8 +632,10 @@ fragment CommittedEventFragment on PullRequestCommit {
 function ForcePushed({ data }: { data: HeadRefForcePushedEvent }) {
   return (
     <div className="flex items-center gap-2">
-      <Icon className="bg-daw-gray-300 text-daw-gray-800"><RepoPushIcon /></Icon>
-      <span><User actor={data.actor!} /> force-pushed the {data.ref && <BranchName>{data.ref.name}</BranchName>} branch from <CommitLink commit={data.beforeCommit!} /> to <CommitLink commit={data.afterCommit!} /></span>
+      <Icon className="bg-accent text-muted-foreground"><RepoPushIcon /></Icon>
+      <span className="text-muted-foreground">
+        <User actor={data.actor!} /> force-pushed the {data.ref && <BranchName>{data.ref.name}</BranchName>} branch from <CommitLink commit={data.beforeCommit!} /> to <CommitLink commit={data.afterCommit!} />
+      </span>
     </div>
   );
 }
@@ -658,7 +664,9 @@ function BaseChanged({ data }: { data: AutomaticBaseChangeSucceededEvent }) {
   return (
     <div className="flex items-center gap-2">
       <Icon className="bg-green-600 text-white"><GitBranchIcon /></Icon>
-      <span>Base automatically changed from <BranchName>{data.oldBase}</BranchName> to <BranchName>{data.newBase}</BranchName></span>
+      <span className="text-muted-foreground">
+        Base automatically changed from <BranchName>{data.oldBase}</BranchName> to <BranchName>{data.newBase}</BranchName>
+      </span>
     </div>
   );
 }
@@ -674,8 +682,9 @@ fragment BaseChangeEventFragment on AutomaticBaseChangeSucceededEvent {
 function ReviewRequested({ data }: { data: ReviewRequestedEvent }) {
   return (
     <div className="flex items-center gap-2">
-      <Icon className="bg-green-600 text-white"><EyeIcon /></Icon>
-      <span><User actor={data.actor!} /> requested a review{'login' in data.requestedReviewer! && <> from <Link to={data.requestedReviewer!.url} target="_blank" className="hover:underline font-semibold">{data.requestedReviewer!.login}</Link></>}</span>
+      <Icon className="bg-accent text-muted-foreground"><EyeIcon /></Icon>
+      <span className="text-muted-foreground">
+        <User actor={data.actor!} /> requested a review{'login' in data.requestedReviewer! && <> from <Link to={data.requestedReviewer!.url} target="_blank" className="hover:underline font-semibold text-foreground">{data.requestedReviewer!.login}</Link></>}</span>
     </div>
   );
 }
@@ -698,7 +707,9 @@ function ConvertToDraft({ data }: { data: ConvertToDraftEvent }) {
   return (
     <div className="flex items-center gap-2">
       <Icon className="bg-zinc-800 text-zinc-300 outline outline-background outline-2"><GitPullRequestDraftIcon /></Icon>
-      <span><User actor={data.actor!} /> marked this pull request as a draft</span>
+      <span className="text-muted-foreground">
+        <User actor={data.actor!} /> marked this pull request as a draft
+      </span>
     </div>
   );
 }
@@ -714,8 +725,10 @@ fragment ConvertToDraftEventFragment on ConvertToDraftEvent {
 function ReadyForReview({ data }: { data: ReadyForReviewEvent }) {
   return (
     <div className="flex items-center gap-2">
-      <Icon className="bg-daw-gray-300 text-daw-gray-800"><EyeIcon /></Icon>
-      <span><User actor={data.actor!} /> marked this pull request as ready for review</span>
+      <Icon className="bg-accent text-muted-foreground"><EyeIcon /></Icon>
+      <span className="text-muted-foreground">
+        <User actor={data.actor!} /> marked this pull request as ready for review
+      </span>
     </div>
   );
 }
@@ -731,8 +744,10 @@ fragment ReadyForReviewEventFragment on ReadyForReviewEvent {
 function CommentDeleted({ data }: { data: CommentDeletedEvent }) {
   return (
     <div className="flex items-center gap-2">
-      <Icon className="bg-daw-gray-300 text-daw-gray-800"><XIcon /></Icon>
-      <span><User actor={data.actor!} /> deleted a comment from <Link to={data.deletedCommentAuthor!.url} target="_blank" className="hover:underline font-semibold">{data.deletedCommentAuthor!.login}</Link></span>
+      <Icon className="bg-accent text-muted-foreground"><XIcon /></Icon>
+      <span className="text-muted-foreground">
+        <User actor={data.actor!} /> deleted a comment from <Link to={data.deletedCommentAuthor!.url} target="_blank" className="hover:underline font-semibold text-foreground">{data.deletedCommentAuthor!.login}</Link>
+      </span>
     </div>
   );
 }

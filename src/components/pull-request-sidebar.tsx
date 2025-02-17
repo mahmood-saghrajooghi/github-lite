@@ -1,6 +1,4 @@
-import { getRouteApi, Link, useParams } from '@tanstack/react-router'
-import { gql } from 'graphql-tag'
-
+import { Link } from '@tanstack/react-router'
 import {
   Sidebar,
   SidebarContent,
@@ -25,11 +23,11 @@ import {
 } from "@/components/ui/popover"
 import { getPrURL } from '@/lib/pull-request'
 import useSWR from 'swr'
-import { github, preload, useQuery } from '@/lib/client'
+import { useQuery } from '@/lib/client'
 import { PullRequestPage } from '@/app/PullRequest'
 import { RestEndpointMethodTypes } from '@octokit/rest'
 import { Repository } from '@octokit/graphql-schema'
-import { CircleCheck, X, Clock3, User, Check } from 'lucide-react'
+import { CircleCheck, X, Clock3, User, Check, Loader } from 'lucide-react'
 import { GitPullRequestDraftIcon, GitPullRequestIcon } from '@primer/octicons-react'
 import { Avatar } from '@/app/components'
 import { useRegisterHotkey } from '@/contexts/hotkey-context'
@@ -39,14 +37,6 @@ import { cn } from '@/lib/utils'
 
 type PullRequest =
   RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][0]
-
-function preloadPullRequest(item: PullRequest) {
-  preload(PullRequestPage.query(), {
-    owner: item.repository?.owner.login,
-    repo: item.repository?.name,
-    number: Number(item.url.split('/').pop()),
-  })
-}
 
 type SearchParams = {
   author?: string
@@ -65,7 +55,7 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
 
   function onAuthorChange(value: string) {
     navigate({
-      search: value? {
+      search: value ? {
         author: value,
       } : undefined,
     })
@@ -81,10 +71,13 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
     return key
   }
 
-  const { data } = useSWR(getSwrKey({ author }))
+  const { data, isLoading } = useSWR(getSwrKey({ author }))
   const ref = useRef<HTMLInputElement>(null)
 
-  useRegisterHotkey('/', () => {
+  useRegisterHotkey('/', (event) => {
+    console.log('ref', ref.current)
+
+    event?.preventDefault()
     ref.current?.focus()
   })
 
@@ -96,11 +89,14 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
       <Command className="bg-color-unset rounded-none">
         <Sidebar collapsible="none" className="bg-color-unset border-r">
           <SidebarHeader className="text-sm flex flex-row items-center h-12 p-0">
-            <CommandInput placeholder="Search pull requests" wrapperClassName="w-full h-full" ref={ref} autoFocus />
+            <CommandInput placeholder="Search pull requests" wrapperClassName="w-full h-full" ref={ref} />
           </SidebarHeader>
           <SidebarContent className="p-2">
-            <div className="flex items-center gap-2">
-              <AuthorFilter value={author} onChange={onAuthorChange} />
+            <div className="flex items-center gap-2 justify-between">
+              <div className="flex items-center gap-2">
+                <AuthorFilter value={author} onChange={onAuthorChange} />
+              </div>
+              {isLoading && <Loader className="w-4 h-4 animate-spin [animation-duration:1500ms] text-muted-foreground" />}
             </div>
             <SidebarMenu>
               <CommandList className="max-h-[unset] overflow-y-auto">
@@ -138,6 +134,7 @@ function PullRequestItem({ item, searchParams }: { item: PullRequest, searchPara
   const repoURL = item.repository_url
   const [owner, repo] = repoURL.split('/').slice(-2)
   const number = Number(item.url.split('/').pop())
+
   const { data: res } = useQuery<{ repository: Repository }>(
     PullRequestPage.query(),
     { owner, repo, number },
@@ -148,9 +145,6 @@ function PullRequestItem({ item, searchParams }: { item: PullRequest, searchPara
       id={getPrURL(item)}
       to={getPrURL(item)}
       search={searchParams}
-      onMouseOver={() => {
-        preloadPullRequest(item)
-      }}
       className="overflow-hidden block flex-1 px-2 py-1.5"
     >
       <div className="flex flex-1 flex-col gap-1.5 w-full">
@@ -220,9 +214,11 @@ type Member = {
 }
 
 export function AuthorFilter({ value, onChange }: { value: string | undefined, onChange: (value: string) => void }) {
+  const listRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false)
 
-  useRegisterHotkey('u', () => {
+  useRegisterHotkey('u', (event) => {
+    event?.preventDefault()
     setOpen(true)
   })
 
@@ -245,9 +241,13 @@ export function AuthorFilter({ value, onChange }: { value: string | undefined, o
         </Button>
       </PopoverTrigger>
       <PopoverContent className=" p-0" align="start">
-        <Command>
+        <Command onChange={() => {
+          queueMicrotask(() => {
+            listRef.current?.scrollTo({ top: 0 })
+          })
+        }}>
           <CommandInput placeholder="Search framework..." />
-          <CommandList>
+          <CommandList ref={listRef}>
             <CommandEmpty>No framework found.</CommandEmpty>
             <CommandGroup>
               {data?.organization?.membersWithRole?.nodes.map((member) => (

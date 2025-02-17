@@ -5,7 +5,7 @@ import { forwardRef, useRef } from 'react';
 import { composeRefs } from '@/hooks/compose-refs';
 
 type TabLinkProps = React.ComponentProps<typeof Link> & {
-  hotKey?: string
+  hotKey?: string;
 }
 
 export const TabLink = forwardRef<HTMLAnchorElement, TabLinkProps>(({
@@ -21,7 +21,7 @@ export const TabLink = forwardRef<HTMLAnchorElement, TabLinkProps>(({
   useRegisterHotkey(hotKey, () => {
     navigate({ to })
     internalRef.current?.focus()
-  })
+  }, [to])
 
   return (
     <Link

@@ -108,9 +108,10 @@ function PullRequestContent({
                 </a>
               </span>
             </div>
-
-            <CommentCard data={data} />
-            <PullHeader data={data} />
+            <div className="grid grid-cols-[1fr_300px] gap-4">
+              <CommentCard data={data} />
+              <PullHeader data={data} />
+            </div>
             <Timeline items={data.timelineItems.nodes!} />
             <IssueCommentForm issue={data} />
           </main>

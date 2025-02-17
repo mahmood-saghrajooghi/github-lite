@@ -42,44 +42,44 @@ export function IssueStatus({ data }: { data: PullRequest | Issue }) {
 }
 
 const checkStates = {
-  EXPECTED: 'bg-daw-yellow-500',
-  PENDING: 'bg-daw-yellow-500',
-  ACTION_REQUIRED: 'bg-daw-yellow-500',
-  ERROR: 'bg-daw-red-500',
-  FAILURE: 'bg-daw-red-500',
-  SUCCESS: 'bg-daw-green-500',
-  CANCELLED: 'bg-daw-gray-500',
-  NEUTRAL: 'bg-daw-gray-500',
-  SKIPPED: 'bg-daw-gray-500',
-  STALE: 'bg-daw-gray-500',
-  STARTUP_FAILURE: 'bg-daw-red-500',
-  TIMED_OUT: 'bg-daw-red-500',
+  EXPECTED: 'bg-yellow-500',
+  PENDING: 'bg-yellow-500',
+  ACTION_REQUIRED: 'bg-yellow-500',
+  ERROR: 'bg-red-500',
+  FAILURE: 'bg-red-500',
+  SUCCESS: 'bg-green-500',
+  CANCELLED: 'bg-gray-500',
+  NEUTRAL: 'bg-gray-500',
+  SKIPPED: 'bg-gray-500',
+  STALE: 'bg-gray-500',
+  STARTUP_FAILURE: 'bg-red-500',
+  TIMED_OUT: 'bg-red-500',
 
-  CHANGES_REQUESTED: 'bg-daw-red-500',
-  REVIEW_REQUIRED: 'bg-daw-red-500',
-  APPROVED: 'bg-daw-green-500',
-  COMMENTED: 'bg-daw-gray-500',
-  DISMISSED: 'bg-daw-gray-500'
+  CHANGES_REQUESTED: 'bg-red-500',
+  REVIEW_REQUIRED: 'bg-red-500',
+  APPROVED: 'bg-green-500',
+  COMMENTED: 'bg-gray-500',
+  DISMISSED: 'bg-gray-500'
 };
 
 const checkIcons = {
   EXPECTED: null,
   PENDING: null,
   ERROR: null,
-  FAILURE: <XIcon className="text-daw-red-500" />,
-  ACTION_REQUIRED: <AlertIcon className="text-daw-yellow-600" />,
-  CANCELLED: <StopIcon className="text-daw-gray-500" />,
-  STARTUP_FAILURE: <XIcon className="text-daw-red-500" />,
-  TIMED_OUT: <XIcon className="text-daw-red-500" />,
-  SUCCESS: <CheckIcon className="text-daw-green-500" />,
+  FAILURE: <XIcon className="text-red-500" />,
+  ACTION_REQUIRED: <AlertIcon className="text-yellow-600" />,
+  CANCELLED: <StopIcon className="text-gray-500" />,
+  STARTUP_FAILURE: <XIcon className="text-red-500" />,
+  TIMED_OUT: <XIcon className="text-red-500" />,
+  SUCCESS: <CheckIcon className="text-green-500" />,
   NEUTRAL: null,
   STALE: null,
   SKIPPED: null,
 
-  CHANGES_REQUESTED: <XIcon className="text-daw-red-500" />,
-  REVIEW_REQUIRED: <XIcon className="text-daw-red-500" />,
-  APPROVED: <CheckIcon className="text-daw-green-500" />,
-  COMMENTED: <CommentIcon className="text-daw-gray-500" />,
+  CHANGES_REQUESTED: <XIcon className="text-red-500" />,
+  REVIEW_REQUIRED: <XIcon className="text-red-500" />,
+  APPROVED: <CheckIcon className="text-green-500" />,
+  COMMENTED: <CommentIcon className="text-gray-500" />,
   DISMISSED: null
 };
 
@@ -123,9 +123,9 @@ export function GithubLabel({ color, children }: { color: string, children: Reac
 
 export function User({ actor }: { actor: Actor }) {
   return (
-    <span className="inline-flex items-center align-bottom">
+    <span className="inline-flex items-center align-bottom text-muted-foreground">
       <Avatar src={actor.avatarUrl} className="inline mr-2" />
-      <Link href={actor.url} target="_blank" className="font-semibold hover:underline">{actor.login}</Link>
+      <Link href={actor.url} target="_blank" className="font-semibold hover:underline text-foreground">{actor.login}</Link>
     </span>
   )
 }

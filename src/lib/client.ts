@@ -20,7 +20,11 @@ function runQuery<T>([query, options]: [string, Record<string, unknown>]): Promi
 }
 
 export function useQuery<T>(query: string, options: Record<string, unknown>): SWRResponse<T> {
-  return useSWR([query, options], runQuery as typeof runQuery<T>);
+  return useSWR([query, options], runQuery as typeof runQuery<T>, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    revalidateIfStale: true,
+  });
 }
 
 export function preload(query: string, options: Record<string, unknown>) {

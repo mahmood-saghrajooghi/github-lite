@@ -192,14 +192,13 @@ function Reviews({ data }: { data: PullRequest }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex gap-2">
-        <Status state={data.reviewDecision!} filled />
-        <h3 className="font-semibold">{reviewDecisionMessages[data.reviewDecision!]}</h3>
+        <h3 className="font-semibold">Reviews</h3>
       </div>
       <ul className="flex flex-col gap-2">
         {[...reviewsByAuthor.values()]?.map((review, i) => (
-          <li key={i} className="flex gap-2 items-center">
-            <div className="w-5 flex justify-center"><Status state={review.state} /></div>
+          <li key={i} className="flex gap-2 items-center justify-between">
             <div><User actor={review.author} /></div>
+            <div className="w-5 flex justify-center"><Status state={review.state} /></div>
           </li>
         ))}
       </ul>
