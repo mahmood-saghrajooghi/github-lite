@@ -25,9 +25,9 @@ export class Node {
 }
 
 export class Leaf extends Node {
-  callback: ((event?: React.KeyboardEvent) => void) | undefined;
+  callback: ((event?: KeyboardEvent) => void) | undefined;
 
-  constructor(key: string, parent: Node, callback: (event?: React.KeyboardEvent) => void) {
+  constructor(key: string, parent: Node, callback: (event?: KeyboardEvent) => void) {
     super(key, parent)
     this.callback = callback
   }
@@ -55,7 +55,7 @@ export class Trie {
     this.emit()
   }
 
-  add(path: string, callback: (event?: React.KeyboardEvent) => void) {
+  add(path: string, callback: (event?: KeyboardEvent) => void) {
     let node: Node | Leaf = this._root
     const chars = path.split(' ');
     for (const [index, char] of chars.entries()) {

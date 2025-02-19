@@ -1,11 +1,14 @@
 import { useEffect, useState, useCallback } from 'react'
+import { isFormField } from '../contexts/hotkey-utils'
 
 export function useIsPressing(hotkey: string) {
   const [isPressing, setIsPressing] = useState(false)
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (event.key === hotkey) {
-      setIsPressing(true)
+      if (!isFormField(event.target as Node)) {
+        setIsPressing(true)
+      }
     }
   }, [hotkey])
 

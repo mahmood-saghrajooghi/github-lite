@@ -182,12 +182,6 @@ function PullRequestItem({ item, searchParams }: { item: PullRequest, searchPara
 }
 
 
-type Member = {
-  login: string
-  avatarUrl: string
-  name: string
-}
-
 export function AuthorFilter({ value, onChange, owner }: { value: string | undefined, onChange: (value: string) => void, owner: string }) {
   const listRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false)

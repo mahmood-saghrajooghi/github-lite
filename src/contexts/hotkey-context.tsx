@@ -13,7 +13,7 @@ import type { NormalizedHotkeyString } from './hotkey-utils'
 
 type HotkeyContextType = {
   isMetaKeyPressed: boolean
-  registerHotkey: (hotkey: string, callback: (event?: React.KeyboardEvent) => void) => void
+  registerHotkey: (hotkey: string, callback: (event?: KeyboardEvent) => void) => void
   unregisterHotkey: (hotkey: string) => void
   sequenceTrackerState: readonly NormalizedHotkeyString[]
 }
@@ -31,7 +31,7 @@ export function HotkeyProvider({ children }: { children: React.ReactNode }) {
 
   const sequenceTrackerState = useSyncExternalStore(sequenceTracker.current.subscribe, () => sequenceTracker.current.path)
 
-  const registerHotkey = useCallback((hotkey: string, callback: (event?: React.KeyboardEvent) => void) => {
+  const registerHotkey = useCallback((hotkey: string, callback: (event?: KeyboardEvent) => void) => {
     trie.current.add(hotkey, callback)
   }, [])
 
@@ -83,7 +83,6 @@ export function HotkeyProvider({ children }: { children: React.ReactNode }) {
       value={{
         isMetaKeyPressed,
         sequenceTrackerState,
-        trie: trie.current,
         registerHotkey,
         unregisterHotkey,
       }}>
@@ -102,7 +101,7 @@ export function useHotkey() {
 
 export function useRegisterHotkey(
   hotkey?: string,
-  callback?: (event?: React.KeyboardEvent) => void,
+  callback?: (event?: KeyboardEvent) => void,
   deps: (string | number)[] = [],
 ) {
   const { registerHotkey, unregisterHotkey } = useHotkey()

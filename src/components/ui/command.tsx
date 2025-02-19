@@ -5,7 +5,6 @@ import { Search } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import isHotkey from 'is-hotkey'
-import { useIsPressing } from '@/hooks/use-is-pressing'
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -40,9 +39,6 @@ const CommandInput = React.forwardRef<
     wrapperClassName?: string
   }
 >(({ className, wrapperClassName, ...props }, ref) => {
-
-  const isPressing = useIsPressing('/')
-
   return (
     <div className={cn("flex items-center border-b px-3 relative", wrapperClassName)} cmdk-input-wrapper="">
       <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
@@ -59,9 +55,6 @@ const CommandInput = React.forwardRef<
         }}
         {...props}
       />
-      <div className={cn("absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 text-xs flex items-center justify-center border rounded-md text-muted-foreground duration-200", isPressing && "text-accent-foreground")}>
-        /
-      </div>
     </div>
   )
 })
