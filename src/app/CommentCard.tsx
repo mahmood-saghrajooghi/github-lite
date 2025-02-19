@@ -20,7 +20,7 @@ export function CommentCard({ data }: { data: Issue | PullRequest | IssueComment
   };
 
   return (
-    <div className="border border-input rounded-lg p-4">
+    <div className="border border-input rounded-lg p-4 bg-background">
       <div
         className="grid gap-x-2 mb-4 border-b border-daw-gray-200 pb-4"
         style={{

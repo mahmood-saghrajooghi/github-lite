@@ -14,59 +14,16 @@ import { CommentDiscussionIcon, FileDiffIcon } from '@primer/octicons-react'
 import { AppHeader } from '@/components/app-header'
 import { TabLink, TabLinkIcon } from '@/components/tab-link'
 import { Link } from '@/components/link'
-import { github } from '@/lib/client'
-import useSWR from 'swr'
+import { usePRsQuery } from '@/hooks/api/use-prs-query'
 
 export const Route = createFileRoute('/pulls/$owner/$repo/$number/_header')({
   component: RouteComponent,
 })
 
 
-async function fetchRepoPullRequests(owner: string, repo: string, search: any) {
-  try {
-    let query = `is:pr is:open repo:${owner}/${repo}`
-
-    if (search.author) {
-      query += ` author:${search.author}`
-    }
-
-    const res = await github.search.issuesAndPullRequests({
-      q: query,
-      per_page: 200,
-      sort: 'updated',
-      order: 'desc',
-    })
-
-    const { data } = res
-    return data
-  } catch (err) {
-    console.log(err)
-  }
-}
-
 function RouteComponent() {
   const { owner, repo, number } = useParams({ from: Route.id })
-  const search = Route.useSearch()
-
-  function getSwrKey(params: { author?: string }) {
-    let key = `pull-requests-${owner}-${repo}`
-    Object.entries(params).forEach(([paramKey, value]) => {
-      if (value) {
-        key += `?${paramKey}=${value}`
-      }
-    })
-    return key
-  }
-
-  useSWR(
-    getSwrKey({ author: search.author }),
-    () => fetchRepoPullRequests(owner, repo, search),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      revalidateIfStale: true,
-    }
-  )
+  usePRsQuery(owner, repo, { author: 'jason' })
 
   return (
     <>
@@ -75,7 +32,7 @@ function RouteComponent() {
           <BreadcrumbList className="gap-2 sm:gap-2">
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link to={'/pulls'} hotKey="g p">Pull requests</Link>
+                <Link to={'/pulls'} hotKey="g p g p">Pull requests</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />

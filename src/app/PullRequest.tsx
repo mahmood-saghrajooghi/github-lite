@@ -2,16 +2,13 @@ import { PullRequest, PullRequestReviewDecision, Repository } from '@octokit/gra
 import { Link } from '@tanstack/react-router';
 import { Fragment, createContext } from 'react';
 import { Button, } from '@/components/ui/button';
-import { Header } from '@/app/Issue';
-import { useQuery } from '@/lib/client';
-import { CommentCard } from '@/app/CommentCard';
+import { useQuery } from '@tanstack/react-query';
 import { Timeline } from '@/app/TimeLine';
-import { IssueCommentForm } from '@/app/CommentForm';
 import { Card, Status, User } from '@/app/components';
-import useSWR from 'swr';
 import { github } from '@/lib/client';
 import { parseDiff, Diff as DiffView, Hunk } from 'react-diff-view';
 import 'react-diff-view/style/index.css';
+import { usePRDiffQuery } from '@/hooks/api/use-pr-diff-query';
 
 
 export const PullRequestContext = createContext<PullRequest | null>(null);
@@ -47,7 +44,7 @@ function renderFile({ oldRevision, newRevision, type, hunks }: any) {
 
 
 function Diff({ data }: { data: PullRequest }) {
-  const { data: diff } = useSWR(`/repos/${data.repository.owner.login}/${data.repository.name}/pulls/${data.number}/files`, () => getDiff(data.repository.owner.login, data.repository.name, data.number));
+  const { data: diff } = usePRDiffQuery(data.repository.owner.login, data.repository.name, data.number);
 
 
   if (!diff) {

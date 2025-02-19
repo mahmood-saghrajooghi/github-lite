@@ -20,7 +20,8 @@ export class SequenceTracker {
 
   private _path: readonly NormalizedHotkeyString[] = []
   private timer: number | null = null
-  private onReset
+  private onReset?: () => void
+  private _subscribers = new Set<() => void>()
 
   constructor({ onReset }: SequenceTrackerOptions = {}) {
     this.onReset = onReset
@@ -37,12 +38,14 @@ export class SequenceTracker {
   registerKeypress(event: KeyboardEvent): void {
     this._path = [...this._path, eventToHotkeyString(event)]
     this.startTimer()
+    this.emit()
   }
 
   reset(): void {
     this.killTimer()
     this._path = []
     this.onReset?.()
+    this.emit()
   }
 
   private killTimer(): void {
@@ -56,4 +59,17 @@ export class SequenceTracker {
     this.killTimer()
     this.timer = window.setTimeout(() => this.reset(), SequenceTracker.CHORD_TIMEOUT)
   }
+
+  subscribe = (callback: () => void) => {
+    this._subscribers.add(callback)
+
+    return () => {
+      this._subscribers.delete(callback)
+    }
+  }
+
+  emit = () => {
+    this._subscribers.forEach(cb => cb())
+  }
+
 }

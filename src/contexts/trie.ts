@@ -25,9 +25,9 @@ export class Node {
 }
 
 export class Leaf extends Node {
-  callback: ((event?: KeyboardEvent) => void) | undefined;
+  callback: ((event?: React.KeyboardEvent) => void) | undefined;
 
-  constructor(key: string, parent: Node, callback: (event?: KeyboardEvent) => void) {
+  constructor(key: string, parent: Node, callback: (event?: React.KeyboardEvent) => void) {
     super(key, parent)
     this.callback = callback
   }
@@ -55,7 +55,7 @@ export class Trie {
     this.emit()
   }
 
-  add(path: string, callback: (event?: KeyboardEvent) => void) {
+  add(path: string, callback: (event?: React.KeyboardEvent) => void) {
     let node: Node | Leaf = this._root
     const chars = path.split(' ');
     for (const [index, char] of chars.entries()) {
@@ -123,20 +123,28 @@ export class Trie {
     this._subscribers = this._subscribers.filter(cb => cb !== callback)
   }
 
-
   emit = () => {
     this._subscribers.forEach(cb => cb())
   }
 
   render() {
+    // Clear the console before rendering
+    console.clear()
+
     const renderNode = (node: Node | Leaf, prefix: string = '', isLast: boolean = true) => {
       const connector = isLast ? '└── ' : '├── '
       const childPrefix = isLast ? '    ' : '│   '
 
-      console.log(`${prefix}${connector}${node.key}${node.isLeaf() ? ' (Leaf)' : ''}`)
+      const isCurrentNode = node === this._currentNode
+      const nodeText = `${node.key}${node.isLeaf() ? ' (Leaf)' : ''}`
+      const coloredText = isCurrentNode
+        ? `\x1b[32m● ${nodeText}\x1b[0m`  // Green dot + text for current node
+        : nodeText
+
+      console.log(`${prefix}${connector}${coloredText}`)
 
       const children = Object.entries(node.children)
-      children.forEach(([_, child], index) => {
+      children.forEach(([_, child], index) => {  // Changed 'key' to '_' since it's unused
         renderNode(child, prefix + childPrefix, index === children.length - 1)
       })
     }

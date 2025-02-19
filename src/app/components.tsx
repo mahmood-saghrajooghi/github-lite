@@ -19,8 +19,8 @@ export function BranchName({ children }: { children: string }) {
 }
 
 const states = {
-  MERGED: 'bg-purple-100 border-purple-200 text-purple-700',
-  CLOSED: 'bg-red-100 border-red-200 text-red-700',
+  MERGED: 'border-purple-200 text-purple-500',
+  CLOSED: 'border-red-200 text-red-500',
   OPEN: 'text-green-500',
   DRAFT: 'text-muted-foreground'
 };
@@ -31,10 +31,21 @@ export function IssueStatus({ data }: { data: PullRequest | Issue }) {
     state = 'DRAFT';
   }
 
-  const icon = state === 'OPEN' ? <GitPullRequestIcon className="text-green-500" /> : state === 'DRAFT' ? <GitPullRequestDraftIcon /> : state.toLowerCase();
+  function getIcon() {
+    if (state === 'OPEN') {
+      return <GitPullRequestIcon className="text-green-500" />
+    }
+    if (state === 'DRAFT') {
+      return <GitPullRequestDraftIcon />
+    }
+    if (state === 'MERGED') {
+      return <GitPullRequestIcon />
+    }
+    return state.toLowerCase();
+  }
   return (
     <div className={`flex items-center gap-1 capitalize w-fit py-0.5 ${states[state]}`}>
-      {icon}
+      {getIcon()}
       {state.toLowerCase()}
       <span className="w-[3px] h-[3px] rounded-full bg-zinc-500" />
     </div>

@@ -67,14 +67,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <Link to="/pulls">
-                  <GitPullRequestIcon />
-                  <span>Pull Requests</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link to="/pulls">
+                <GitPullRequestIcon />
+                <span>Pull Requests</span>
+              </Link>
+            </SidebarMenuButton>
           </SidebarMenu>
         </SidebarGroup>
 

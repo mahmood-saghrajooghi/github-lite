@@ -5,14 +5,17 @@ import {
   useRef,
   useEffect,
   useCallback,
+  useSyncExternalStore,
 } from 'react'
 import { Leaf, Trie } from './trie'
 import { SequenceTracker } from './sequence'
+import type { NormalizedHotkeyString } from './hotkey-utils'
 
 type HotkeyContextType = {
   isMetaKeyPressed: boolean
-  registerHotkey: (hotkey: string, callback: (event?: KeyboardEvent) => void) => void
+  registerHotkey: (hotkey: string, callback: (event?: React.KeyboardEvent) => void) => void
   unregisterHotkey: (hotkey: string) => void
+  sequenceTrackerState: readonly NormalizedHotkeyString[]
 }
 
 const HotkeyContext = createContext<HotkeyContextType | null>(null)
@@ -26,9 +29,10 @@ export function HotkeyProvider({ children }: { children: React.ReactNode }) {
     }
   }))
 
-  const registerHotkey = useCallback((hotkey: string, callback: (event?: KeyboardEvent) => void) => {
+  const sequenceTrackerState = useSyncExternalStore(sequenceTracker.current.subscribe, () => sequenceTracker.current.path)
+
+  const registerHotkey = useCallback((hotkey: string, callback: (event?: React.KeyboardEvent) => void) => {
     trie.current.add(hotkey, callback)
-    // trie.current.render()
   }, [])
 
   const unregisterHotkey = useCallback((hotkey: string) => {
@@ -51,6 +55,8 @@ export function HotkeyProvider({ children }: { children: React.ReactNode }) {
 
     const node = trie.current.next(event.key);
     sequenceTracker.current.registerKeypress(event)
+
+    // trie.current.render()
 
     if (node?.isLeaf()) {
       (node as Leaf).getCallback()?.(event)
@@ -76,6 +82,8 @@ export function HotkeyProvider({ children }: { children: React.ReactNode }) {
     <HotkeyContext.Provider
       value={{
         isMetaKeyPressed,
+        sequenceTrackerState,
+        trie: trie.current,
         registerHotkey,
         unregisterHotkey,
       }}>

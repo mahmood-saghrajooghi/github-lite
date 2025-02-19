@@ -1,14 +1,18 @@
 import { Issue, PullRequest, Repository } from '@octokit/graphql-schema';
 import Markdown from 'markdown-to-jsx';
-import { useQuery } from '@/lib/client';
 import { Timeline } from './TimeLine';
 import { CommentCard } from './CommentCard';
 import { IssueCommentForm } from './CommentForm';
 import { MarkGithubIcon } from "@primer/octicons-react"
+import { runQuery } from '@/lib/client';
+import { useQuery } from '@tanstack/react-query';
 
 export function IssuePage({ owner, repo, number }: { owner: string, repo: string, number: number }) {
-  let { data: res } = useQuery<{ repository: Repository }>(IssuePage.query(), { owner, repo, number });
-  let data = res?.repository.issue;
+  const { data: res } = useQuery<{ repository: Repository }>({
+    queryKey: [IssuePage.query(), { owner, repo, number }],
+    queryFn: () => runQuery([IssuePage.query(), { owner, repo, number }]),
+  });
+  const data = res?.repository.issue;
   if (!data) {
     return null;
   }

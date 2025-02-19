@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { motion } from 'motion/react'
 import { Link, useNavigate, } from '@tanstack/react-router'
 import { SidebarMenuItem } from '@/components/ui/sidebar'
+import { useQuery } from '@tanstack/react-query'
 import {
   Command,
   CommandEmpty,
@@ -10,8 +11,7 @@ import {
   CommandInput,
 } from '@/components/ui/command'
 import { getPrURL } from '@/lib/pull-request'
-import useSWR from 'swr'
-import { preload, useQuery } from '@/lib/client'
+import { preload, runQuery } from '@/lib/client'
 import { PullRequestPage } from '@/app/PullRequest'
 import { RestEndpointMethodTypes } from '@octokit/rest'
 import { Repository } from '@octokit/graphql-schema'
@@ -19,6 +19,7 @@ import { CheckIcon } from 'lucide-react'
 import { GitPullRequestDraftIcon, GitPullRequestIcon } from '@primer/octicons-react'
 import { Avatar } from '@/app/components'
 import { useHotkey, useRegisterHotkey } from '@/contexts/hotkey-context'
+import { useMyPRs } from '@/hooks/api/use-my-prs'
 
 type PullRequest =
   RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][0]
@@ -31,13 +32,9 @@ function preloadPullRequest({ owner, repo, number }: { owner: string, repo: stri
   })
 }
 
-type Props = {
-  swrKey: string
-}
-
-export function PullRequestsList({ swrKey }: Props) {
+export function PullRequestsList() {
   const ref = useRef<HTMLInputElement>(null)
-  const { data } = useSWR(swrKey)
+  const { data } = useMyPRs()
   const navigate = useNavigate()
   const { isMetaKeyPressed } = useHotkey()
 
@@ -96,10 +93,10 @@ function PullRequestItem({ item, index, isMetaKeyPressed }: PullRequestItemProps
   const repoURL = item.repository_url
   const [owner, repo] = repoURL.split('/').slice(-2)
   const number = Number(item.url.split('/').pop())
-  const { data: res } = useQuery<{ repository: Repository }>(
-    PullRequestPage.query(),
-    { owner, repo, number },
-  )
+  const { data: res } = useQuery<{ repository: Repository }>({
+    queryKey: [PullRequestPage.query(), { owner, repo, number }],
+    queryFn: () => runQuery([PullRequestPage.query(), { owner, repo, number }]),
+  })
 
   let reviews = [];
   if (res?.repository.pullRequest?.reviews?.nodes) {

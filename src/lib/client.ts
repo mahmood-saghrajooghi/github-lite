@@ -1,6 +1,6 @@
 import { graphql as githubGraphql } from '@octokit/graphql';
 import { Octokit } from '@octokit/rest';
-import useSWR, { SWRResponse, preload as swrPreload } from 'swr';
+import { queryClient } from '@/query-client';
 
 const CLIENT_ID = 'Iv23liKSgTuckq1LavWJ';
 
@@ -15,27 +15,19 @@ export const graphql = githubGraphql.defaults({
   },
 });
 
-function runQuery<T>([query, options]: [string, Record<string, unknown>]): Promise<T> {
+export async function runQuery<T>([query, options]: [string, Record<string, unknown>]): Promise<T> {
   return graphql(query, options);
 }
 
-export function useQuery<T>(query: string, options: Record<string, unknown>): SWRResponse<T> {
-  return useSWR([query, options], runQuery as typeof runQuery<T>, {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    revalidateIfStale: true,
-  });
-}
-
 export function preload(query: string, options: Record<string, unknown>) {
-  swrPreload([query, options], runQuery);
+  queryClient.prefetchQuery({ queryKey: [query, options], queryFn: () => runQuery([query, options]) });
 }
 
 export async function login() {
-  let url = new URL(location.href);
-  let code = url.searchParams.get('code');
+  const url = new URL(location.href);
+  const code = url.searchParams.get('code');
   if (!code) {
-    let redirect = new URL('https://github.com/login/oauth/authorize');
+    const redirect = new URL('https://github.com/login/oauth/authorize');
     redirect.searchParams.set('client_id', CLIENT_ID);
     redirect.searchParams.set('scope', 'repo notifications read:user');
     if (process.env.NODE_ENV !== 'production') {
@@ -46,7 +38,7 @@ export async function login() {
   }
 
   try {
-    let res = await fetch('https://github-lite.pages.dev/login', {
+    const res = await fetch('https://github-lite.pages.dev/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -54,7 +46,7 @@ export async function login() {
       body: JSON.stringify({code})
     });
 
-    let json = await res.json();
+    const json = await res.json();
     if (json.error) {
       console.log(json);
       return;

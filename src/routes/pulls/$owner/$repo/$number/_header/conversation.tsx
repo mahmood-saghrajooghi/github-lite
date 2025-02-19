@@ -1,11 +1,5 @@
-import { Repository } from '@octokit/graphql-schema'
 import { createFileRoute, useParams } from '@tanstack/react-router'
-import { useQuery } from '@/lib/client'
-import {
-  PullRequestPage,
-  PullRequestContext,
-  PullHeader,
-} from '@/app/PullRequest'
+import { PullRequestContext, PullHeader } from '@/app/PullRequest'
 import { CommentCard } from '@/app/CommentCard'
 import { Timeline } from '@/app/TimeLine'
 import { IssueCommentForm } from '@/app/CommentForm'
@@ -13,6 +7,7 @@ import { Header } from '@/app/Issue'
 import { ErrorBoundary } from 'react-error-boundary'
 import { IssueStatus } from '@/app/components'
 import { PullRequestsSidebar } from '@/components/pull-request-sidebar'
+import { usePRQuery } from '@/hooks/api/use-pr-query'
 
 export const Route = createFileRoute(
   '/pulls/$owner/$repo/$number/_header/conversation',
@@ -48,10 +43,7 @@ function PullRequestContent({
   repo: string
   number: string
 }) {
-  const { data: res } = useQuery<{ repository: Repository }>(
-    PullRequestPage.query(),
-    { owner, repo, number: Number(number) },
-  )
+  const { data: res } = usePRQuery(owner, repo, Number(number))
 
   const navigate = Route.useNavigate()
   const searchParams = Route.useSearch()

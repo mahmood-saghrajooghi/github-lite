@@ -2,8 +2,8 @@ import { RestEndpointMethodTypes } from '@octokit/rest';
 import { github } from '@/lib/client';
 import { LoginPage } from '@/app/login/page';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
-import { mutate } from 'swr';
 import { useEffect, useRef } from 'react';
+import { useMutation } from '@tanstack/react-query';
 
 type PullRequest = RestEndpointMethodTypes["search"]["issuesAndPullRequests"]["response"]["data"]["items"][0];
 
@@ -42,15 +42,8 @@ function Notifications() {
   );
 }
 
-function markAsRead(id: string) {
-  mutate('notifications', async (notifications?: Notification[]) => {
-    await github.activity.markThreadAsRead({ thread_id: Number(id) });
-    if (notifications) {
-      let index = notifications.findIndex(n => n.id === id);
-      let result = [...notifications];
-      result[index] = { ...result[index], unread: false };
-      return result;
-    }
-    return notifications;
+function useMarkAsRead(id: string) {
+  return useMutation({
+    mutationFn: async () => github.activity.markThreadAsRead({ thread_id: Number(id) }),
   });
 }

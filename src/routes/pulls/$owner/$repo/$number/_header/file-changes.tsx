@@ -1,12 +1,10 @@
-import { Repository } from '@octokit/graphql-schema'
 import { createFileRoute, useParams } from '@tanstack/react-router'
-import { github, useQuery } from '@/lib/client'
-import { PullRequestPage } from '@/app/PullRequest'
 import { Hunk, parseDiff, Diff as DiffView, tokenize } from 'react-diff-view'
-import useSWR from 'swr'
 import { RestEndpointMethodTypes } from '@octokit/rest'
 import { FileIcon } from '@primer/octicons-react'
-import { useMemo } from 'react'
+import { usePRDiffQuery } from '@/hooks/api/use-pr-diff-query'
+import { usePRQuery } from '@/hooks/api/use-pr-query'
+import { useMemo, useState, useCallback } from 'react'
 import refractor from 'refractor'
 
 import 'prism-color-variables/variables.css'
@@ -20,18 +18,6 @@ export const Route = createFileRoute(
 )({
   component: RouteComponent,
 })
-
-const getDiff = async (owner: string, repo: string, number: number) => {
-  const res = await github.pulls.get({
-    owner,
-    repo,
-    pull_number: number,
-    headers: {
-      accept: 'application/vnd.github.v3.diff', // Request diff format
-    },
-  })
-  return res.data
-}
 
 const renderToken = (token: any, defaultRender: any, i: any) => {
   switch (token.type) {
@@ -62,6 +48,34 @@ function File({
     () => tokenize(hunks, { highlight: true, language: 'tsx', refractor }),
     [hunks],
   )
+  const [selectedChanges, setSelectedChanges] = useState<any[]>([]);
+  console.log(selectedChanges)
+  const selectChange = useCallback(
+    ({ change }: { change: any }) => {
+      const toggle = (selectedChanges: any) => {
+        const index = selectedChanges.indexOf(change);
+        if (index >= 0) {
+          return [
+            ...selectedChanges.slice(0, index),
+            ...selectedChanges.slice(index + 1),
+          ];
+        }
+        return [...selectedChanges, change];
+      };
+      setSelectedChanges(toggle);
+    },
+    []
+  );
+  const diffProps = useMemo(
+    () => {
+      return {
+        gutterEvents: { onClick: selectChange },
+        codeEvents: { onClick: selectChange },
+      };
+    },
+    [selectChange]
+  );
+
 
   return (
     <div>
@@ -91,6 +105,7 @@ function File({
         hunks={hunks}
         renderToken={renderToken}
         tokens={tokens}
+        {...diffProps}
       >
         {(hunks) =>
           hunks.map((hunk) => <Hunk key={hunk.content} hunk={hunk} />)
@@ -101,16 +116,7 @@ function File({
 }
 
 function Diff({ data }: { data: PullRequest }) {
-  const { data: diff } = useSWR(
-    `/repos/${data.repository.owner.login}/${data.repository.name}/pulls/${data.number}/files`,
-    () =>
-      getDiff(data.repository.owner.login, data.repository.name, data.number),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      revalidateIfStale: true,
-    }
-  )
+  const { data: diff } = usePRDiffQuery(data.repository.owner.login, data.repository.name, data.number)
 
   if (!diff) {
     return null
@@ -129,10 +135,7 @@ function Diff({ data }: { data: PullRequest }) {
 
 function RouteComponent() {
   const { owner, repo, number } = useParams({ from: Route.id })
-  const { data } = useQuery<{ repository: Repository }>(
-    PullRequestPage.query(),
-    { owner, repo, number: Number(number) },
-  )
+  const { data } = usePRQuery(owner, repo, Number(number))
 
   if (!data) {
     return null

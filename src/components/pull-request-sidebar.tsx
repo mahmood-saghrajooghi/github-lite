@@ -22,8 +22,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { getPrURL } from '@/lib/pull-request'
-import useSWR from 'swr'
-import { useQuery } from '@/lib/client'
+import { useQuery } from '@tanstack/react-query'
 import { PullRequestPage } from '@/app/PullRequest'
 import { RestEndpointMethodTypes } from '@octokit/rest'
 import { Repository } from '@octokit/graphql-schema'
@@ -34,6 +33,10 @@ import { useRegisterHotkey } from '@/contexts/hotkey-context'
 import { useRef, useState } from 'react'
 import { Button, ButtonIcon } from './ui/button'
 import { cn } from '@/lib/utils'
+import { usePRsQuery } from '@/hooks/api/use-prs-query'
+import { usePRQuery } from '@/hooks/api/use-pr-query'
+import { useRepoMembers } from '@/hooks/api/use-repo-members'
+import { useIsPressing } from '@/hooks/use-is-pressing'
 
 type PullRequest =
   RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][0]
@@ -61,22 +64,10 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
     })
   }
 
-  function getSwrKey(params: { author?: string }) {
-    let key = `pull-requests-${owner}-${repo}`
-    Object.entries(params).forEach(([paramKey, value]) => {
-      if (value) {
-        key += `?${paramKey}=${value}`
-      }
-    })
-    return key
-  }
-
-  const { data, isLoading } = useSWR(getSwrKey({ author }))
+  const { data, isLoading } = usePRsQuery(owner, repo, { author })
   const ref = useRef<HTMLInputElement>(null)
 
   useRegisterHotkey('/', (event) => {
-    console.log('ref', ref.current)
-
     event?.preventDefault()
     ref.current?.focus()
   })
@@ -94,7 +85,7 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
           <SidebarContent className="p-2">
             <div className="flex items-center gap-2 justify-between">
               <div className="flex items-center gap-2">
-                <AuthorFilter value={author} onChange={onAuthorChange} />
+                <AuthorFilter value={author} onChange={onAuthorChange} owner={owner} />
               </div>
               {isLoading && <Loader className="w-4 h-4 animate-spin [animation-duration:1500ms] text-muted-foreground" />}
             </div>
@@ -135,10 +126,7 @@ function PullRequestItem({ item, searchParams }: { item: PullRequest, searchPara
   const [owner, repo] = repoURL.split('/').slice(-2)
   const number = Number(item.url.split('/').pop())
 
-  const { data: res } = useQuery<{ repository: Repository }>(
-    PullRequestPage.query(),
-    { owner, repo, number },
-  )
+  const { data: res } = usePRQuery(owner, repo, number);
 
   return (
     <Link
@@ -193,19 +181,6 @@ function PullRequestItem({ item, searchParams }: { item: PullRequest, searchPara
   )
 }
 
-const memebersQuery = `
-  query members {
-    organization(login: "Flowsystem") {
-      membersWithRole(first: 100) {
-        nodes {
-          login
-          avatarUrl
-          name
-        }
-      }
-    }
-  }
-`
 
 type Member = {
   login: string
@@ -213,7 +188,7 @@ type Member = {
   name: string
 }
 
-export function AuthorFilter({ value, onChange }: { value: string | undefined, onChange: (value: string) => void }) {
+export function AuthorFilter({ value, onChange, owner }: { value: string | undefined, onChange: (value: string) => void, owner: string }) {
   const listRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false)
 
@@ -222,7 +197,7 @@ export function AuthorFilter({ value, onChange }: { value: string | undefined, o
     setOpen(true)
   })
 
-  const { data } = useQuery<{ organization: { membersWithRole: { nodes: Member[] } } }>(memebersQuery, {})
+  const { data } = useRepoMembers(owner)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
