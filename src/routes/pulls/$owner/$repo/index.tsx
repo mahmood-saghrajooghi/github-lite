@@ -2,16 +2,12 @@ import { AppHeader } from '@/components/app-header'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbSeparator, BreadcrumbLink } from '@/components/ui/breadcrumb'
 import { createFileRoute, useParams, useSearch } from '@tanstack/react-router'
 import { PullRequestsSidebar } from '@/components/pull-request-sidebar'
-import { z } from 'zod'
 import { Link } from '@/components/link'
-
-const searchSchema = z.object({
-  author: z.string().optional(),
-})
+import { prSearchSchema } from '@/lib/pr-search.scema'
 
 export const Route = createFileRoute('/pulls/$owner/$repo/')({
   component: RouteComponent,
-  validateSearch: (search) => searchSchema.parse(search),
+  validateSearch: (search) => prSearchSchema.parse(search),
 })
 
 function RouteComponent() {

@@ -14,7 +14,6 @@ import { CommentDiscussionIcon, FileDiffIcon } from '@primer/octicons-react'
 import { AppHeader } from '@/components/app-header'
 import { TabLink, TabLinkIcon } from '@/components/tab-link'
 import { Link } from '@/components/link'
-import { usePRsQuery } from '@/hooks/api/use-prs-query'
 
 export const Route = createFileRoute('/pulls/$owner/$repo/$number/_header')({
   component: RouteComponent,
@@ -23,7 +22,6 @@ export const Route = createFileRoute('/pulls/$owner/$repo/$number/_header')({
 
 function RouteComponent() {
   const { owner, repo, number } = useParams({ from: Route.id })
-  usePRsQuery(owner, repo, { author: 'jason' })
 
   return (
     <>

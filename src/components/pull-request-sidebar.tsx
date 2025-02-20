@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { omit } from 'lodash'
 import {
   Sidebar,
   SidebarContent,
@@ -22,11 +23,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { getPrURL } from '@/lib/pull-request'
-import { useQuery } from '@tanstack/react-query'
-import { PullRequestPage } from '@/app/PullRequest'
 import { RestEndpointMethodTypes } from '@octokit/rest'
-import { Repository } from '@octokit/graphql-schema'
-import { CircleCheck, X, Clock3, User, Check, Loader } from 'lucide-react'
+import { CircleCheck, X, Clock3, User, Check, Loader, ListFilterIcon } from 'lucide-react'
 import { GitPullRequestDraftIcon, GitPullRequestIcon } from '@primer/octicons-react'
 import { Avatar } from '@/app/components'
 import { useRegisterHotkey } from '@/contexts/hotkey-context'
@@ -36,13 +34,14 @@ import { cn } from '@/lib/utils'
 import { usePRsQuery } from '@/hooks/api/use-prs-query'
 import { usePRQuery } from '@/hooks/api/use-pr-query'
 import { useRepoMembers } from '@/hooks/api/use-repo-members'
-import { useIsPressing } from '@/hooks/use-is-pressing'
 
 type PullRequest =
   RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][0]
 
 type SearchParams = {
   author?: string
+  state?: string
+  sort?: string
 }
 
 
@@ -54,17 +53,18 @@ type Props = {
 }
 
 export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Props) {
-  const { author } = searchParams;
+  const { author, state, sort } = searchParams;
 
-  function onAuthorChange(value: string) {
+  function onSearchChange(key: string, value: string) {
     navigate({
       search: value ? {
-        author: value,
-      } : undefined,
+        ...searchParams,
+        [key]: value,
+      } : omit(searchParams, key),
     })
   }
 
-  const { data, isLoading } = usePRsQuery(owner, repo, { author })
+  const { data, isLoading } = usePRsQuery(owner, repo, { author, state, sort })
   const ref = useRef<HTMLInputElement>(null)
 
   useRegisterHotkey('/', (event) => {
@@ -85,7 +85,9 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
           <SidebarContent className="p-2">
             <div className="flex items-center gap-2 justify-between">
               <div className="flex items-center gap-2">
-                <AuthorFilter value={author} onChange={onAuthorChange} owner={owner} />
+                <AuthorFilter value={author} onChange={(value) => onSearchChange('author', value)} owner={owner} />
+                <StateFilter value={state} onChange={(value) => onSearchChange('state', value)} owner={owner} />
+                <SortFilter value={sort} onChange={(value) => onSearchChange('sort', value)} />
               </div>
               {isLoading && <Loader className="w-4 h-4 animate-spin [animation-duration:1500ms] text-muted-foreground" />}
             </div>
@@ -235,6 +237,195 @@ export function AuthorFilter({ value, onChange, owner }: { value: string | undef
                     className={cn(
                       "mr-2 h-4 w-4",
                       value === member.login ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+export function StateFilter({ value, onChange, owner }: { value: string | undefined, onChange: (value: string) => void, owner: string }) {
+  const listRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false)
+
+  useRegisterHotkey('s t', (event) => {
+    event?.preventDefault()
+    setOpen(true)
+  })
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          role="combobox"
+          aria-expanded={open}
+          className="max-w-[200px] justify-between"
+        >
+          <ButtonIcon>
+            <ListFilterIcon className="h-4 w-4 shrink-0" />
+          </ButtonIcon>
+          {value ? value : "State"}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className=" p-0" align="start">
+        <Command onChange={() => {
+          queueMicrotask(() => {
+            listRef.current?.scrollTo({ top: 0 })
+          })
+        }}>
+          <CommandInput placeholder="Search pull request state..." />
+          <CommandList ref={listRef}>
+            <CommandEmpty>No pull request state found.</CommandEmpty>
+            <CommandGroup>
+              <CommandItem
+                key="open"
+                value="open"
+                onSelect={(currentValue) => {
+                  onChange(currentValue === value ? "" : currentValue)
+                  setOpen(false)
+                }}
+                className="overflow-hidden text-ellipsis whitespace-nowrap"
+              >
+                Open
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    value === "open" ? "opacity-100" : "opacity-0"
+                  )}
+                />
+              </CommandItem>
+              <CommandItem
+                key="closed"
+                value="closed"
+                onSelect={(currentValue) => {
+                  onChange(currentValue === value ? "" : currentValue)
+                  setOpen(false)
+                }}
+                className="overflow-hidden text-ellipsis whitespace-nowrap"
+              >
+                Closed
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    value === "closed" ? "opacity-100" : "opacity-0"
+                  )}
+                />
+              </CommandItem>
+              <CommandItem
+                key="merged"
+                value="merged"
+                onSelect={(currentValue) => {
+                  onChange(currentValue === value ? "" : currentValue)
+                  setOpen(false)
+                }}
+                className="overflow-hidden text-ellipsis whitespace-nowrap"
+              >
+                Merged
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    value === "merged" ? "opacity-100" : "opacity-0"
+                  )}
+                />
+              </CommandItem>
+              <CommandItem
+                key="draft"
+                value="draft"
+                onSelect={(currentValue) => {
+                  onChange(currentValue === value ? "" : currentValue)
+                  setOpen(false)
+                }}
+                className="overflow-hidden text-ellipsis whitespace-nowrap"
+              >
+                Draft
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    value === "draft" ? "opacity-100" : "opacity-0"
+                  )}
+                />
+              </CommandItem>
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+type SortOption = {
+  label: string;
+  value: string;
+}
+const sortOptions: SortOption[] = [
+  { label: "Newest", value: "created-desc" },
+  { label: "Oldest", value: "created-asc" },
+  { label: "Most commented", value: "comments-desc" },
+  { label: "Least commented", value: "comments-asc" },
+  { label: "Recently updated", value: "updated-desc" },
+  { label: "Least recently updated", value: "updated-asc" },
+  { label: "Best match", value: "relevance-desc" },
+];
+
+function SortFilter({ value, onChange }: { value: string | undefined, onChange: (value: string) => void }) {
+  const listRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false)
+
+  useRegisterHotkey('s b', (event) => {
+    event?.preventDefault()
+    setOpen(true)
+  })
+
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          role="combobox"
+          aria-expanded={open}
+          className="max-w-[200px] justify-between"
+        >
+          <ButtonIcon>
+            <ListFilterIcon className="h-4 w-4 shrink-0" />
+          </ButtonIcon>
+          {value ? value : "Sort by"}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className=" p-0" align="start">
+        <Command onChange={() => {
+          queueMicrotask(() => {
+            listRef.current?.scrollTo({ top: 0 })
+          })
+        }}>
+          <CommandInput placeholder="Search pull request state..." />
+          <CommandList ref={listRef}>
+            <CommandEmpty>No pull request state found.</CommandEmpty>
+            <CommandGroup>
+              {sortOptions.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  value={option.value}
+                  keywords={[option.label]}
+                  onSelect={(currentValue) => {
+                    onChange(currentValue === value ? "" : currentValue)
+                    setOpen(false)
+                  }}
+                  className="overflow-hidden text-ellipsis whitespace-nowrap"
+                >
+                  {option.label}
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === option.value ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>

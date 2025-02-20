@@ -8,11 +8,13 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { IssueStatus } from '@/app/components'
 import { PullRequestsSidebar } from '@/components/pull-request-sidebar'
 import { usePRQuery } from '@/hooks/api/use-pr-query'
+import { prSearchSchema } from '@/lib/pr-search.scema'
 
 export const Route = createFileRoute(
   '/pulls/$owner/$repo/$number/_header/conversation',
 )({
   component: RouteComponent,
+  validateSearch: (search) => prSearchSchema.parse(search),
 })
 
 function ErrorFallback({ error }: { error: Error }) {
