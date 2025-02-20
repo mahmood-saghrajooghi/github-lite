@@ -103,6 +103,15 @@ export function CommentForm({ children, className, onSubmit }: CommentFormProps)
       e.preventDefault();
       formRef.current?.requestSubmit();
     }
+    if (isHotkey('escape', e)) {
+      e.preventDefault();
+      e.stopPropagation();
+      // parent that has data-quick-focus
+      const parent = (e.target as HTMLElement).closest('[data-quick-focus]');
+      if (parent) {
+        (parent as HTMLElement).focus();
+      }
+    }
   };
 
   return (

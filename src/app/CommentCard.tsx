@@ -8,7 +8,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Avatar } from './components';
 import { graphql } from '@/lib/client';
 
-export function CommentCard({ data }: { data: Issue | PullRequest | IssueComment | PullRequestReviewComment }) {
+export function CommentCard({ data, ...props }: { data: Issue | PullRequest | IssueComment | PullRequestReviewComment } & React.HTMLAttributes<HTMLDivElement>) {
   const formatDate = (date: string) => {
     return new Date(date).toLocaleString(undefined, {
       year: 'numeric',
@@ -20,7 +20,7 @@ export function CommentCard({ data }: { data: Issue | PullRequest | IssueComment
   };
 
   return (
-    <div className="border border-input rounded-lg p-4 bg-background">
+    <div className="border border-input rounded-lg p-4 bg-background focus:outline focus:outline-2 focus:outline-blue-500" {...props}>
       <div
         className="grid gap-x-2 mb-4 border-b border-daw-gray-200 pb-4"
         style={{

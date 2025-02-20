@@ -31,7 +31,7 @@ function RouteComponent() {
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link to={'/pulls/$owner/$repo'} params={{ owner, repo }}>
+                <Link to="/pulls/$owner/$repo" params={{ owner, repo: repo }}>
                   {repo}
                 </Link>
               </BreadcrumbLink>

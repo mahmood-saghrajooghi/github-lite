@@ -1,6 +1,6 @@
 import { AutomaticBaseChangeSucceededEvent, ClosedEvent, CommentDeletedEvent, Commit, ConvertToDraftEvent, CrossReferencedEvent, HeadRefDeletedEvent, HeadRefForcePushedEvent, IssueTimelineItems, LabeledEvent, MergedEvent, PullRequestCommit, PullRequestReview, PullRequestReviewThread, PullRequestTimelineItems, ReadyForReviewEvent, ReferencedEvent, RenamedTitleEvent, ReopenedEvent, ReviewDismissedEvent, ReviewRequestedEvent, UnlabeledEvent } from '@octokit/graphql-schema';
 import { CheckCircleIcon, GitCommitIcon, CrossReferenceIcon, EyeIcon, GitBranchIcon, GitMergeIcon, GitPullRequestClosedIcon, GitPullRequestDraftIcon, IssueClosedIcon, IssueReopenedIcon, PencilIcon, RepoPushIcon, SkipIcon, TagIcon, XIcon } from '@primer/octicons-react';
-import { useContext } from 'react';
+import { useContext, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from '@tanstack/react-router';
 import { PullRequestContext } from './PullRequest';
@@ -8,6 +8,7 @@ import { CommentCard, CommentBody, Reactions } from './CommentCard';
 import { BranchName, GithubLabel, Icon, User, IssueStatus, Avatar, Status } from './components';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { CommentForm } from './CommentForm';
+import { cn } from '@/lib/utils';
 
 export function Timeline({ items }: { items: (IssueTimelineItems | PullRequestTimelineItems | null)[] }) {
   return (
@@ -17,7 +18,7 @@ export function Timeline({ items }: { items: (IssueTimelineItems | PullRequestTi
         {items.map((item, i) => {
           switch (item?.__typename) {
             case 'IssueComment':
-              return <CommentCard key={item.id} data={item} />;
+              return <CommentCard key={item.id} data={item} data-quick-focus tabIndex={0} />;
             case 'AutomaticBaseChangeSucceededEvent':
               return <BaseChanged key={item.id} data={item} />;
             case 'PullRequestCommit':
@@ -25,7 +26,7 @@ export function Timeline({ items }: { items: (IssueTimelineItems | PullRequestTi
             case 'HeadRefForcePushedEvent':
               return <ForcePushed key={item.id} data={item} />;
             case 'PullRequestReview':
-              return <Reviewed key={item.id} data={item} />;
+              return <Reviewed key={item.id} data={item} data-quick-focus tabIndex={0} />;
             case 'ReviewDismissedEvent':
               return <ReviewDismissed key={item.id} data={item} />;
             case 'RenamedTitleEvent':
@@ -273,9 +274,11 @@ fragment RenamedTitleFragment on RenamedTitleEvent {
 }
 `;
 
-function Reviewed({ data }: { data: PullRequestReview }) {
+function Reviewed({ data, style, className, ...props }: { data: PullRequestReview } & React.HTMLAttributes<HTMLDivElement>) {
   let pr = useContext(PullRequestContext);
   let threadsById = new Map();
+
+  const ref = useRef<HTMLDivElement>(null);
 
   if (!pr?.reviewThreads.nodes) {
     return;
@@ -293,8 +296,9 @@ function Reviewed({ data }: { data: PullRequestReview }) {
           "icon description"
           ".    issue"
         `,
-        gridTemplateColumns: 'min-content 1fr'
-      }}>
+        gridTemplateColumns: 'min-content 1fr',
+      }}
+      >
       {data.state === 'CHANGES_REQUESTED'
         ? <Icon className="bg-red-600 text-white"><GitPullRequestClosedIcon /></Icon>
         : data.state === 'APPROVED'
@@ -302,7 +306,12 @@ function Reviewed({ data }: { data: PullRequestReview }) {
           : <Icon className="bg-accent text-muted-foreground"><EyeIcon /></Icon>}
       <div style={{ gridArea: 'description' }}><User actor={data.author!} />  {data.state === 'CHANGES_REQUESTED' ? 'requested changes' : data.state === 'APPROVED' ? 'approved' : 'reviewed'}</div>
       {(data.body || !!data.comments?.nodes?.length) && (
-        <div style={{ gridArea: 'issue' }} className="flex flex-col gap-2">
+        <div
+          style={{ gridArea: 'issue', ...style }}
+          className={cn("flex flex-col gap-2 focus:outline focus:outline-2 focus:outline-blue-500 rounded-xl", className)}
+          ref={ref}
+          {...props}
+        >
           {data.body &&
             <Card>
               <CommentBody>{data.body}</CommentBody>

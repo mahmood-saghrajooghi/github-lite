@@ -34,22 +34,21 @@ import { cn } from '@/lib/utils'
 import { usePRsQuery } from '@/hooks/api/use-prs-query'
 import { usePRQuery } from '@/hooks/api/use-pr-query'
 import { useRepoMembers } from '@/hooks/api/use-repo-members'
+import { prSearchSchema } from '@/lib/pr-search.scema'
+import { z } from 'zod'
+import isHotkey from 'is-hotkey'
 
 type PullRequest =
   RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][0]
 
-type SearchParams = {
-  author?: string
-  state?: string
-  sort?: string
-}
+type SearchParams = z.infer<typeof prSearchSchema>
 
 
 type Props = {
   owner: string
   repo: string
   searchParams: SearchParams
-  navigate: (params: { search: { author?: string } | undefined }) => void
+  navigate: (params: { search: SearchParams | undefined }) => void
 }
 
 export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Props) {
@@ -80,11 +79,26 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
       <Command className="bg-color-unset rounded-none">
         <Sidebar collapsible="none" className="bg-color-unset border-r">
           <SidebarHeader className="text-sm flex flex-row items-center h-12 p-0">
-            <CommandInput placeholder="Search pull requests" wrapperClassName="w-full h-full" ref={ref} />
+            <CommandInput
+              placeholder="Search pull requests"
+              wrapperClassName="w-full h-full"
+              ref={ref}
+              onKeyDown={(event) => {
+                if (isHotkey('meta+l', event)) {
+                  event.preventDefault()
+                  const commentCard = document.querySelector('[data-quick-focus]')
+                  if (commentCard) {
+                    ref.current?.blur();
+                    (commentCard as HTMLElement).focus();
+                    (commentCard as HTMLElement).scrollIntoView();
+                  }
+                }
+              }}
+            />
           </SidebarHeader>
           <SidebarContent className="p-2">
             <div className="flex items-center gap-2 justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <AuthorFilter value={author} onChange={(value) => onSearchChange('author', value)} owner={owner} />
                 <StateFilter value={state} onChange={(value) => onSearchChange('state', value)} owner={owner} />
                 <SortFilter value={sort} onChange={(value) => onSearchChange('sort', value)} />

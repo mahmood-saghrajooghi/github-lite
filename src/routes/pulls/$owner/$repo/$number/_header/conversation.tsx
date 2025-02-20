@@ -9,6 +9,8 @@ import { IssueStatus } from '@/app/components'
 import { PullRequestsSidebar } from '@/components/pull-request-sidebar'
 import { usePRQuery } from '@/hooks/api/use-pr-query'
 import { prSearchSchema } from '@/lib/pr-search.scema'
+import { isHotkey } from 'is-hotkey'
+import { isFormField } from '@/contexts/hotkey-utils'
 
 export const Route = createFileRoute(
   '/pulls/$owner/$repo/$number/_header/conversation',
@@ -56,8 +58,35 @@ function PullRequestContent({
     return null
   }
 
+  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (isFormField(event.target as Node)) {
+      return;
+    }
+    const focusedElement = document.querySelector('[data-quick-focus]:focus')
+    const elements = document.querySelectorAll('[data-quick-focus]')
+    const index = Array.from(elements).indexOf(focusedElement as HTMLElement)
+
+    if (isHotkey('j', event)) {
+      event.preventDefault()
+      event.stopPropagation()
+      if (index < elements.length - 1) {
+        (elements[index + 1] as HTMLElement).focus();
+        (elements[index + 1] as HTMLElement).scrollIntoView();
+      }
+    }
+
+    if (isHotkey('k', event)) {
+      event.preventDefault()
+      event.stopPropagation()
+      if (index > 0) {
+        (elements[index - 1] as HTMLElement).focus();
+        (elements[index - 1] as HTMLElement).scrollIntoView();
+      }
+    }
+  }
+
   return (
-    <div className="grid grid-cols-[auto_1fr] grid-rows-[1fr]">
+    <div className="grid grid-cols-[auto_1fr] grid-rows-[1fr]" onKeyDown={handleKeyDown}>
       <PullRequestsSidebar
         owner={owner}
         repo={repo}

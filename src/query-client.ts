@@ -10,9 +10,9 @@ export const queryClient = new QueryClient({
       refetchOnReconnect: true,
       retry: false,
       // 1 hour
-      staleTime: 1000 * 60 * 60,
+      staleTime: 1000 * 60 * 30,
       gcTime: 1000 * 60 * 60,
-      cacheTime: 1000 * 60 * 60 * 24, // 24 hours
+      cacheTime: 1000 * 30, // 24 hours
     },
   },
 })
