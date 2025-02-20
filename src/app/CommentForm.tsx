@@ -17,7 +17,7 @@ export function IssueCommentForm({ issue }: { issue: Issue | PullRequest }) {
   const { data: user } = useUser();
 
   const onSubmit = async (comment: string) => {
-    optimisticallyUpdatePullRequest({ owner: issue.repository.owner.login, repo: issue.repository.name, number: issue.number, user: user, values: comment });
+    optimisticallyUpdatePullRequest({ owner: issue.repository.owner.login, repo: issue.repository.name, number: issue.number, user: user, values: { comment } });
 
     await github.issues.createComment({
       owner: issue.repository.owner.login,
