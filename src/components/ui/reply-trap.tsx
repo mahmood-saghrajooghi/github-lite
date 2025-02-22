@@ -28,7 +28,7 @@ const ReplyTrap = forwardRef<React.ElementRef<typeof Primitive.div>, ReplyTrapPr
 
       {isFocused && replyTrapRef.current && createPortal(
         <div className="items-center gap-1 text-xs text-muted-foreground absolute bottom-[calc(100%+.5rem)] right-0 z-10 hidden group-focus:flex">
-          Press <Kbd className="text-[11px] w-[18px] h-[18px] rounded-sm">R</Kbd> to reply
+          <Kbd className="text-[11px] min-w-[18px] w-auto px-[4px] h-[18px] rounded-sm">R</Kbd> reply
         </div>,
         replyTrapRef.current
       )}

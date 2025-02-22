@@ -8,12 +8,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Avatar } from './components';
 import { graphql } from '@/lib/client';
+import { cn } from '@/lib/utils';
 
 type CommentCardProps = {
   data: Issue | PullRequest | IssueComment | PullRequestReviewComment
 } & React.ComponentPropsWithoutRef<typeof Primitive.div>
 
-export const CommentCard = forwardRef<React.ElementRef<typeof Primitive.div>, CommentCardProps>(({ data, ...props }, ref) => {
+export const CommentCard = forwardRef<React.ElementRef<typeof Primitive.div>, CommentCardProps>(({ data, className, ...props }, ref) => {
   const formatDate = (date: string) => {
     return new Date(date).toLocaleString(undefined, {
       year: 'numeric',
@@ -27,7 +28,7 @@ export const CommentCard = forwardRef<React.ElementRef<typeof Primitive.div>, Co
   return (
     <Primitive.div
       ref={ref}
-      className="border border-input rounded-lg p-4 bg-background focus:outline focus:outline-2 focus:outline-blue-500"
+      className={cn("border border-input p-4 bg-background rounded-xl", className)}
       {...props}
     >
       <div

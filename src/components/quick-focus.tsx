@@ -3,10 +3,11 @@ import { isHotkey } from "is-hotkey";
 import { Primitive } from '@radix-ui/react-primitive';
 import { forwardRef, useRef } from 'react';
 import { composeRefs } from '@/lib/compose-refs';
+import { cn } from '@/lib/utils';
 
 type QuickFocusProps = React.ComponentPropsWithoutRef<typeof Primitive.div>
 
-export const QuickFocus = forwardRef<React.ElementRef<typeof Primitive.div>, QuickFocusProps>(({ children, onKeyDown: onKeyDownProp, ...props }, ref) => {
+export const QuickFocus = forwardRef<React.ElementRef<typeof Primitive.div>, QuickFocusProps>(({ children, onKeyDown: onKeyDownProp, className, ...props }, ref) => {
   const internalRef = useRef<HTMLDivElement>(null)
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (isFormField(event.target as Node)) {
@@ -44,6 +45,7 @@ export const QuickFocus = forwardRef<React.ElementRef<typeof Primitive.div>, Qui
       data-quick-focus
       onKeyDown={handleKeyDown}
       tabIndex={0}
+      className={cn("focus:outline focus:outline-2 focus:outline-blue-500 focus:outline-offset-2 rounded-xl", className)}
     >
       {children}
     </Primitive.div>

@@ -7,7 +7,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <ThemeProvider>
       <SidebarProvider defaultOpen={true}>
         <AppSidebar />
-        <SidebarInset className='rounded-xl mb-2 mr-2 min-h-[unset] grid grid-rows-[auto_1fr] grid-cols-[1fr]'>
+        <SidebarInset className='rounded-xl mb-2 mr-2 min-h-[unset] grid grid-rows-[auto_1fr] grid-cols-[1fr] relative overflow-y-auto pb-8'>
           {children}
         </SidebarInset>
       </SidebarProvider>

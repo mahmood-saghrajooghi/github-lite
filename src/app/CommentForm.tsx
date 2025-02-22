@@ -26,13 +26,12 @@ import {
   PopoverAnchor,
 } from "@/components/ui/popover"
 import { composeRefs } from '@/lib/compose-refs';
-import { cn } from '@/lib/utils';
 
 type IssueCommentFormProps = {
   issue: Issue | PullRequest,
 } & React.HTMLAttributes<HTMLFormElement>
 
-export const IssueCommentForm = forwardRef<HTMLFormElement, IssueCommentFormProps>(({ issue, className, ...props }, ref) => {
+export const IssueCommentForm = forwardRef<HTMLFormElement, IssueCommentFormProps>(({ issue, ...props }, ref) => {
   const { data: user } = useUser();
 
   const onSubmit = async (comment: string) => {
@@ -51,7 +50,6 @@ export const IssueCommentForm = forwardRef<HTMLFormElement, IssueCommentFormProp
   return (
     <CommentForm
       onSubmit={onSubmit}
-      className={cn("focus:outline focus:outline-2 focus:outline-blue-500 focus-outline-offset-2 rounded-lg", className)}
       {...props}
       ref={ref}
     >

@@ -315,7 +315,7 @@ function Reviewed({ data, style, className, ...props }: { data: PullRequestRevie
         <div style={{ gridArea: 'issue' }}>
           <ReplyTrap
             style={style}
-            className={cn("flex flex-col gap-2 focus:outline focus:outline-2 focus:outline-blue-500 rounded-xl", className)}
+            className={cn("flex flex-col gap-2 rounded-md", className)}
             ref={ref}
             {...props}
           >

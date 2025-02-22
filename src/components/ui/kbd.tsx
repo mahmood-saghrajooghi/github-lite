@@ -42,7 +42,6 @@ export function Kbd({ children, className, ...props }: KbdProps) {
   const kbdContext = useContext(KbdContext)
   const { sequenceTrackerState } = useHotkey();
 
-
   const isPressing = useIsPressing(children);
 
   let keyActive = false;
