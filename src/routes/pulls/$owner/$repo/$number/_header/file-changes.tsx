@@ -53,6 +53,7 @@ function File({
   const selectChange = useCallback(
     ({ change }: { change: any }) => {
       const toggle = (selectedChanges: any) => {
+        console.log('toggle', selectedChanges)
         const index = selectedChanges.indexOf(change);
         if (index >= 0) {
           return [
