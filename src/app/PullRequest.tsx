@@ -1,8 +1,7 @@
-import { PullRequest, PullRequestReviewDecision, Repository } from '@octokit/graphql-schema';
+import { PullRequest, PullRequestReviewDecision, PullRequestReviewThread } from '@octokit/graphql-schema';
 import { Link } from '@tanstack/react-router';
-import { Fragment, createContext } from 'react';
+import { Fragment, createContext, useContext, useMemo } from 'react';
 import { Button, } from '@/components/ui/button';
-import { useQuery } from '@tanstack/react-query';
 import { Timeline } from '@/app/TimeLine';
 import { Card, Status, User } from '@/app/components';
 import { github } from '@/lib/client';
@@ -11,7 +10,35 @@ import 'react-diff-view/style/index.css';
 import { usePRDiffQuery } from '@/hooks/api/use-pr-diff-query';
 
 
-export const PullRequestContext = createContext<PullRequest | null>(null);
+type PullRequestContextType = {
+  pr: PullRequest,
+  threadsById: Map<string, PullRequestReviewThread>
+}
+export const PullRequestContext = createContext<PullRequestContextType | null>(null);
+
+export function PullRequestContextProvider({ children, pr }: { children: React.ReactNode, pr: PullRequest }) {
+
+  const threadsById = useMemo(() => {
+    const res = new Map();
+    if (!pr?.reviewThreads.nodes) {
+      return res;
+    }
+    for (const thread of pr.reviewThreads.nodes) {
+      res.set(thread?.comments.nodes?.[0]?.id, thread);
+    }
+    return res;
+  }, [pr.reviewThreads.nodes]);
+
+  return <PullRequestContext.Provider value={{ pr, threadsById }}>{children}</PullRequestContext.Provider>
+}
+
+export function usePullRequest() {
+  const contextValue = useContext(PullRequestContext);
+  if (!contextValue) {
+    throw new Error('PullRequestContext not found');
+  }
+  return contextValue;
+}
 
 export function PullRequestPage({ owner, repo, number }: { owner: string, repo: string, number: number }) {
 }

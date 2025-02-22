@@ -84,7 +84,7 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
               wrapperClassName="w-full h-full"
               ref={ref}
               onKeyDown={(event) => {
-                if (isHotkey('meta+l', event)) {
+                if (isHotkey(['meta+l', 'arrowRight'], event)) {
                   event.preventDefault()
                   const commentCard = document.querySelector('[data-quick-focus]')
                   if (commentCard) {

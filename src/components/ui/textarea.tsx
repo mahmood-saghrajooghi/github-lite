@@ -1,11 +1,22 @@
 import * as React from "react"
-
+import { isHotkey } from "is-hotkey"
 import { cn } from "@/lib/utils"
 
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
   React.ComponentProps<"textarea">
->(({ className, ...props }, ref) => {
+>(({ className, onKeyDown, ...props }, ref) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (isHotkey('escape', event)) {
+      (event.target as HTMLTextAreaElement).blur();
+      const quickFocus = (event.target as HTMLElement).closest('[data-quick-focus]');
+      if (quickFocus) {
+        (quickFocus as HTMLElement).focus();
+      }
+    }
+    onKeyDown?.(event);
+  }
+
   return (
     <textarea
       className={cn(
@@ -14,6 +25,7 @@ const Textarea = React.forwardRef<
       )}
       ref={ref}
       {...props}
+      onKeyDown={handleKeyDown}
     />
   )
 })

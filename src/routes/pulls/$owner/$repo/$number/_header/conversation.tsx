@@ -1,5 +1,5 @@
 import { createFileRoute, useParams } from '@tanstack/react-router'
-import { PullRequestContext, PullHeader } from '@/app/PullRequest'
+import { PullRequestContextProvider, PullHeader } from '@/app/PullRequest'
 import { CommentCard } from '@/app/CommentCard'
 import { Timeline } from '@/app/TimeLine'
 import { IssueCommentForm } from '@/app/CommentForm'
@@ -9,8 +9,10 @@ import { IssueStatus } from '@/app/components'
 import { PullRequestsSidebar } from '@/components/pull-request-sidebar'
 import { usePRQuery } from '@/hooks/api/use-pr-query'
 import { prSearchSchema } from '@/lib/pr-search.scema'
-import { isHotkey } from 'is-hotkey'
-import { isFormField } from '@/contexts/hotkey-utils'
+import { QuickFocus } from '@/components/quick-focus'
+import { ReplyTrap } from '@/components/ui/reply-trap'
+import { useIsFocused } from '@/hooks/use-is-focused'
+import { Kbd } from '@/components/ui/kbd'
 
 export const Route = createFileRoute(
   '/pulls/$owner/$repo/$number/_header/conversation',
@@ -49,6 +51,7 @@ function PullRequestContent({
 }) {
   const { data: res } = usePRQuery(owner, repo, Number(number))
 
+
   const navigate = Route.useNavigate()
   const searchParams = Route.useSearch()
 
@@ -58,45 +61,21 @@ function PullRequestContent({
     return null
   }
 
-  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-    if (isFormField(event.target as Node)) {
-      return;
-    }
-    const focusedElement = document.querySelector('[data-quick-focus]:focus')
-    const elements = document.querySelectorAll('[data-quick-focus]')
-    const index = Array.from(elements).indexOf(focusedElement as HTMLElement)
-
-    if (isHotkey('j', event)) {
-      event.preventDefault()
-      event.stopPropagation()
-      if (index < elements.length - 1) {
-        (elements[index + 1] as HTMLElement).focus();
-        (elements[index + 1] as HTMLElement).scrollIntoView();
-      }
-    }
-
-    if (isHotkey('k', event)) {
-      event.preventDefault()
-      event.stopPropagation()
-      if (index > 0) {
-        (elements[index - 1] as HTMLElement).focus();
-        (elements[index - 1] as HTMLElement).scrollIntoView();
-      }
-    }
-  }
-
   return (
-    <div className="grid grid-cols-[auto_1fr] grid-rows-[1fr]" onKeyDown={handleKeyDown}>
+    <div
+      className="grid grid-cols-[auto_1fr] grid-rows-[1fr] overflow-hidden"
+    >
       <PullRequestsSidebar
         owner={owner}
         repo={repo}
         searchParams={searchParams}
         navigate={navigate}
       />
-      <div className="flex flex-col gap-4 ">
-        <PullRequestContext.Provider value={data}>
+      <div className="flex flex-col gap-4 relative overflow-y-auto">
+        <PullRequestContextProvider pr={data}>
           <Header data={data} />
-          <main className="flex flex-col gap-4 px-4">
+          <main className="flex flex-col gap-4 px-4 pb-4
+          jj">
             <div className="flex gap-2 items-center bg-muted/50 rounded-lg py-2 px-3">
               <div className="text-sm">
                 <IssueStatus data={data} />
@@ -136,9 +115,13 @@ function PullRequestContent({
               <PullHeader data={data} />
             </div>
             <Timeline items={data.timelineItems.nodes!} />
-            <IssueCommentForm issue={data} />
+            <ReplyTrap asChild>
+              <QuickFocus asChild>
+                <IssueCommentForm issue={data} />
+              </QuickFocus>
+            </ReplyTrap>
           </main>
-        </PullRequestContext.Provider>
+        </PullRequestContextProvider>
       </div>
     </div>
   )

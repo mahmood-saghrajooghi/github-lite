@@ -43,8 +43,6 @@ export function Kbd({ children, className, ...props }: KbdProps) {
   const { sequenceTrackerState } = useHotkey();
 
 
-  console.log(sequenceTrackerState)
-
   const isPressing = useIsPressing(children);
 
   let keyActive = false;
@@ -64,7 +62,7 @@ export function Kbd({ children, className, ...props }: KbdProps) {
 
   return (
     <kbd className={cn(
-      "w-5 h-5 text-xs flex items-center justify-center bg-accent border border-accent rounded-md text-muted-foreground duration-200",
+      "w-5 h-5 text-xs flex shrink-0 items-center justify-center bg-accent border border-accent rounded-md text-muted-foreground duration-200",
       keyActive || isPressing ? "text-accent-foreground bg-secondary border border-accent" : "",
       className
     )} {...props}>

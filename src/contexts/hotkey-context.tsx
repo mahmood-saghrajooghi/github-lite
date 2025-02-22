@@ -10,6 +10,7 @@ import {
 import { Leaf, Trie } from './trie'
 import { SequenceTracker } from './sequence'
 import type { NormalizedHotkeyString } from './hotkey-utils'
+import { isFormField } from './hotkey-utils'
 
 type HotkeyContextType = {
   isMetaKeyPressed: boolean
@@ -40,6 +41,10 @@ export function HotkeyProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   function handleKeyDown(event: KeyboardEvent) {
+    if (isFormField(event.target as Node)) {
+      return
+    }
+
     if (event.metaKey) {
       setIsMetaKeyPressed(true)
     }

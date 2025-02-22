@@ -3,12 +3,20 @@ import { CheckCircleIcon, GitCommitIcon, CrossReferenceIcon, EyeIcon, GitBranchI
 import { useContext, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from '@tanstack/react-router';
-import { PullRequestContext } from './PullRequest';
+import { PullRequestContext, usePullRequest } from './PullRequest';
 import { CommentCard, CommentBody, Reactions } from './CommentCard';
 import { BranchName, GithubLabel, Icon, User, IssueStatus, Avatar, Status } from './components';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { CommentForm } from './CommentForm';
 import { cn } from '@/lib/utils';
+import { github } from '@/lib/client';
+import type { AddPullRequestReviewThreadReplyInput } from '@octokit/graphql-schema';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { usePRQuery } from '@/hooks/api/use-pr-query';
+import { QuickFocus } from '@/components/quick-focus';
+import { ReplyTrap } from '@/components/ui/reply-trap';
+import { useIsFocused } from '@/hooks/use-is-focused';
+import { Kbd } from '@/components/ui/kbd';
 
 export function Timeline({ items }: { items: (IssueTimelineItems | PullRequestTimelineItems | null)[] }) {
   return (
@@ -18,7 +26,11 @@ export function Timeline({ items }: { items: (IssueTimelineItems | PullRequestTi
         {items.map((item, i) => {
           switch (item?.__typename) {
             case 'IssueComment':
-              return <CommentCard key={item.id} data={item} data-quick-focus tabIndex={0} />;
+              return (
+                <QuickFocus asChild key={item.id}>
+                  <CommentCard data={item} />
+                </QuickFocus>
+              );
             case 'AutomaticBaseChangeSucceededEvent':
               return <BaseChanged key={item.id} data={item} />;
             case 'PullRequestCommit':
@@ -26,7 +38,11 @@ export function Timeline({ items }: { items: (IssueTimelineItems | PullRequestTi
             case 'HeadRefForcePushedEvent':
               return <ForcePushed key={item.id} data={item} />;
             case 'PullRequestReview':
-              return <Reviewed key={item.id} data={item} data-quick-focus tabIndex={0} />;
+              return (
+                <QuickFocus asChild key={item.id}>
+                  <Reviewed data={item} />
+                </QuickFocus>
+              );
             case 'ReviewDismissedEvent':
               return <ReviewDismissed key={item.id} data={item} />;
             case 'RenamedTitleEvent':
@@ -275,18 +291,8 @@ fragment RenamedTitleFragment on RenamedTitleEvent {
 `;
 
 function Reviewed({ data, style, className, ...props }: { data: PullRequestReview } & React.HTMLAttributes<HTMLDivElement>) {
-  let pr = useContext(PullRequestContext);
-  let threadsById = new Map();
-
-  const ref = useRef<HTMLDivElement>(null);
-
-  if (!pr?.reviewThreads.nodes) {
-    return;
-  }
-
-  for (let thread of pr?.reviewThreads.nodes!) {
-    threadsById.set(thread?.comments.nodes?.[0]?.id, thread);
-  }
+  const { threadsById } = usePullRequest();
+  const { isFocused, ref } = useIsFocused();
 
   return (
     <div
@@ -298,7 +304,7 @@ function Reviewed({ data, style, className, ...props }: { data: PullRequestRevie
         `,
         gridTemplateColumns: 'min-content 1fr',
       }}
-      >
+    >
       {data.state === 'CHANGES_REQUESTED'
         ? <Icon className="bg-red-600 text-white"><GitPullRequestClosedIcon /></Icon>
         : data.state === 'APPROVED'
@@ -306,26 +312,34 @@ function Reviewed({ data, style, className, ...props }: { data: PullRequestRevie
           : <Icon className="bg-accent text-muted-foreground"><EyeIcon /></Icon>}
       <div style={{ gridArea: 'description' }}><User actor={data.author!} />  {data.state === 'CHANGES_REQUESTED' ? 'requested changes' : data.state === 'APPROVED' ? 'approved' : 'reviewed'}</div>
       {(data.body || !!data.comments?.nodes?.length) && (
-        <div
-          style={{ gridArea: 'issue', ...style }}
-          className={cn("flex flex-col gap-2 focus:outline focus:outline-2 focus:outline-blue-500 rounded-xl", className)}
-          ref={ref}
-          {...props}
-        >
-          {data.body &&
-            <Card>
-              <CommentBody>{data.body}</CommentBody>
-            </Card>
-          }
-          {data.comments.nodes?.map(comment => {
-            let thread = threadsById.get(comment?.id);
-            if (thread) {
-              return <PullRequestThread key={thread.id} data={thread} />;
+        <div style={{ gridArea: 'issue' }}>
+          <ReplyTrap
+            style={style}
+            className={cn("flex flex-col gap-2 focus:outline focus:outline-2 focus:outline-blue-500 rounded-xl", className)}
+            ref={ref}
+            {...props}
+          >
+            {data.body &&
+              <Card>
+                <CommentBody>{data.body}</CommentBody>
+              </Card>
             }
-          })}
-        </div>
-      )}
-    </div>
+            {data.comments.nodes?.map(comment => {
+              const thread = threadsById.get(comment?.id ?? '');
+              if (thread) {
+                return <PullRequestThread key={thread.id} data={thread} />;
+              }
+            })}
+          </ReplyTrap>
+          {isFocused && (
+            <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
+              Press <Kbd className="text-[11px] w-[18px] h-[18px] rounded-sm">R</Kbd> to reply
+            </div>
+          )}
+        </div >
+      )
+      }
+    </div >
   );
 }
 
@@ -349,6 +363,23 @@ fragment ReviewedEventFragment on PullRequestReview {
 }
 `;
 
+const addPullRequestReviewThreadReply = `
+  mutation addPullRequestReviewThreadReply($input: AddPullRequestReviewThreadReplyInput!) {
+    addPullRequestReviewThreadReply(input: $input) {
+      clientMutationId
+      comment {
+        id
+        author {
+          login
+          avatarUrl
+        }
+        body
+        createdAt
+      }
+    }
+  }
+`;
+
 function PullRequestThread({ data }: { data: PullRequestReviewThread }) {
   const formatDate = (date: string) => {
     return new Date(date).toLocaleString(undefined, {
@@ -359,6 +390,23 @@ function PullRequestThread({ data }: { data: PullRequestReviewThread }) {
       minute: 'numeric'
     });
   };
+
+  const { mutate } = useMutation({
+    mutationFn: (body: string) => {
+      return github.graphql(addPullRequestReviewThreadReply, {
+        input: {
+          body,
+          clientMutationId: '1',
+          pullRequestReviewThreadId: data.id,
+        } as AddPullRequestReviewThreadReplyInput
+      });
+    }
+  });
+
+
+  function onSubmit(body: string) {
+    mutate(body);
+  }
 
   return (
     <Card>
@@ -391,7 +439,7 @@ function PullRequestThread({ data }: { data: PullRequestReviewThread }) {
           ))}
         </div>
         <div className="p-3 border-t border-input">
-          <CommentForm>
+          <CommentForm onSubmit={onSubmit}>
             {data.viewerCanResolve &&
               <Button className="flex-shrink-0 px-4 py-2 rounded-md bg-accent pressed:bg-accent/80 border border-accent pressed:border-accent/80 text-foreground text-sm font-medium cursor-default outline-none focus-visible:ring-2 ring-offset-2 ring-blue-600">Resolve conversation</Button>
             }
@@ -408,6 +456,15 @@ fragment PullRequestThreadFragment on PullRequestReviewThread {
   isCollapsed
   isOutdated
   isResolved
+  repository {
+    owner {
+      login
+    }
+    name
+  }
+  pullRequest {
+    number
+  }
   resolvedBy {
     ...ActorFragment
   }
