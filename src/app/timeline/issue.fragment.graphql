@@ -1,0 +1,13 @@
+
+fragment IssueTimelineFragment on PullRequestTimelineItems {
+  __typename
+  ...IssueCommentFragment
+  ...RenamedTitleFragment
+  ...LabeledEventFragment
+  ...UnlabeledEventFragment
+  ...ClosedEventFragment
+  ...ReopenedEventFragment
+  ...CrossReferencedEventFragment
+  ...ReferencedEventFragment
+  ...CommentDeletedEventFragment
+}

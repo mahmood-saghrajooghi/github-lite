@@ -1,8 +1,8 @@
 import { Issue, PullRequest, Repository } from '@octokit/graphql-schema';
 import Markdown from 'markdown-to-jsx';
-import { Timeline } from './TimeLine';
-import { CommentCard } from './CommentCard';
-import { IssueCommentForm } from './CommentForm';
+import { Timeline } from '@/app/timeline/timeline';
+import { CommentCard } from '@/components/comment-card/comment-card';
+import { IssueCommentForm } from '@/app/CommentForm';
 import { MarkGithubIcon } from "@primer/octicons-react"
 import { runQuery } from '@/lib/client';
 import { useQuery } from '@tanstack/react-query';

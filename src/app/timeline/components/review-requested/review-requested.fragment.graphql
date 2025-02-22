@@ -1,0 +1,12 @@
+
+fragment ReviewRequestedEventFragment on ReviewRequestedEvent {
+  actor {
+    ...ActorFragment
+  }
+  requestedReviewer {
+    ...on Actor {
+      login
+      url
+    }
+  }
+}

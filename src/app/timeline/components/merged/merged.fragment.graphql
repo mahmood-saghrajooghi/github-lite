@@ -1,0 +1,12 @@
+
+fragment MergedEventFragment on MergedEvent {
+  id
+  actor {
+    ...ActorFragment
+  }
+  commit {
+    url
+    abbreviatedOid
+  }
+  mergeRefName
+}

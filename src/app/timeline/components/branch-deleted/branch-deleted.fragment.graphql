@@ -1,0 +1,8 @@
+
+fragment BranchDeletedEventFragment on HeadRefDeletedEvent {
+  id
+  actor {
+    ...ActorFragment
+  }
+  headRefName
+}

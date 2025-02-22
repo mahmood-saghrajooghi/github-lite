@@ -1,0 +1,8 @@
+
+fragment ReactionFragment on ReactionGroup {
+  content
+  viewerHasReacted
+  reactors {
+    totalCount
+  }
+}

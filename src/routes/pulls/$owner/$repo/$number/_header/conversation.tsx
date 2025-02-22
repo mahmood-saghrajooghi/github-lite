@@ -1,7 +1,7 @@
 import { createFileRoute, useParams } from '@tanstack/react-router'
 import { PullRequestContextProvider, PullHeader } from '@/app/PullRequest'
-import { CommentCard } from '@/app/CommentCard'
-import { Timeline } from '@/app/TimeLine'
+import { CommentCard } from '@/components/comment-card/comment-card'
+import { Timeline } from '@/app/timeline/timeline'
 import { IssueCommentForm } from '@/app/CommentForm'
 import { Header } from '@/app/Issue'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -11,8 +11,6 @@ import { usePRQuery } from '@/hooks/api/use-pr-query'
 import { prSearchSchema } from '@/lib/pr-search.scema'
 import { QuickFocus } from '@/components/quick-focus'
 import { ReplyTrap } from '@/components/ui/reply-trap'
-import { useIsFocused } from '@/hooks/use-is-focused'
-import { Kbd } from '@/components/ui/kbd'
 
 export const Route = createFileRoute(
   '/pulls/$owner/$repo/$number/_header/conversation',

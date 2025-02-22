@@ -1,0 +1,14 @@
+
+fragment PullRequestTimelineFragment on PullRequestTimelineItems {
+  ...IssueTimelineFragment
+  ...BaseChangeEventFragment
+  ...CommittedEventFragment
+  ...ForcePushedEventFragment
+  ...ReviewedEventFragment
+  ...ReviewDismissedFragment
+  ...MergedEventFragment
+  ...BranchDeletedEventFragment
+  ...ReviewRequestedEventFragment
+  ...ConvertToDraftEventFragment
+  ...ReadyForReviewEventFragment
+}

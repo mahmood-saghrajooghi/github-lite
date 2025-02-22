@@ -1,14 +1,9 @@
-import { PullRequest, PullRequestReviewDecision, PullRequestReviewThread } from '@octokit/graphql-schema';
+import { PullRequest, PullRequestReviewThread } from '@octokit/graphql-schema';
 import { Link } from '@tanstack/react-router';
 import { Fragment, createContext, useContext, useMemo } from 'react';
 import { Button, } from '@/components/ui/button';
-import { Timeline } from '@/app/TimeLine';
-import { Card, Status, User } from '@/app/components';
-import { github } from '@/lib/client';
-import { parseDiff, Diff as DiffView, Hunk } from 'react-diff-view';
-import 'react-diff-view/style/index.css';
-import { usePRDiffQuery } from '@/hooks/api/use-pr-diff-query';
-
+import { Card, Status } from '@/app/components';
+import { User } from '@/components/user/user';
 
 type PullRequestContextType = {
   pr: PullRequest,
@@ -40,146 +35,6 @@ export function usePullRequest() {
   return contextValue;
 }
 
-export function PullRequestPage({ owner, repo, number }: { owner: string, repo: string, number: number }) {
-}
-
-const getDiff = async (owner: string, repo: string, number: number) => {
-  const res = await github.pulls.get({
-    owner,
-    repo,
-    pull_number: number,
-    headers: {
-      accept: "application/vnd.github.v3.diff", // Request diff format
-    },
-  });
-  return res.data;
-}
-
-
-function renderFile({ oldRevision, newRevision, type, hunks }: any) {
-  return (
-    <DiffView
-      key={oldRevision + '-' + newRevision}
-      viewType="split"
-      diffType={type}
-      hunks={hunks}
-    >
-      {hunks => hunks.map(hunk => <Hunk key={hunk.content} hunk={hunk} />)}
-    </DiffView>
-  );
-}
-
-
-function Diff({ data }: { data: PullRequest }) {
-  const { data: diff } = usePRDiffQuery(data.repository.owner.login, data.repository.name, data.number);
-
-
-  if (!diff) {
-    return null;
-  }
-
-  const files = parseDiff(diff);
-
-  return (
-    <div className="text-xs font-mono">
-      {files.map(file => renderFile(file))}
-    </div>
-  );
-}
-
-PullRequestPage.query = () => `
-query issueTimeline($owner: String!, $repo: String!, $number: Int!) {
-  repository(owner:$owner, name:$repo) {
-    pullRequest(number:$number) {
-      __typename
-      id
-      number
-      url
-      title
-      body
-      createdAt
-      state
-      isDraft
-      author {
-        avatarUrl
-        url
-        login
-      }
-      reactionGroups {
-        content
-        viewerHasReacted
-        reactors {
-          totalCount
-        }
-      }
-      repository {
-        name
-        owner {
-          login
-          avatarUrl
-        }
-      }
-      headRef {
-        name
-      }
-      baseRef {
-        name
-      }
-      reviews(last:100) {
-        nodes {
-          author {
-            ...ActorFragment
-          }
-          state
-        }
-      }
-      commits(last:1) {
-        nodes {
-          commit {
-            statusCheckRollup {
-              state
-            }
-          }
-        }
-      }
-      mergeable
-      reviewDecision
-      viewerCanMergeAsAdmin
-      viewerCanClose
-      viewerCanUpdateBranch
-      timelineItems(first:100) {
-        nodes {
-          ...PullRequestTimelineFragment
-        }
-      }
-      reviewThreads(first:100) {
-        nodes {
-          ...PullRequestThreadFragment
-        }
-      }
-      reviewRequests(first:100) {
-        nodes {
-          requestedReviewer {
-            __typename
-            ... on User {
-              login
-              avatarUrl
-              url
-            }
-            ... on Team {
-              name
-              url
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-${Timeline.pullRequestFragment()}
-`;
-
 export function PullHeader({ data }: { data: PullRequest }) {
   return (
     <Card>
@@ -196,20 +51,20 @@ export function PullHeader({ data }: { data: PullRequest }) {
   );
 }
 
-let reviewDecisionMessages: Record<PullRequestReviewDecision, string> = {
-  APPROVED: 'Approved',
-  REVIEW_REQUIRED: 'Review required',
-  CHANGES_REQUESTED: 'Changes requested'
-};
+// let reviewDecisionMessages: Record<PullRequestReviewDecision, string> = {
+//   APPROVED: 'Approved',
+//   REVIEW_REQUIRED: 'Review required',
+//   CHANGES_REQUESTED: 'Changes requested'
+// };
 
 function Reviews({ data }: { data: PullRequest }) {
-  let reviews = data.reviews?.nodes?.filter(node => node?.author?.login !== data.author?.login);
+  const reviews = data.reviews?.nodes?.filter(node => node?.author?.login !== data.author?.login);
   if (!reviews || !reviews.length) {
     return <div>No reviews.</div>;
   }
 
-  let reviewsByAuthor = new Map();
-  for (let review of reviews) {
+  const reviewsByAuthor = new Map();
+  for (const review of reviews) {
     reviewsByAuthor.set(review?.author?.login, review);
   }
 
@@ -232,7 +87,7 @@ function Reviews({ data }: { data: PullRequest }) {
 
 function Checks({ data }: { data: PullRequest }) {
   let status = data.commits.nodes?.[0]?.commit.statusCheckRollup?.state;
-  let checks = data.commits.nodes?.[0]?.commit.checkSuites?.nodes;
+  const checks = data.commits.nodes?.[0]?.commit.checkSuites?.nodes;
 
   if (status == null && checks?.length) {
     status = 'PENDING';
@@ -250,7 +105,7 @@ function Checks({ data }: { data: PullRequest }) {
             return null;
           }
 
-          let summary = (
+          const summary = (
             <div className="flex gap-2 items-center">
               <div className="w-5 flex justify-center"><Status state={check!.conclusion!} /></div>
               <img src={check!.app?.logoUrl} className="w-8 h-8 rounded" style={{ backgroundColor: '#' + check!.app?.logoBackgroundColor }} alt="" />

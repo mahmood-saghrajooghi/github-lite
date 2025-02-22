@@ -1,6 +1,7 @@
 import { graphql as githubGraphql } from '@octokit/graphql';
 import { Octokit } from '@octokit/rest';
 import { queryClient } from '@/query-client';
+import { print } from 'graphql';
 
 const CLIENT_ID = 'Iv23liKSgTuckq1LavWJ';
 
@@ -16,8 +17,10 @@ export const graphql = githubGraphql.defaults({
   },
 });
 
-export async function runQuery<T>([query, options]: [string, Record<string, unknown>]): Promise<T> {
-  return graphql(query, options);
+export async function runQuery<T>([query, options]: [string | any, Record<string, unknown>]): Promise<T> {
+  // If query is not a string (is AST), convert it to string
+  const queryString = typeof query === 'string' ? query : print(query);
+  return graphql(queryString, options);
 }
 
 export function preload(query: string, options: Record<string, unknown>) {

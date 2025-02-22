@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/command'
 import { getPrURL } from '@/lib/pull-request'
 import { preload, runQuery } from '@/lib/client'
-import { PullRequestPage } from '@/app/PullRequest'
 import { RestEndpointMethodTypes } from '@octokit/rest'
 import { Repository } from '@octokit/graphql-schema'
 import { CheckIcon } from 'lucide-react'
@@ -20,12 +19,13 @@ import { GitPullRequestDraftIcon, GitPullRequestIcon } from '@primer/octicons-re
 import { Avatar } from '@/app/components'
 import { useHotkey, useRegisterHotkey } from '@/contexts/hotkey-context'
 import { useMyPRs } from '@/hooks/api/use-my-prs'
+import { issueTimeline } from '@/app/issue-timeline.query.graphql'
 
 type PullRequest =
   RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][0]
 
 function preloadPullRequest({ owner, repo, number }: { owner: string, repo: string, number: number }) {
-  preload(PullRequestPage.query(), {
+  preload(issueTimeline, {
     owner,
     repo,
     number,
