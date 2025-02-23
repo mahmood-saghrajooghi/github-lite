@@ -8,6 +8,7 @@ import refractor from 'refractor'
 import type { ChangeData, DiffProps, EventMap } from 'react-diff-view'
 import type { PullRequest } from '@octokit/graphql-schema'
 
+import 'react-diff-view/style/index.css';
 import 'prism-color-variables/variables.css'
 import './github-token-colors.css'
 
