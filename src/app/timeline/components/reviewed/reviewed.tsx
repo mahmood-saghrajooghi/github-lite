@@ -3,12 +3,9 @@ import { CheckCircleIcon, GitPullRequestClosedIcon, EyeIcon } from '@primer/octi
 import { Icon } from '@/app/components';
 import { Card } from '@/components/ui/card';
 import { CommentBody } from '@/components/comment-card/comment-card';
-import { useIsFocused } from '@/hooks/use-is-focused';
-import { Kbd } from '@/components/ui/kbd';
 import { PullRequestThread } from '../pull-request-thread/pull-request-thread';
 import { usePullRequest } from '@/app/PullRequest';
 import { cn } from '@/lib/utils';
-import { ReplyTrap } from '@/components/ui/reply-trap';
 import { User } from '@/components/user/user';
 
 
