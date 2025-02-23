@@ -1,5 +1,3 @@
-import { ActorFragment } from '@/components/user/user.fragment';
-
 export const UnlabeledEventFragment = /* GraphQL */ `
   fragment UnlabeledEventFragment on UnlabeledEvent {
     id
@@ -11,6 +9,4 @@ export const UnlabeledEventFragment = /* GraphQL */ `
       color
     }
   }
-
-  ${ActorFragment}
 `;

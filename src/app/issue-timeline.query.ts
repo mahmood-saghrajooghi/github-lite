@@ -94,5 +94,4 @@ export const issueTimelineQuery = /* GraphQL */ `
 
   ${PullRequestTimelineFragment}
   ${PullRequestThreadFragment}
-  ${ActorFragment}
 `;

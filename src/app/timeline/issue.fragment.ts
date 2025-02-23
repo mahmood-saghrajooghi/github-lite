@@ -33,5 +33,3 @@ export const IssueTimelineFragment = /* GraphQL */ `
   ${ReferencedEventFragment}
   ${CommentDeletedEventFragment}
 `;
-
-console.log(IssueTimelineFragment);

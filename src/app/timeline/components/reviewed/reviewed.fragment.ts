@@ -1,6 +1,3 @@
-import { ActorFragment } from '@/components/user/user.fragment';
-import { ReactionFragment } from '@/components/comment-card/reactions.fragment';
-
 export const ReviewedEventFragment = /* GraphQL */ `
   fragment ReviewedEventFragment on PullRequestReview {
     id
@@ -19,7 +16,4 @@ export const ReviewedEventFragment = /* GraphQL */ `
       }
     }
   }
-
-  ${ActorFragment}
-  ${ReactionFragment}
 `;

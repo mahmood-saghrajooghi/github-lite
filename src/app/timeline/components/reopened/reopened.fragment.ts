@@ -1,4 +1,3 @@
-import { ActorFragment } from '@/components/user/user.fragment'
 export const ReopenedEventFragment = /* GraphQL */ `
   fragment ReopenedEventFragment on ReopenedEvent {
     id
@@ -6,6 +5,4 @@ export const ReopenedEventFragment = /* GraphQL */ `
       ...ActorFragment
     }
   }
-
-  ${ActorFragment}
 `;

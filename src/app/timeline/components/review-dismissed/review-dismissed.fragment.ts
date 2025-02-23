@@ -1,5 +1,3 @@
-import { ActorFragment } from '@/components/user/user.fragment';
-
 export const ReviewDismissedFragment = /* GraphQL */ `
   fragment ReviewDismissedFragment on ReviewDismissedEvent {
     id
@@ -20,6 +18,4 @@ export const ReviewDismissedFragment = /* GraphQL */ `
       }
     }
   }
-
-  ${ActorFragment}
 `;

@@ -1,4 +1,3 @@
-import { ActorFragment } from '@/components/user/user.fragment';
 export const ReviewRequestedEventFragment = /* GraphQL */ `
   fragment ReviewRequestedEventFragment on ReviewRequestedEvent {
     actor {
@@ -11,6 +10,4 @@ export const ReviewRequestedEventFragment = /* GraphQL */ `
       }
     }
   }
-
-  ${ActorFragment}
 `;

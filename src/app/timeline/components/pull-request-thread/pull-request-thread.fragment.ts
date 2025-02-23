@@ -1,6 +1,3 @@
-import { ActorFragment } from '@/components/user/user.fragment';
-import { ReactionFragment } from '@/components/comment-card/reactions.fragment';
-
 export const PullRequestThreadFragment = /* GraphQL */ `
   fragment PullRequestThreadFragment on PullRequestReviewThread {
     id
@@ -43,7 +40,4 @@ export const PullRequestThreadFragment = /* GraphQL */ `
       }
     }
   }
-
-  ${ActorFragment}
-  ${ReactionFragment}
 `;

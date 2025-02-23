@@ -1,6 +1,3 @@
-import { ActorFragment } from '@/components/user/user.fragment';
-import { ReactionFragment } from './reactions.fragment';
-
 export const IssueCommentFragment = /* GraphQL */ `
   fragment IssueCommentFragment on IssueComment {
     id
@@ -13,7 +10,4 @@ export const IssueCommentFragment = /* GraphQL */ `
       ...ReactionFragment
     }
   }
-
-  ${ActorFragment}
-  ${ReactionFragment}
 `;
