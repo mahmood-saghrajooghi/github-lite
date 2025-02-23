@@ -26,7 +26,7 @@ createRoot(document.getElementById('root')!).render(
     <PersistQueryClientProvider client={queryClient} persistOptions={{ persister: asyncStoragePersister }}>
       <HotkeyProvider>
         <RouterProvider router={router} />
-        <ReactQueryDevtools initialIsOpen={false} />
+        {/* <ReactQueryDevtools initialIsOpen={false} /> */}
       </HotkeyProvider>
     </PersistQueryClientProvider>
   </StrictMode>,

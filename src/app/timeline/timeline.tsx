@@ -41,11 +41,7 @@ export function Timeline({ items }: { items: (IssueTimelineItems | PullRequestTi
             case 'HeadRefForcePushedEvent':
               return <ForcePushed key={item.id} data={item} />;
             case 'PullRequestReview':
-              return (
-                <QuickFocus asChild key={item.id}>
-                  <Reviewed data={item} />
-                </QuickFocus>
-              );
+              return <Reviewed data={item} />;
             case 'ReviewDismissedEvent':
               return <ReviewDismissed key={item.id} data={item} />;
             case 'RenamedTitleEvent':

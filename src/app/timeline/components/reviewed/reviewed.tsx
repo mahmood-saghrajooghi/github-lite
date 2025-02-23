@@ -14,8 +14,6 @@ import { User } from '@/components/user/user';
 
 export function Reviewed({ data, style, className, ...props }: { data: PullRequestReview } & React.HTMLAttributes<HTMLDivElement>) {
   const { threadsById } = usePullRequest();
-  const { isFocused, handleFocus, handleBlur } = useIsFocused();
-
   return (
     <div
       className="grid items-center gap-2"
@@ -35,11 +33,9 @@ export function Reviewed({ data, style, className, ...props }: { data: PullReque
       <div style={{ gridArea: 'description' }}><User actor={data.author!} />  {data.state === 'CHANGES_REQUESTED' ? 'requested changes' : data.state === 'APPROVED' ? 'approved' : 'reviewed'}</div>
       {(data.body || !!data.comments?.nodes?.length) && (
         <div style={{ gridArea: 'issue' }}>
-          <ReplyTrap
+          <div
             style={style}
-            className={cn("flex flex-col gap-2 rounded-md", className)}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
+            className={cn("flex flex-col gap-8 rounded-md", className)}
             {...props}
           >
             {data.body &&
@@ -53,12 +49,7 @@ export function Reviewed({ data, style, className, ...props }: { data: PullReque
                 return <PullRequestThread key={thread.id} data={thread} />;
               }
             })}
-          </ReplyTrap>
-          {isFocused && (
-            <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-              Press <Kbd className="text-[11px] w-[18px] h-[18px] rounded-sm">R</Kbd> to reply
-            </div>
-          )}
+          </div>
         </div >
       )
       }
