@@ -1,7 +1,7 @@
 export const CommittedEventFragment = /* GraphQL */ `
   fragment CommittedEventFragment on PullRequestCommit {
     id
-    commit {
+    commitedCommit: commit {
       url
       abbreviatedOid
       message

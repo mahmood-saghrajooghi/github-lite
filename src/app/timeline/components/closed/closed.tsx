@@ -1,5 +1,5 @@
 
-import { ClosedEvent } from '@octokit/graphql-schema';
+import { ClosedEvent } from '@/generated/graphql';
 import { Icon } from '@/app/components';
 import { IssueClosedIcon, SkipIcon } from '@primer/octicons-react';
 import { User } from '@/components/user/user';

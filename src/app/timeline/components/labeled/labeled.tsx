@@ -1,4 +1,4 @@
-import { LabeledEvent } from '@octokit/graphql-schema';
+import { LabeledEvent } from '@/generated/graphql';
 import { TagIcon } from '@primer/octicons-react';
 import { GithubLabel, Icon } from '@/app/components';
 import { User } from '@/components/user/user';

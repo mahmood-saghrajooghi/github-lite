@@ -1,4 +1,4 @@
-import { PullRequestReview } from '@octokit/graphql-schema';
+import { PullRequestReview } from '@/generated/graphql';
 import { CheckCircleIcon, GitPullRequestClosedIcon, EyeIcon } from '@primer/octicons-react';
 import { Icon } from '@/app/components';
 import { Card } from '@/components/ui/card';

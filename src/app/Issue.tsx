@@ -1,33 +1,29 @@
-import { Issue, PullRequest, Repository } from '@octokit/graphql-schema';
 import Markdown from 'markdown-to-jsx';
-import { Timeline } from '@/app/timeline/timeline';
-import { CommentCard } from '@/components/comment-card/comment-card';
-import { IssueCommentForm } from '@/app/CommentForm';
 import { MarkGithubIcon } from "@primer/octicons-react"
-import { runQuery } from '@/lib/client';
-import { useQuery } from '@tanstack/react-query';
+import { Issue, PullRequest } from '@/generated/graphql';
+import { IssueTimelineFragment } from './timeline/issue.fragment';
 
-export function IssuePage({ owner, repo, number }: { owner: string, repo: string, number: number }) {
-  const { data: res } = useQuery<{ repository: Repository }>({
-    queryKey: [IssuePage.query(), { owner, repo, number }],
-    queryFn: () => runQuery([IssuePage.query(), { owner, repo, number }]),
-  });
-  const data = res?.repository.issue;
-  if (!data) {
-    return null;
-  }
+// export function IssuePage({ owner, repo, number }: { owner: string, repo: string, number: number }) {
+//   const { data: res } = useQuery<{ repository: Repository }>({
+//     queryKey: [IssuePage.query(), { owner, repo, number }],
+//     queryFn: () => runQuery([IssuePage.query(), { owner, repo, number }]),
+//   });
+//   const data = res?.repository.issue;
+//   if (!data) {
+//     return null;
+//   }
 
-  return (
-    <div className="flex flex-col gap-4 my-4 max-w-3xl mx-auto">
-      <Header data={data} />
-      <CommentCard data={data} />
-      <Timeline items={data.timelineItems.nodes!} />
-      <IssueCommentForm issue={data} />
-    </div>
-  );
-}
+//   return (
+//     <div className="flex flex-col gap-4 my-4 max-w-3xl mx-auto">
+//       <Header data={data} />
+//       <CommentCard data={data} />
+//       <Timeline items={data.timelineItems.nodes!} />
+//       <IssueCommentForm issue={data} />
+//     </div>
+//   );
+// }
 
-IssuePage.query = () => `
+export const IssuePageQuery = () => `
 query IssueTimeline($owner: String!, $repo: String!, $number: Int!) {
   repository(owner:$owner, name:$repo) {
     issue(number:$number) {
@@ -62,7 +58,7 @@ query IssueTimeline($owner: String!, $repo: String!, $number: Int!) {
   }
 }
 
-${Timeline.issueFragment()}
+${IssueTimelineFragment}
 `;
 
 export function Header({ data }: { data: Issue | PullRequest }) {

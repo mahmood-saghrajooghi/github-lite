@@ -56,7 +56,7 @@ function File({
     () => tokenize(hunks, { highlight: true, language: 'tsx', refractor }),
     [hunks],
   )
-  const [selectedChanges, setSelectedChanges] = useState<(ChangeData | null)[]>([]);
+  const setSelectedChanges = useState<(ChangeData | null)[]>([])[1];
   const selectChange = useCallback<NonNullable<EventMap['onClick']>>(
     ({ change }) => {
       setSelectedChanges((selectedChanges) => {
@@ -149,7 +149,7 @@ function RouteComponent() {
 
   return (
     <div>
-      <Diff data={data.repository.pullRequest as PullRequest} />
+      <Diff data={data.repository?.pullRequest as PullRequest} />
     </div>
   )
 }

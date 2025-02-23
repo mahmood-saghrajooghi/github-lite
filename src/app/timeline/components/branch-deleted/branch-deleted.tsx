@@ -1,4 +1,4 @@
-import { HeadRefDeletedEvent } from '@octokit/graphql-schema';
+import { HeadRefDeletedEvent } from '@/generated/graphql';
 import { GitBranchIcon } from '@primer/octicons-react';
 import { Icon } from '@/app/components';
 import { BranchName } from '@/app/components';

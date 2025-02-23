@@ -147,10 +147,8 @@ export function Reactions({ id, data: initialData }: { id: string, data: Reactio
           <ToggleGroupItem
             key={r.content}
             value={r.content}
-            onPressedChange={pressed => {
-              console.log(pressed);
-              toggleReaction(r.content, pressed)
-            }}
+            // FIXME: type errors here, see if it is working
+            // onPressedChange={pressed => toggleReaction(r.content, pressed)}
             className="h-8 min-w-8"
           >
             <span>{emojis[r.content]}</span>

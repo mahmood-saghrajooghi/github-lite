@@ -1,4 +1,4 @@
-import { RenamedTitleEvent } from '@octokit/graphql-schema';
+import { RenamedTitleEvent } from '@/generated/graphql';
 import { PencilIcon } from '@primer/octicons-react';
 import { Icon } from '@/app/components';
 import { User } from '@/components/user/user';

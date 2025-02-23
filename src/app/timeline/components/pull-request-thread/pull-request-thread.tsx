@@ -1,11 +1,10 @@
-import { PullRequestReviewThread } from '@octokit/graphql-schema';
 import { Button } from '@/components/ui/button';
 import { Link } from '@tanstack/react-router';
 import { Avatar} from '@/app/components';
 import { Card } from '@/components/ui/card';
 import { CommentForm } from '@/app/CommentForm';
 import { github } from '@/lib/client';
-import type { AddPullRequestReviewThreadReplyInput } from '@octokit/graphql-schema';
+import type { AddPullRequestReviewThreadReplyInput, PullRequestReviewThread  } from '@/generated/graphql';
 import { useMutation } from '@tanstack/react-query';
 import { CommentBody } from '@/components/comment-card/comment-body';
 import { Reactions } from '@/components/comment-card/reactions';

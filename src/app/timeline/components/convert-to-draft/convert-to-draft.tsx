@@ -1,4 +1,4 @@
-import { ConvertToDraftEvent } from '@octokit/graphql-schema';
+import { ConvertToDraftEvent } from '@/generated/graphql';
 import { GitPullRequestDraftIcon } from '@primer/octicons-react';
 import { Icon } from '@/app/components';
 import { User } from '@/components/user/user';

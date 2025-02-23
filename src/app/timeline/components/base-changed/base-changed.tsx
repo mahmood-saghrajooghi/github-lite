@@ -1,4 +1,4 @@
-import { AutomaticBaseChangeSucceededEvent } from '@octokit/graphql-schema';
+import { AutomaticBaseChangeSucceededEvent } from '@/generated/graphql';
 import { GitBranchIcon } from '@primer/octicons-react';
 import { Icon } from '@/app/components';
 import { BranchName } from '@/app/components';

@@ -1,6 +1,6 @@
-import { Commit } from '@octokit/graphql-schema';
-import { Link } from '@tanstack/react-router';
+import { CommittedEventFragmentFragment } from '@/generated/graphql';
+import { Link } from '@/components/link';
 
-export function CommitLink({ commit }: { commit: Commit }) {
-  return <Link target="_blank" to={commit.url} className="text-sm hover:underline"><code>{commit.abbreviatedOid}</code></Link>;
+export function CommitLink({ commit }: { commit: CommittedEventFragmentFragment['commitedCommit'] }) {
+  return <Link target="_blank" to={commit.commitUrl} className="text-sm hover:underline"><code>{commit.abbreviatedOid}</code></Link>;
 }

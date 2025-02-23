@@ -5,7 +5,7 @@ export const ReferencedEventFragment = /* GraphQL */ `
       ...ActorFragment
     }
     isCrossRepository
-    commit {
+    referencedCommit: commit {
       url
       abbreviatedOid
       message

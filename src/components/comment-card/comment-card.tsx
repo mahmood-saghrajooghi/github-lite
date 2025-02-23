@@ -1,10 +1,10 @@
-import { Issue, IssueComment, PullRequest, PullRequestReviewComment } from '@octokit/graphql-schema';
 import { Primitive } from '@radix-ui/react-primitive';
 import Markdown from 'markdown-to-jsx';
 import { forwardRef } from 'react';
 import { Avatar } from '../../app/components';
 import { cn } from '@/lib/utils';
 import { Reactions } from './reactions';
+import { Issue, IssueComment, PullRequest, PullRequestReviewComment } from '@/generated/graphql';
 
 type CommentCardProps = {
   data: Issue | PullRequest | IssueComment | PullRequestReviewComment

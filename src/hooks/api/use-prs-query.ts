@@ -33,7 +33,7 @@ async function fetchRepoPullRequests(owner: string, repo: string, search?: { aut
       }
     }
 
-    function getSort(sort: string) {
+    function getSort(sort: string | undefined) {
       if (sort === 'created-desc') {
         return { sort: 'created', order: 'desc' } as const
       }

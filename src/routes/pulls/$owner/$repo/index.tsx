@@ -4,10 +4,12 @@ import { createFileRoute, useParams, useSearch } from '@tanstack/react-router'
 import { PullRequestsSidebar } from '@/components/pull-request-sidebar'
 import { Link } from '@/components/link'
 import { prSearchSchema } from '@/lib/pr-search.scema'
+import { zodValidator } from '@tanstack/zod-adapter'
+
 
 export const Route = createFileRoute('/pulls/$owner/$repo/')({
   component: RouteComponent,
-  validateSearch: (search) => prSearchSchema.parse(search),
+  validateSearch: zodValidator(prSearchSchema),
 })
 
 function RouteComponent() {
@@ -31,7 +33,7 @@ function RouteComponent() {
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link to="/pulls/$owner/$repo" params={{ owner, repo: repo }}>
+                <Link to="/pulls/$owner/$repo" params={{ owner, repo: repo }} hotKey="g p">
                   {repo}
                 </Link>
               </BreadcrumbLink>

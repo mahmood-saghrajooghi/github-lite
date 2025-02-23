@@ -1,9 +1,10 @@
-import { PullRequest, PullRequestReviewThread } from '@octokit/graphql-schema';
+import { PullRequestReviewThread, StatusState } from '@/generated/graphql';
 import { Link } from '@tanstack/react-router';
 import { Fragment, createContext, useContext, useMemo } from 'react';
 import { Button, } from '@/components/ui/button';
 import { Card, Status } from '@/app/components';
 import { User } from '@/components/user/user';
+import { PullRequest } from '@/generated/graphql';
 
 type PullRequestContextType = {
   pr: PullRequest,
@@ -86,7 +87,7 @@ function Reviews({ data }: { data: PullRequest }) {
 }
 
 function Checks({ data }: { data: PullRequest }) {
-  let status = data.commits.nodes?.[0]?.commit.statusCheckRollup?.state;
+  let status = data.commits.nodes?.[0]?.commit.statusCheckRollup?.state as StatusState | "PENDING" | undefined;
   const checks = data.commits.nodes?.[0]?.commit.checkSuites?.nodes;
 
   if (status == null && checks?.length) {

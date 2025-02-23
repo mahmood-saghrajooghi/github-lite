@@ -1,6 +1,6 @@
 
 
-import { ReactionContent, ReactionGroup } from '@octokit/graphql-schema';
+import { ReactionContent, ReactionGroup } from '@/generated/graphql';
 import { SmileyIcon } from '@primer/octicons-react';
 import { useState } from 'react';
 import { Button, ButtonIcon } from "@/components/ui/button"
@@ -86,8 +86,9 @@ export function Reactions({ id, data: initialData }: { id: string, data: Reactio
           <ToggleGroupItem
             key={r.content}
             value={r.content}
-            pressed={r.viewerHasReacted}
-            onPressedChange={pressed => toggleReaction(r.content, pressed)}
+            // FIXME: type errors here, see if it is working
+            // pressed={r.viewerHasReacted}
+            // onPressedChange={pressed => toggleReaction(r.content, pressed)}
             className="h-8 min-w-8"
           >
             <span>{emojis[r.content]}</span>

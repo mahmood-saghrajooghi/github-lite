@@ -9,7 +9,7 @@ type QuickFocusProps = React.ComponentPropsWithoutRef<typeof Primitive.div>
 
 export const QuickFocus = forwardRef<React.ElementRef<typeof Primitive.div>, QuickFocusProps>(({ children, onKeyDown: onKeyDownProp, className, ...props }, ref) => {
   const internalRef = useRef<HTMLDivElement>(null)
-  const handleKeyDown = (event: React.KeyboardEvent) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (isFormField(event.target as Node)) {
       return;
     }

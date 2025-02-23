@@ -1,9 +1,8 @@
 import { GitPullRequestClosedIcon } from '@primer/octicons-react';
-import { Issue, PullRequest } from "@octokit/graphql-schema";
 import { github } from "@/lib/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ReactNode, useRef, useState, forwardRef   } from "react";
+import { useRef, useState, forwardRef   } from "react";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -26,6 +25,7 @@ import {
   PopoverAnchor,
 } from "@/components/ui/popover"
 import { composeRefs } from '@/lib/compose-refs';
+import { Issue, PullRequest } from '@/generated/graphql';
 
 type IssueCommentFormProps = {
   issue: Issue | PullRequest,
@@ -49,7 +49,8 @@ export const IssueCommentForm = forwardRef<HTMLFormElement, IssueCommentFormProp
 
   return (
     <CommentForm
-      onSubmit={onSubmit}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onSubmit={onSubmit as any}
       {...props}
       ref={ref}
     >
@@ -94,11 +95,9 @@ function optimisticallyUpdatePullRequest({ owner, repo, number, user, values }: 
   });
 }
 
-type CommentFormProps = {
-  children: ReactNode,
-  className?: string,
+type CommentFormProps = Omit<React.HTMLAttributes<HTMLFormElement>, 'onSubmit'> & {
   onSubmit?: (comment: string) => Promise<void>,
-} & React.HTMLAttributes<HTMLFormElement>
+}
 
 
 export const CommentForm = forwardRef<HTMLFormElement, CommentFormProps>(({ children, className, onSubmit, ...props }, ref) => {

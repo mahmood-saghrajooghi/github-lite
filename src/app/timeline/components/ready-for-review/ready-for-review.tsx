@@ -1,4 +1,4 @@
-import { ReadyForReviewEvent } from '@octokit/graphql-schema';
+import { ReadyForReviewEvent } from '@/generated/graphql';
 import { EyeIcon } from '@primer/octicons-react';
 import { Icon } from '@/app/components';
 import { User } from '@/components/user/user';

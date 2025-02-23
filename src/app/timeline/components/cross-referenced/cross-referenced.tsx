@@ -1,4 +1,4 @@
-import { CrossReferencedEvent } from '@octokit/graphql-schema';
+import { CrossReferencedEvent } from '@/generated/graphql';
 import { CrossReferenceIcon } from '@primer/octicons-react';
 import { Link } from '@tanstack/react-router';
 import { Icon, IssueStatus, Avatar } from '@/app/components';

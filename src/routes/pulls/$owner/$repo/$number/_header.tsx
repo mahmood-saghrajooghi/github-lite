@@ -52,6 +52,7 @@ function RouteComponent() {
           <TabLink
             to="/pulls/$owner/$repo/$number/conversation"
             params={{ owner, repo, number }}
+            search={{}}
             hotKey="g c"
           >
 

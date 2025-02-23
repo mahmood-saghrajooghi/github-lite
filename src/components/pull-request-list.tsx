@@ -2,7 +2,6 @@ import { useRef } from 'react'
 import { motion } from 'motion/react'
 import { Link, useNavigate, } from '@tanstack/react-router'
 import { SidebarMenuItem } from '@/components/ui/sidebar'
-import { useQuery } from '@tanstack/react-query'
 import {
   Command,
   CommandEmpty,
@@ -11,15 +10,15 @@ import {
   CommandInput,
 } from '@/components/ui/command'
 import { getPrURL } from '@/lib/pull-request'
-import { preload, runQuery } from '@/lib/client'
+import { preload } from '@/lib/client'
 import { RestEndpointMethodTypes } from '@octokit/rest'
-import { Repository } from '@octokit/graphql-schema'
 import { CheckIcon } from 'lucide-react'
 import { GitPullRequestDraftIcon, GitPullRequestIcon } from '@primer/octicons-react'
 import { Avatar } from '@/app/components'
 import { useHotkey, useRegisterHotkey } from '@/contexts/hotkey-context'
 import { useMyPRs } from '@/hooks/api/use-my-prs'
 import { issueTimelineQuery } from '@/app/issue-timeline.query'
+import { usePRQuery } from '@/hooks/api/use-pr-query'
 
 type PullRequest =
   RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][0]
@@ -53,7 +52,7 @@ export function PullRequestsList() {
             e.preventDefault();
             e.stopPropagation();
             navigate({
-              to: getPrURL(data?.items[Number(e.key) - 1]),
+              to: getPrURL(data?.items[Number(e.key) - 1] as { repository_url: string, pull_request: { url: string } }),
             })
           }
         }}
@@ -66,7 +65,7 @@ export function PullRequestsList() {
             value={item.title.toString()}
             onSelect={() => {
               navigate({
-                to: getPrURL(item),
+                to: getPrURL(item as { repository_url: string, pull_request: { url: string } }),
               })
             }}
             asChild
@@ -93,23 +92,27 @@ function PullRequestItem({ item, index, isMetaKeyPressed }: PullRequestItemProps
   const repoURL = item.repository_url
   const [owner, repo] = repoURL.split('/').slice(-2)
   const number = Number(item.url.split('/').pop())
-  const { data: res } = useQuery<{ repository: Repository }>({
-    queryKey: [PullRequestPage.query(), { owner, repo, number }],
-    queryFn: () => runQuery([PullRequestPage.query(), { owner, repo, number }]),
-  })
+  const { data: res } = usePRQuery(owner, repo, number );
 
-  let reviews = [];
-  if (res?.repository.pullRequest?.reviews?.nodes) {
-    reviews = [...reviews, ...res?.repository.pullRequest?.reviews?.nodes.filter(({ state }) => state === 'APPROVED')]
+  if (!res) {
+    return null;
   }
-  if (res?.repository.pullRequest?.reviewRequests?.nodes) {
-    reviews = [...reviews, ...res?.repository.pullRequest?.reviewRequests?.nodes]
+
+  let reviews: unknown[] = [];
+  const prReviews = res?.repository?.pullRequest?.reviews?.nodes;
+  const prReviewRequests = res?.repository?.pullRequest?.reviewRequests?.nodes;
+
+  if (prReviews) {
+    reviews = [...reviews, ...prReviews.filter((review) => review?.state === 'APPROVED')]
+  }
+  if (prReviewRequests) {
+    reviews = [...reviews, ...prReviewRequests]
   }
 
   return (
     <Link
-      id={getPrURL(item)}
-      to={getPrURL(item)}
+      id={getPrURL(item as { repository_url: string, pull_request: { url: string } })}
+      to={getPrURL(item as { repository_url: string, pull_request: { url: string } })}
       onMouseOver={() => {
         preloadPullRequest({
           owner,
@@ -147,7 +150,8 @@ function PullRequestItem({ item, index, isMetaKeyPressed }: PullRequestItemProps
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {reviews?.map((node, index) => (
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            {reviews?.map((node: any, index) => (
               <div key={node?.requestedReviewer?.login ?? index} className="w-5 flex justify-center relative">
                 <Avatar src={node?.requestedReviewer?.avatarUrl || node.author?.avatarUrl} size="s" />
                 {node?.state === 'APPROVED' && (

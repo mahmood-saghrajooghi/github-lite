@@ -1,4 +1,3 @@
-import { IssueTimelineItems, PullRequestTimelineItems } from '@octokit/graphql-schema';
 import { CommentCard } from '@/components/comment-card/comment-card';
 import { QuickFocus } from '@/components/quick-focus';
 import { BaseChanged } from './components/base-changed/base-changed';
@@ -19,6 +18,8 @@ import { ReviewRequested } from './components/review-requested/review-requested'
 import { ConvertToDraft } from './components/convert-to-draft/convert-to-draft';
 import { ReadyForReview } from './components/ready-for-review/ready-for-review';
 import { CommentDeleted } from './components/comment-deleted/comment-deleted';
+import { IssueTimelineItems, PullRequestTimelineItems, CommittedEventFragmentFragment } from '@/generated/graphql';
+
 
 export function Timeline({ items }: { items: (IssueTimelineItems | PullRequestTimelineItems | null)[] }) {
   return (
@@ -36,7 +37,7 @@ export function Timeline({ items }: { items: (IssueTimelineItems | PullRequestTi
             case 'AutomaticBaseChangeSucceededEvent':
               return <BaseChanged key={item.id} data={item} />;
             case 'PullRequestCommit':
-              return <Committed key={item.id} data={item} />;
+              return <Committed key={item.id} data={item as unknown as CommittedEventFragmentFragment} />;
             case 'HeadRefForcePushedEvent':
               return <ForcePushed key={item.id} data={item} />;
             case 'PullRequestReview':

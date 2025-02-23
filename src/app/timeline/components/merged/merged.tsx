@@ -1,5 +1,5 @@
 
-import { MergedEvent } from '@octokit/graphql-schema';
+import { MergedEvent } from '@/generated/graphql';
 import { GitMergeIcon } from '@primer/octicons-react';
 import { Icon } from '@/app/components';
 import { User } from '@/components/user/user';

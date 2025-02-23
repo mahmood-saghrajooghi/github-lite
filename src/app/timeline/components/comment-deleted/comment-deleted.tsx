@@ -1,4 +1,4 @@
-import { CommentDeletedEvent } from '@octokit/graphql-schema';
+import { CommentDeletedEvent } from '@/generated/graphql';
 import { XIcon } from '@primer/octicons-react';
 import { Link } from '@tanstack/react-router';
 import { Icon } from '@/app/components';

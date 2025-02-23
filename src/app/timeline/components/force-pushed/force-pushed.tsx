@@ -1,4 +1,4 @@
-import { HeadRefForcePushedEvent } from '@octokit/graphql-schema';
+import { HeadRefForcePushedEvent } from '@/generated/graphql';
 import { RepoPushIcon } from '@primer/octicons-react';
 import { Icon, BranchName } from '@/app/components';
 import { User } from '@/components/user/user';

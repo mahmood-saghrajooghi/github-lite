@@ -11,12 +11,14 @@ import { usePRQuery } from '@/hooks/api/use-pr-query'
 import { prSearchSchema } from '@/lib/pr-search.scema'
 import { QuickFocus } from '@/components/quick-focus'
 import { ReplyTrap } from '@/components/ui/reply-trap'
+import { PullRequest, PullRequestTimelineItems } from '@/generated/graphql'
+import { zodValidator } from '@tanstack/zod-adapter'
 
 export const Route = createFileRoute(
   '/pulls/$owner/$repo/$number/_header/conversation',
 )({
   component: RouteComponent,
-  validateSearch: (search) => prSearchSchema.parse(search),
+  validateSearch: zodValidator(prSearchSchema),
 })
 
 function ErrorFallback({ error }: { error: Error }) {
@@ -53,9 +55,9 @@ function PullRequestContent({
   const navigate = Route.useNavigate()
   const searchParams = Route.useSearch()
 
-  const data = res?.repository.pullRequest
+  const pr = res?.repository?.pullRequest
 
-  if (!data) {
+  if (!pr) {
     return null
   }
 
@@ -70,52 +72,52 @@ function PullRequestContent({
         navigate={navigate}
       />
       <div className="flex flex-col gap-4 relative overflow-y-auto">
-        <PullRequestContextProvider pr={data}>
-          <Header data={data} />
+        <PullRequestContextProvider pr={pr as PullRequest}>
+          <Header data={pr as PullRequest} />
           <main className="flex flex-col gap-4 px-4 pb-4
           jj">
             <div className="flex gap-2 items-center bg-muted/50 rounded-lg py-2 px-3">
               <div className="text-sm">
-                <IssueStatus data={data} />
+                <IssueStatus data={pr as PullRequest} />
               </div>
               <span className="text-sm">
                 <a
                   target="_blank"
                   className="cursor-pointer hover:text-blue-500 hover:underline"
-                  href={data.url
+                  href={pr.url
                     .split('/pull')[0]
                     .split('/')
                     .slice(0, -1)
                     .join('/')}
                 >
-                  {data.repository.owner.login}
+                  {pr.repository.owner.login}
                 </a>
                 /
                 <a
                   target="_blank"
                   className="cursor-pointer hover:text-blue-500 hover:underline"
-                  href={data.url.split('/pull')[0]}
+                  href={pr.url.split('/pull')[0]}
                 >
-                  {data.repository.name}
+                  {pr.repository.name}
                 </a>
                 /
                 <a
                   target="_blank"
                   className="cursor-pointer hover:text-blue-500 hover:underline"
-                  href={data.url}
+                  href={pr.url}
                 >
-                  #{data.number}
+                  #{pr.number}
                 </a>
               </span>
             </div>
             <div className="grid grid-cols-[1fr_300px] gap-4">
-              <CommentCard data={data} />
-              <PullHeader data={data} />
+              <CommentCard data={pr as PullRequest} />
+              <PullHeader data={pr as PullRequest} />
             </div>
-            <Timeline items={data.timelineItems.nodes!} />
+            <Timeline items={pr.timelineItems.nodes! as PullRequestTimelineItems[]} />
             <ReplyTrap asChild>
               <QuickFocus asChild>
-                <IssueCommentForm issue={data} />
+                <IssueCommentForm issue={pr as PullRequest} />
               </QuickFocus>
             </ReplyTrap>
           </main>
