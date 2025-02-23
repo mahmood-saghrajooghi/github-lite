@@ -9,6 +9,8 @@ import { BranchDeletedEventFragment } from './components/branch-deleted/branch-d
 import { ReviewRequestedEventFragment } from './components/review-requested/review-requested.fragment';
 import { ConvertToDraftEventFragment } from './components/convert-to-draft/convert-to-draft.fragment';
 import { ReadyForReviewEventFragment } from './components/ready-for-review/ready-for-review.fragment';
+import { ActorFragment } from '@/components/user/user.fragment';
+import { ReactionFragment } from '@/components/comment-card/reactions.fragment';
 
 export const PullRequestTimelineFragment = /* GraphQL */ `
   fragment PullRequestTimelineFragment on PullRequestTimelineItems {
@@ -36,4 +38,7 @@ export const PullRequestTimelineFragment = /* GraphQL */ `
   ${ReviewRequestedEventFragment}
   ${ConvertToDraftEventFragment}
   ${ReadyForReviewEventFragment}
+
+  ${ActorFragment}
+  ${ReactionFragment}
 `;

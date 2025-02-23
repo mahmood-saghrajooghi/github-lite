@@ -8,7 +8,6 @@ import { ReferencedEventFragment } from './components/referenced/referenced.frag
 import { CommentDeletedEventFragment } from './components/comment-deleted/comment-deleted.fragment';
 import { IssueCommentFragment } from '@/components/comment-card/comment-card.fragment';
 
-
 export const IssueTimelineFragment = /* GraphQL */ `
   fragment IssueTimelineFragment on PullRequestTimelineItems {
     __typename
