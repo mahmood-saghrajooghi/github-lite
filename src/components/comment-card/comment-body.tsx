@@ -6,7 +6,7 @@ import { Button, ButtonIcon } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { graphql } from '@/lib/client';
-import { ReactionFragment } from './reactions.fragment.graphql';
+import { ReactionFragment } from './reactions.fragment.ts';
 
 export function CommentBody({ children }: { children: string }) {
   return (

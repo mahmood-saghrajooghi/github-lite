@@ -1,6 +1,0 @@
-
-fragment ConvertToDraftEventFragment on ConvertToDraftEvent {
-  actor {
-    ...ActorFragment
-  }
-}

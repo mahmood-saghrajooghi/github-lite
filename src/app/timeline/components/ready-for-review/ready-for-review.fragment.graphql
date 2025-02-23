@@ -1,5 +1,0 @@
-fragment ReadyForReviewEventFragment on ReadyForReviewEvent {
-  actor {
-    ...ActorFragment
-  }
-}

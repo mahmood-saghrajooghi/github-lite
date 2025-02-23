@@ -1,9 +1,0 @@
-
-fragment RenamedTitleFragment on RenamedTitleEvent {
-  id
-  actor {
-    ...ActorFragment
-  }
-  previousTitle
-  currentTitle
-}

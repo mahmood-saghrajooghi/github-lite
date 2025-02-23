@@ -1,9 +1,0 @@
-fragment CommentDeletedEventFragment on CommentDeletedEvent {
-  actor {
-    ...ActorFragment
-  }
-  deletedCommentAuthor {
-    login
-    url
-  }
-}

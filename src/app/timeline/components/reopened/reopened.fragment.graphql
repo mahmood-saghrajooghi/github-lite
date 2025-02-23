@@ -1,7 +1,0 @@
-
-fragment ReopenedEventFragment on ReopenedEvent {
-  id
-  actor {
-    ...ActorFragment
-  }
-}

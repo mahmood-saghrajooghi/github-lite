@@ -9,7 +9,7 @@ import type { AddPullRequestReviewThreadReplyInput } from '@octokit/graphql-sche
 import { useMutation } from '@tanstack/react-query';
 import { CommentBody } from '@/components/comment-card/comment-body';
 import { Reactions } from '@/components/comment-card/reactions';
-import { addPullRequestReviewThreadReply } from './add-pull-request-review-thread-reply.mutation.graphql';
+import { AddPullRequestReviewThreadReplyMutation } from './add-pull-request-review-thread-reply.mutation';
 
 export function PullRequestThread({ data }: { data: PullRequestReviewThread }) {
   const formatDate = (date: string) => {
@@ -24,7 +24,7 @@ export function PullRequestThread({ data }: { data: PullRequestReviewThread }) {
 
   const { mutate } = useMutation({
     mutationFn: (body: string) => {
-      return github.graphql(addPullRequestReviewThreadReply, {
+      return github.graphql(AddPullRequestReviewThreadReplyMutation, {
         input: {
           body,
           clientMutationId: '1',

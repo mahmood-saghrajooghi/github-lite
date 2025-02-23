@@ -19,13 +19,13 @@ import { GitPullRequestDraftIcon, GitPullRequestIcon } from '@primer/octicons-re
 import { Avatar } from '@/app/components'
 import { useHotkey, useRegisterHotkey } from '@/contexts/hotkey-context'
 import { useMyPRs } from '@/hooks/api/use-my-prs'
-import { issueTimeline } from '@/app/issue-timeline.query.graphql'
+import { issueTimelineQuery } from '@/app/issue-timeline.query'
 
 type PullRequest =
   RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][0]
 
 function preloadPullRequest({ owner, repo, number }: { owner: string, repo: string, number: number }) {
-  preload(issueTimeline, {
+  preload(issueTimelineQuery, {
     owner,
     repo,
     number,

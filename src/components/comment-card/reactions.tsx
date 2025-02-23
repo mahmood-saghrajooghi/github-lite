@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { graphql } from '@/lib/client';
 
-import { ReactionFragment } from './reactions.fragment.graphql';
+import { ReactionFragment } from './reactions.fragment.ts';
 
 const emojis: Record<ReactionContent, string> = {
   THUMBS_UP: '👍',
@@ -24,7 +24,7 @@ export function Reactions({ id, data: initialData }: { id: string, data: Reactio
   const [data, setData] = useState(initialData);
   const toggleReaction = async (emoji: ReactionContent, isSelected: boolean) => {
     if (isSelected) {
-      const data = graphql<{ addReaction: { reactionGroups: ReactionGroup[] } }>(`
+      const data = graphql<{ addReaction: { reactionGroups: ReactionGroup[] } }>(/* GraphQL */ `
         mutation AddReaction($input: AddReactionInput!) {
           addReaction(input: $input) {
             reactionGroups {
