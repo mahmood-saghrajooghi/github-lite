@@ -1,5 +1,4 @@
 import { PullRequestThreadFragment } from './timeline/components/pull-request-thread/pull-request-thread.fragment';
-import { ActorFragment } from '@/components/user/user.fragment';
 import { PullRequestTimelineFragment } from './timeline/pull-request.fragment';
 
 export const issueTimelineQuery = /* GraphQL */ `
