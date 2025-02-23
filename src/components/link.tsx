@@ -1,33 +1,41 @@
 import { useRegisterHotkey } from '@/contexts/hotkey-context';
-import { Link as TanStackLink, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
+import { createLink } from '@tanstack/react-router'
+import type { LinkComponent } from '@tanstack/react-router';
 import { forwardRef, useRef } from 'react';
-import { composeRefs } from '@/hooks/compose-refs';
+import { composeRefs } from '@/lib/compose-refs';
 
-type LinkProps = React.ComponentProps<typeof TanStackLink> & {
+interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   hotKey?: string
 }
 
-export const Link = forwardRef<HTMLAnchorElement, LinkProps>(({
-  children,
+export const LinkImplementation = forwardRef<HTMLAnchorElement, LinkProps>(({
   hotKey,
-  to,
+  href,
+  children,
   ...props
 }, ref) => {
   const navigate = useNavigate()
   const internalRef = useRef<HTMLAnchorElement>(null)
 
   useRegisterHotkey(hotKey, () => {
-    navigate({ to })
+    navigate({ to: href })
     internalRef.current?.focus()
   })
 
   return (
-    <TanStackLink
-      to={to}
+    <a
+      href={href}
       ref={composeRefs(ref, internalRef)}
       {...props}
     >
       {children}
-    </TanStackLink>
+    </a>
   )
 })
+
+const CreatedLinkComponent = createLink(LinkImplementation)
+
+export const Link: LinkComponent<typeof LinkImplementation> = (props) => {
+  return <CreatedLinkComponent preload={'intent'} {...props} />
+}

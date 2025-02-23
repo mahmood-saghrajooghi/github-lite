@@ -1,77 +1,12 @@
-import { Issue, IssueComment, PullRequest, PullRequestReviewComment, ReactionContent, ReactionGroup } from '@octokit/graphql-schema';
-import { Primitive } from '@radix-ui/react-primitive';
+import { ReactionContent, ReactionGroup } from '@octokit/graphql-schema';
 import { SmileyIcon } from '@primer/octicons-react';
 import Markdown from 'markdown-to-jsx';
-import { forwardRef, useState } from 'react';
+import { useState } from 'react';
 import { Button, ButtonIcon } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { Avatar } from './components';
 import { graphql } from '@/lib/client';
-import { cn } from '@/lib/utils';
-
-type CommentCardProps = {
-  data: Issue | PullRequest | IssueComment | PullRequestReviewComment
-} & React.ComponentPropsWithoutRef<typeof Primitive.div>
-
-export const CommentCard = forwardRef<React.ElementRef<typeof Primitive.div>, CommentCardProps>(({ data, className, ...props }, ref) => {
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric'
-    });
-  };
-
-  return (
-    <Primitive.div
-      ref={ref}
-      className={cn("border border-input p-4 bg-background rounded-xl", className)}
-      {...props}
-    >
-      <div
-        className="grid gap-x-2 mb-4 border-b border-daw-gray-200 pb-4"
-        style={{
-          gridTemplateAreas: `
-            "avatar    username"
-            "avatar    date"
-          `,
-          gridTemplateRows: 'auto auto',
-          gridTemplateColumns: '40px 1fr'
-        }}>
-        <Avatar size="l" className="[grid-area:avatar]" src={data.author!.avatarUrl} />
-        <span className="font-medium text-sm" style={{ gridArea: 'username' }}>{data.author!.login}</span>
-        <span className="text-xs text-daw-gray-600" style={{ gridArea: 'date' }}>
-          {formatDate(data.createdAt)}
-        </span>
-      </div>
-      <div className="text-sm">
-        <CommentBody>{data.body}</CommentBody>
-      </div>
-      {data.reactionGroups && (
-        <div className="mt-2">
-          <Reactions id={data.id} data={data.reactionGroups} />
-        </div>
-      )}
-    </Primitive.div>
-  );
-})
-
-CommentCard.fragment = `
-fragment IssueCommentFragment on IssueComment {
-  id
-  body
-  createdAt
-  author {
-    ...ActorFragment
-  }
-  reactionGroups {
-    ...ReactionFragment
-  }
-}
-`;
+import { ReactionFragment } from './reactions.fragment.ts';
 
 export function CommentBody({ children }: { children: string }) {
   return (
@@ -110,7 +45,7 @@ export function CommentBody({ children }: { children: string }) {
           props: { className: 'mb-4' }
         },
         a: {
-          component: (props: any) => (
+          component: (props: React.HTMLProps<HTMLAnchorElement>) => (
             <a
               {...props}
               className="underline hover:text-blue-600"
@@ -159,7 +94,7 @@ export function Reactions({ id, data: initialData }: { id: string, data: Reactio
           }
         }
 
-        ${Reactions.fragment}
+        ${ReactionFragment}
       `, { input: { subjectId: id, content: emoji } });
       setData((await data).addReaction.reactionGroups);
     } else {
@@ -172,7 +107,7 @@ export function Reactions({ id, data: initialData }: { id: string, data: Reactio
         }
       }
 
-      ${Reactions.fragment}
+      ${ReactionFragment}
     `, { input: { subjectId: id, content: emoji } });
       setData(data.removeReaction.reactionGroups);
     }
@@ -212,8 +147,8 @@ export function Reactions({ id, data: initialData }: { id: string, data: Reactio
           <ToggleGroupItem
             key={r.content}
             value={r.content}
-            pressed={r.viewerHasReacted}
-            onPressedChange={pressed => toggleReaction(r.content, pressed)}
+            // FIXME: type errors here, see if it is working
+            // onPressedChange={pressed => toggleReaction(r.content, pressed)}
             className="h-8 min-w-8"
           >
             <span>{emojis[r.content]}</span>
@@ -224,13 +159,3 @@ export function Reactions({ id, data: initialData }: { id: string, data: Reactio
     </div>
   );
 }
-
-Reactions.fragment = `
-fragment ReactionFragment on ReactionGroup {
-  content
-  viewerHasReacted
-  reactors {
-    totalCount
-  }
-}
-`;

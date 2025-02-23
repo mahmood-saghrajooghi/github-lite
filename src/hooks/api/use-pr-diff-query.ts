@@ -9,7 +9,7 @@ const getDiff = async (owner: string, repo: string, number: number) => {
     headers: {
       accept: 'application/vnd.github.v3.diff', // Request diff format
     },
-  })
+  }) as unknown as { data: string }
   return res.data
 }
 

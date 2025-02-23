@@ -10,6 +10,8 @@ function setRef<T>(ref: PossibleRef<T>, value: T) {
   if (typeof ref === 'function') {
     return ref(value);
   } else if (ref !== null && ref !== undefined) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     ref.current = value;
   }
 }
@@ -38,6 +40,8 @@ function composeRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T> {
         for (let i = 0; i < cleanups.length; i++) {
           const cleanup = cleanups[i];
           if (typeof cleanup == 'function') {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             cleanup();
           } else {
             setRef(refs[i], null);

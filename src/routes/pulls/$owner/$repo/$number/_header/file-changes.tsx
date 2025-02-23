@@ -1,17 +1,16 @@
 import { createFileRoute, useParams } from '@tanstack/react-router'
 import { Hunk, parseDiff, Diff as DiffView, tokenize } from 'react-diff-view'
-import { RestEndpointMethodTypes } from '@octokit/rest'
 import { FileIcon } from '@primer/octicons-react'
 import { usePRDiffQuery } from '@/hooks/api/use-pr-diff-query'
 import { usePRQuery } from '@/hooks/api/use-pr-query'
 import { useMemo, useState, useCallback } from 'react'
 import refractor from 'refractor'
+import type { ChangeData, DiffProps, EventMap } from 'react-diff-view'
+import type { PullRequest } from '@octokit/graphql-schema'
 
+import 'react-diff-view/style/index.css';
 import 'prism-color-variables/variables.css'
 import './github-token-colors.css'
-
-type PullRequest =
-  RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][0]
 
 export const Route = createFileRoute(
   '/pulls/$owner/$repo/$number/_header/file-changes',
@@ -19,14 +18,14 @@ export const Route = createFileRoute(
   component: RouteComponent,
 })
 
-const renderToken = (token: any, defaultRender: any, i: any) => {
+const renderToken: NonNullable<DiffProps['renderToken']> = (token, defaultRender, i) => {
   switch (token.type) {
     case 'space':
       console.log(token)
       return (
         <span key={i} className="space">
           {token.children &&
-            token.children.map((token: any, i: any) =>
+            token.children.map((token, i) =>
               renderToken(token, defaultRender, i),
             )}
         </span>
@@ -36,6 +35,15 @@ const renderToken = (token: any, defaultRender: any, i: any) => {
   }
 }
 
+type FileProps= {
+  oldRevision: string
+  newRevision: string
+  type: DiffProps['diffType']
+  hunks: DiffProps['hunks']
+  oldPath: string
+  newPath: string
+}
+
 function File({
   oldRevision,
   newRevision,
@@ -43,16 +51,15 @@ function File({
   hunks,
   oldPath,
   newPath,
-}: any) {
+}: FileProps) {
   const tokens = useMemo(
     () => tokenize(hunks, { highlight: true, language: 'tsx', refractor }),
     [hunks],
   )
-  const [selectedChanges, setSelectedChanges] = useState<any[]>([]);
-  console.log(selectedChanges)
-  const selectChange = useCallback(
-    ({ change }: { change: any }) => {
-      const toggle = (selectedChanges: any) => {
+  const setSelectedChanges = useState<(ChangeData | null)[]>([])[1];
+  const selectChange = useCallback<NonNullable<EventMap['onClick']>>(
+    ({ change }) => {
+      setSelectedChanges((selectedChanges) => {
         const index = selectedChanges.indexOf(change);
         if (index >= 0) {
           return [
@@ -61,8 +68,7 @@ function File({
           ];
         }
         return [...selectedChanges, change];
-      };
-      setSelectedChanges(toggle);
+      });
     },
     []
   );
@@ -116,7 +122,7 @@ function File({
 }
 
 function Diff({ data }: { data: PullRequest }) {
-  const { data: diff } = usePRDiffQuery(data.repository.owner.login, data.repository.name, data.number)
+  const { data: diff } = usePRDiffQuery(data.repository!.owner.login, data.repository!.name, data.number)
 
   if (!diff) {
     return null
@@ -143,7 +149,7 @@ function RouteComponent() {
 
   return (
     <div>
-      <Diff data={data.repository.pullRequest} />
+      <Diff data={data.repository?.pullRequest as PullRequest} />
     </div>
   )
 }

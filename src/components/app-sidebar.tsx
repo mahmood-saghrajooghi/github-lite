@@ -1,9 +1,4 @@
 import * as React from "react"
-import {
-  Frame,
-  Map,
-  PieChart,
-} from "lucide-react"
 import { MarkGithubIcon, GitPullRequestIcon } from "@primer/octicons-react"
 import { Link } from "@tanstack/react-router"
 import { NavUser } from "@/components/nav-user"
@@ -17,33 +12,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { useUser } from '@/hooks/api/use-user'
-
-// This is sample data.
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (

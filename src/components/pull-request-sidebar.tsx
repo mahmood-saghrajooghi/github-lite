@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, UseNavigateResult } from '@tanstack/react-router'
 import { omit } from 'lodash'
 import {
   Sidebar,
@@ -43,12 +43,13 @@ type PullRequest =
 
 type SearchParams = z.infer<typeof prSearchSchema>
 
+type Navigate = UseNavigateResult<"/pulls/$owner/$repo"> | UseNavigateResult<"/pulls/$owner/$repo/$number/conversation">
 
 type Props = {
   owner: string
   repo: string
   searchParams: SearchParams
-  navigate: (params: { search: SearchParams | undefined }) => void
+  navigate: Navigate
 }
 
 export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Props) {
@@ -59,7 +60,7 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
       search: value ? {
         ...searchParams,
         [key]: value,
-      } : omit(searchParams, key),
+      } : omit(searchParams, key) as SearchParams,
     })
   }
 
@@ -100,7 +101,7 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
             <div className="flex items-center gap-2 justify-between">
               <div className="flex flex-wrap items-center gap-2">
                 <AuthorFilter value={author} onChange={(value) => onSearchChange('author', value)} owner={owner} />
-                <StateFilter value={state} onChange={(value) => onSearchChange('state', value)} owner={owner} />
+                <StateFilter value={state} onChange={(value) => onSearchChange('state', value)} />
                 <SortFilter value={sort} onChange={(value) => onSearchChange('sort', value)} />
               </div>
               {isLoading && <Loader className="w-4 h-4 animate-spin [animation-duration:1500ms] text-muted-foreground" />}
@@ -114,7 +115,7 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
                     value={item.title.toString()}
                     onSelect={() => {
                       navigate({
-                        to: getPrURL(item),
+                        to: getPrURL(item as { repository_url: string, pull_request: { url: string } }),
                         search: searchParams,
                       })
                     }}
@@ -146,8 +147,8 @@ function PullRequestItem({ item, searchParams }: { item: PullRequest, searchPara
 
   return (
     <Link
-      id={getPrURL(item)}
-      to={getPrURL(item)}
+      id={getPrURL(item as { repository_url: string, pull_request: { url: string } })}
+      to={getPrURL(item as { repository_url: string, pull_request: { url: string } })}
       search={searchParams}
       className="overflow-hidden block flex-1 px-2 py-1.5"
     >
@@ -235,22 +236,22 @@ export function AuthorFilter({ value, onChange, owner }: { value: string | undef
           <CommandList ref={listRef}>
             <CommandEmpty>No framework found.</CommandEmpty>
             <CommandGroup>
-              {data?.organization?.membersWithRole?.nodes.map((member) => (
+              {data?.organization?.membersWithRole?.nodes?.map((member) => (
                 <CommandItem
-                  key={member.login}
-                  value={member.login}
+                  key={member?.login}
+                  value={member?.login}
                   onSelect={(currentValue) => {
                     onChange(currentValue === value ? "" : currentValue)
                     setOpen(false)
                   }}
                   className="overflow-hidden text-ellipsis whitespace-nowrap"
                 >
-                  <Avatar src={member.avatarUrl} size="s" />
-                  {member.name}
+                  <Avatar src={member?.avatarUrl} size="s" />
+                  {member?.name}
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === member.login ? "opacity-100" : "opacity-0"
+                      value === member?.login ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>
@@ -263,7 +264,7 @@ export function AuthorFilter({ value, onChange, owner }: { value: string | undef
   )
 }
 
-export function StateFilter({ value, onChange, owner }: { value: string | undefined, onChange: (value: string) => void, owner: string }) {
+export function StateFilter({ value, onChange }: { value: string | undefined, onChange: (value: string) => void }) {
   const listRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false)
 

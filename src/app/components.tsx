@@ -1,7 +1,7 @@
-import { Actor, CheckConclusionState, Issue, PullRequest, PullRequestReviewDecision, PullRequestReviewState, StatusState } from '@octokit/graphql-schema';
+import { CheckConclusionState, PullRequestReviewDecision, PullRequestReviewState, StatusState } from '@octokit/graphql-schema';
 import { AlertIcon, CheckIcon, CommentIcon, StopIcon, XIcon, GitPullRequestIcon, GitPullRequestDraftIcon } from '@primer/octicons-react';
 import { DOMAttributes, ReactNode, cloneElement } from 'react';
-import { Link } from '@tanstack/react-router';
+import type { PullRequest, Issue } from '@/generated/graphql';
 
 const avatarSizes = {
   xs: 'w-4',
@@ -95,7 +95,7 @@ const checkIcons = {
 };
 
 export function Status({ state, filled }: { state: StatusState | CheckConclusionState | PullRequestReviewState | PullRequestReviewDecision, filled?: boolean }) {
-  let icon = checkIcons[state];
+  const icon = checkIcons[state];
   if (filled && icon) {
     return <span className={`w-5 h-5 rounded-full text-white flex items-center justify-center ${checkStates[state]}`}>{cloneElement(icon, { className: 'text-white' })}</span>
   }
@@ -131,20 +131,3 @@ export function GithubLabel({ color, children }: { color: string, children: Reac
     </span>
   );
 }
-
-export function User({ actor }: { actor: Actor }) {
-  return (
-    <span className="inline-flex items-center align-bottom text-muted-foreground">
-      <Avatar src={actor.avatarUrl} className="inline mr-2" />
-      <Link href={actor.url} target="_blank" className="font-semibold hover:underline text-foreground">{actor.login}</Link>
-    </span>
-  )
-}
-
-User.fragment = `
-fragment ActorFragment on Actor {
-  avatarUrl
-  url
-  login
-}
-`;
