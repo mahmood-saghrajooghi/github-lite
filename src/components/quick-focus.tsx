@@ -22,7 +22,7 @@ export const QuickFocus = forwardRef<React.ElementRef<typeof Primitive.div>, Qui
       // next element that has data-quick-focus after the current
       if (index < elements.length ) {
         (elements[index + 1] as HTMLElement).focus();
-        (elements[index + 1] as HTMLElement).scrollIntoView();
+        (elements[index + 1] as HTMLElement).scrollIntoView({ block: 'center' });
       }
     }
 
@@ -31,7 +31,7 @@ export const QuickFocus = forwardRef<React.ElementRef<typeof Primitive.div>, Qui
       // previous element that has data-quick-focus before the current
       if (index > 0) {
         (elements[index - 1] as HTMLElement).focus();
-        (elements[index - 1] as HTMLElement).scrollIntoView();
+        (elements[index - 1] as HTMLElement).scrollIntoView({ block: 'center' });
       }
     }
 
