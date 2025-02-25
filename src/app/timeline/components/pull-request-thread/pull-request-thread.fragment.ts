@@ -18,6 +18,7 @@ export const PullRequestThreadFragment = /* GraphQL */ `
     }
     line
     path
+    diffSide
     viewerCanResolve
     comments(first:100) {
       nodes {

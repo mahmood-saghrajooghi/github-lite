@@ -11,5 +11,6 @@ export function usePRQuery(owner: string, repo: string, number: number) {
   return useQuery<IssueTimelineQuery>({
     queryKey: getQueryKey(owner, repo, number),
     queryFn: () => runQuery<IssueTimelineQuery>([issueTimelineQuery, { owner, repo, number: Number(number) }]),
+    refetchOnWindowFocus: true
   })
 }
