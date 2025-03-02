@@ -33,7 +33,7 @@ import { Button, ButtonIcon } from './ui/button'
 import { cn } from '@/lib/utils'
 import { usePRsQuery } from '@/hooks/api/use-prs-query'
 import { usePRQuery } from '@/hooks/api/use-pr-query'
-import { useRepoMembers } from '@/hooks/api/use-repo-members'
+import { useRepoCollaborators } from '@/hooks/api/use-repo-members'
 import { prSearchSchema } from '@/lib/pr-search.scema'
 import { z } from 'zod'
 import isHotkey from 'is-hotkey'
@@ -94,13 +94,17 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
                     (commentCard as HTMLElement).scrollIntoView();
                   }
                 }
+
+                if (isHotkey('esc', event)) {
+                  ref.current?.blur()
+                }
               }}
             />
           </SidebarHeader>
           <SidebarContent className="p-2">
             <div className="flex items-center gap-2 justify-between">
               <div className="flex flex-wrap items-center gap-2">
-                <AuthorFilter value={author} onChange={(value) => onSearchChange('author', value)} owner={owner} />
+                <AuthorFilter value={author} onChange={(value) => onSearchChange('author', value)} owner={owner} repo={repo} />
                 <StateFilter value={state} onChange={(value) => onSearchChange('state', value)} />
                 <SortFilter value={sort} onChange={(value) => onSearchChange('sort', value)} />
               </div>
@@ -199,7 +203,7 @@ function PullRequestItem({ item, searchParams }: { item: PullRequest, searchPara
 }
 
 
-export function AuthorFilter({ value, onChange, owner }: { value: string | undefined, onChange: (value: string) => void, owner: string }) {
+export function AuthorFilter({ value, onChange, owner, repo }: { value: string | undefined, onChange: (value: string) => void, owner: string, repo: string }) {
   const listRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false)
 
@@ -208,7 +212,7 @@ export function AuthorFilter({ value, onChange, owner }: { value: string | undef
     setOpen(true)
   })
 
-  const { data } = useRepoMembers(owner)
+  const { data } = useRepoCollaborators(owner, repo)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -236,7 +240,7 @@ export function AuthorFilter({ value, onChange, owner }: { value: string | undef
           <CommandList ref={listRef}>
             <CommandEmpty>No framework found.</CommandEmpty>
             <CommandGroup>
-              {data?.organization?.membersWithRole?.nodes?.map((member) => (
+              {data?.repository?.collaborators?.nodes?.map((member) => (
                 <CommandItem
                   key={member?.login}
                   value={member?.login}

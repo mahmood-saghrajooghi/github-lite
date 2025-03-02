@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/command"
 import { MarkGithubIcon } from '@primer/octicons-react'
 import { usePRQuery } from '@/hooks/api/use-pr-query'
-import { useRepoMembers } from '@/hooks/api/use-repo-members'
+import { useRepoCollaborators } from '@/hooks/api/use-repo-members'
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { useNavigate, useSearch } from '@tanstack/react-router'
@@ -268,6 +268,7 @@ export function PullRequestCommands({ owner, repo, number }: Props) {
           {activePage === 'authors' && (
             <AuthorsPage
               owner={owner}
+              repo={repo}
               selectedAuthor={searchParams.author || ''}
               onSelect={(author) => {
                 onSearchChange('author', author)
@@ -306,16 +307,17 @@ export function PullRequestCommands({ owner, repo, number }: Props) {
 
 type AuthorsPageProps = {
   owner: string
+  repo: string
   selectedAuthor: string
   onSelect: (author: string) => void
 }
 
-function AuthorsPage({ owner, selectedAuthor, onSelect }: AuthorsPageProps) {
-  const { data } = useRepoMembers(owner)
+function AuthorsPage({ owner, repo, selectedAuthor, onSelect }: AuthorsPageProps) {
+  const { data } = useRepoCollaborators(owner, repo)
 
   return (
     <CommandGroup heading="Authors">
-      {data?.organization?.membersWithRole?.nodes?.map((member) => (
+      {data?.repository?.collaborators?.nodes?.map((member) => (
         <CommandItem
           key={member?.login}
           value={member?.login}
