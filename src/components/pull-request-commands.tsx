@@ -268,6 +268,7 @@ export function PullRequestCommands({ owner, repo, number }: Props) {
           {activePage === 'authors' && (
             <AuthorsPage
               owner={owner}
+              repo={repo}
               selectedAuthor={searchParams.author || ''}
               onSelect={(author) => {
                 onSearchChange('author', author)
@@ -306,16 +307,17 @@ export function PullRequestCommands({ owner, repo, number }: Props) {
 
 type AuthorsPageProps = {
   owner: string
+  repo: string
   selectedAuthor: string
   onSelect: (author: string) => void
 }
 
-function AuthorsPage({ owner, selectedAuthor, onSelect }: AuthorsPageProps) {
+function AuthorsPage({ owner, repo, selectedAuthor, onSelect }: AuthorsPageProps) {
   const { data } = useRepoCollaborators(owner, repo)
 
   return (
     <CommandGroup heading="Authors">
-      {data?.organization?.membersWithRole?.nodes?.map((member) => (
+      {data?.repository?.collaborators?.nodes?.map((member) => (
         <CommandItem
           key={member?.login}
           value={member?.login}
