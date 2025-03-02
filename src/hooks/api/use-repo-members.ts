@@ -1,11 +1,11 @@
 import { runQuery } from '@/lib/client'
 import { useQuery } from '@tanstack/react-query'
-import { MembersQuery } from '@/generated/graphql'
+import { RepoCollaboratorsQuery } from '@/generated/graphql'
 
-const membersQuery = /* GraphQL */ `
-  query members($owner: String!) {
-    organization(login: $owner) {
-      membersWithRole(first: 100) {
+const repoCollaboratorsQuery = /* GraphQL */ `
+  query repoCollaborators($owner: String!, $name: String!) {
+    repository(owner: $owner, name: $name) {
+      collaborators(first: 100) {
         nodes {
           login
           avatarUrl
@@ -15,9 +15,10 @@ const membersQuery = /* GraphQL */ `
     }
   }
 `
-export function useRepoMembers(owner: string) {
-  return useQuery({
-    queryKey: ['repo-members', owner],
-    queryFn: () => runQuery<MembersQuery>([membersQuery, { owner }]),
+
+export function useRepoCollaborators(owner: string, repo: string) {
+  return useQuery<RepoCollaboratorsQuery>({
+    queryKey: ['repo-collaborators', owner, repo],
+    queryFn: () => runQuery<RepoCollaboratorsQuery>([repoCollaboratorsQuery, { owner, name: repo }]),
   })
 }

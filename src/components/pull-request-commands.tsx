@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/command"
 import { MarkGithubIcon } from '@primer/octicons-react'
 import { usePRQuery } from '@/hooks/api/use-pr-query'
-import { useRepoMembers } from '@/hooks/api/use-repo-members'
+import { useRepoCollaborators } from '@/hooks/api/use-repo-members'
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { useNavigate, useSearch } from '@tanstack/react-router'
@@ -311,7 +311,7 @@ type AuthorsPageProps = {
 }
 
 function AuthorsPage({ owner, selectedAuthor, onSelect }: AuthorsPageProps) {
-  const { data } = useRepoMembers(owner)
+  const { data } = useRepoCollaborators(owner, repo)
 
   return (
     <CommandGroup heading="Authors">

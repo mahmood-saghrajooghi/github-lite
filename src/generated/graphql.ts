@@ -32712,9 +32712,10 @@ type ActorFragment_User_Fragment = { __typename?: 'User', avatarUrl: any, url: a
 
 export type ActorFragmentFragment = ActorFragment_Bot_Fragment | ActorFragment_EnterpriseUserAccount_Fragment | ActorFragment_Mannequin_Fragment | ActorFragment_Organization_Fragment | ActorFragment_User_Fragment;
 
-export type MembersQueryVariables = Exact<{
+export type RepoCollaboratorsQueryVariables = Exact<{
   owner: Scalars['String']['input'];
+  name: Scalars['String']['input'];
 }>;
 
 
-export type MembersQuery = { __typename?: 'Query', organization?: { __typename?: 'Organization', membersWithRole: { __typename?: 'OrganizationMemberConnection', nodes?: Array<{ __typename?: 'User', login: string, avatarUrl: any, name?: string | null } | null> | null } } | null };
+export type RepoCollaboratorsQuery = { __typename?: 'Query', repository?: { __typename?: 'Repository', collaborators?: { __typename?: 'RepositoryCollaboratorConnection', nodes?: Array<{ __typename?: 'User', login: string, avatarUrl: any, name?: string | null } | null> | null } | null } | null };
