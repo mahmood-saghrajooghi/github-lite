@@ -1,11 +1,11 @@
 import { createFileRoute, useParams } from '@tanstack/react-router'
 import { Hunk, parseDiff, Diff as DiffView, tokenize, getChangeKey } from 'react-diff-view';
-import type { DiffProps, ChangeData } from 'react-diff-view'
+import type { DiffProps, ChangeData, GutterOptions } from 'react-diff-view'
 import { FileIcon } from '@primer/octicons-react'
-import { ChevronDownIcon } from 'lucide-react'
+import { ChevronDownIcon, PlusIcon } from 'lucide-react'
 import { usePRDiffQuery } from '@/hooks/api/use-pr-diff-query'
 import { usePRQuery } from '@/hooks/api/use-pr-query'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import refractor from 'refractor'
 import type { IssueTimelineQuery, PullRequest, PullRequestReviewComment, PullRequestReviewThread } from '@/generated/graphql'
 import { CommentForm } from '@/app/CommentForm'
@@ -13,14 +13,15 @@ import { useMutation } from '@tanstack/react-query'
 import { github } from '@/lib/client'
 import { getThreadsByIdMap } from '@/lib/pull-request';
 import { useSelection } from '@/hooks/diff-viewer/use-selection';
-import { Command, CommandEmpty, CommandInput } from '@/components/ui/command'
-import { CommandItem as CommandItemPrimitive, CommandList, CommandList as CommandListPrimitive } from 'cmdk'
+// import { Command, CommandEmpty, CommandInput } from '@/components/ui/command'
+// import { CommandItem as CommandItemPrimitive, CommandList, CommandList as CommandListPrimitive } from 'cmdk'
 
 import 'react-diff-view/style/index.css';
 import 'prism-color-variables/variables.css'
 import './github-token-colors.css'
-import { Button, ButtonIcon } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { PullRequestThread } from '@/app/timeline/components/pull-request-thread/pull-request-thread';
+import { Card } from '@/components/ui/card';
 
 export const Route = createFileRoute(
   '/pulls/$owner/$repo/$number/_header/file-changes',
@@ -28,8 +29,16 @@ export const Route = createFileRoute(
   component: RouteComponent,
 })
 
-function getChangeId(change: ChangeData, side: 'new' | 'old') {
-  return `${change.content}-${change.lineNumber}-${side}`;
+const CommentTrigger = ({ onClick, renderDefault }: { onClick: () => void; renderDefault: () => React.ReactNode }) => {
+  return (
+    <div
+      className="relative"
+      onClick={() => onClick()}
+    >
+      <PlusIcon className="w-4 h-4 bg-blue-500 text-white absolute top-1/2 left-1 rounded -translate-x-1/2 -translate-y-1/2 hover:w-5 hover:h-5 duration-200 ease" />
+      {renderDefault()}
+    </div>
+  );
 }
 
 const renderToken: NonNullable<DiffProps['renderToken']> = (token, defaultRender, i) => {
@@ -89,93 +98,165 @@ function File({
   //   multiple: true,
   // });
   const [selectedChanges, toggleChangeSelection] = useSelection(hunks, newPath);
-
+  // Track the change that the user wants to comment on
+  const [commentingChange, setCommentingChange] = useState<{ changeKey: string; change: ChangeData; side: string } | null>(null);
 
   const tokens = useMemo(
     () => tokenize(hunks, { highlight: true, language: 'tsx', refractor }),
     [hunks],
   )
 
-  const [isCommenting, setIsCommenting] = useState(false);
-
-  const { mutate: createReviewThread } = useMutation({
-    mutationFn: async ({ body, line }: { body: string; line: number }) => {
-      return github.graphql(/* GraphQL */`
-        mutation AddPullRequestReviewThread($input: AddPullRequestReviewThreadInput!) {
-          addPullRequestReviewThread(input: $input) {
-            thread {
+  const { mutate: addComment } = useMutation({
+    mutationFn: async ({ body, line, path, side }: { body: string; line: number; path: string; side: string }) => {
+      await github.graphql(/* GraphQL */`
+        mutation CreateReview($input: AddPullRequestReviewInput!) {
+          addPullRequestReview(input: $input) {
+            pullRequestReview {
               id
             }
           }
         }
       `, {
         input: {
-          body,
-          path: newPath,
-          line,
           pullRequestId,
+          threads: [
+            {
+              body,
+              path,
+              line,
+              side
+            }
+          ]
+        }
+      });
+      await github.graphql(/* GraphQL */`
+        mutation SubmitPullRequestReview($input: SubmitPullRequestReviewInput!) {
+          submitPullRequestReview(input: $input) {
+            pullRequestReview {
+              id
+            }
+          }
+        }
+      `, {
+        input: {
+          pullRequestId,
+          event: 'COMMENT'
         }
       });
     }
   });
 
+  const handleCommentClick = useCallback(({ change, side} : { change: ChangeData, side: string}) => {
+    const changeKey = getChangeKey(change);
+    setCommentingChange({ changeKey, change, side });
+  }, []);
+
+  const handleCommentSubmit = useCallback(async (body: string) => {
+    if (!commentingChange) return;
+
+    let line: number;
+    if(commentingChange.change.type === 'insert' || commentingChange.change.type === 'delete') {
+      line = commentingChange.change.lineNumber;
+    } else {
+      line = commentingChange.change.newLineNumber;
+    }
+
+    // Create the review thread
+    await addComment({
+      body,
+      line,
+      path: newPath,
+      side: commentingChange.side === 'new' ? 'RIGHT' : 'LEFT'
+    });
+
+    // Clear the commenting state
+    setCommentingChange(null);
+  }, [commentingChange, addComment, newPath]);
+
+  const renderGutter = useCallback(
+    ({ change, side, inHoverState, renderDefault, wrapInAnchor }: GutterOptions) => {
+      const canComment = inHoverState;
+      if (canComment) {
+        return (
+          <CommentTrigger
+            onClick={() => handleCommentClick({ change, side })}
+            renderDefault={renderDefault}
+          />
+        );
+      }
+
+      return wrapInAnchor(renderDefault());
+    },
+    [handleCommentClick]
+  );
+
   const diffProps = useMemo(
     () => {
-      const isSelected = (change: ChangeData | null, side: 'new' | 'old') => {
-        if (!change) return false;
-        if (change.type !== 'insert' && change.type !== 'delete') return false;
-        const changeId = getChangeId(change, side);
-        return selectedChanges.has(changeId);
-      };
-
-      // const renderGutter: DiffProps['renderGutter'] = (options) => {
-      //   const selected = isSelected(options.change, options.side);
-      //   return (
-      //     <div
-      //       className={`select-none ${selected ? 'bg-blue-100 dark:bg-blue-950' : ''}`}
-      //       {...options}
-      //     >
-      //       {options.change?.type === 'insert' || options.change?.type === 'delete' ? options.change.lineNumber : null}
-      //     </div>
-      //   );
-      // };
-
       return {
         gutterEvents: { onClick: toggleChangeSelection },
         selectedChanges,
-        // renderGutter,
+        renderGutter,
       };
     },
-    [toggleChangeSelection, selectedChanges]
+    [toggleChangeSelection, selectedChanges, renderGutter]
   );
 
   const widgets = useMemo(
-    () => comments.reduce<Record<string, React.ReactElement[]>>(
-      (widgets, comment) => {
-        const change = hunks.reduce((prev, hunk) => {
-          const res = hunk.changes.find(change => (comment.thread?.diffSide === "RIGHT" ? change.type === "insert" : change.type === "delete") && change.lineNumber === comment.line);
-          if (res) {
-            return res;
+    () => {
+      // Start with existing comments
+      const widgetsMap = comments.reduce<Record<string, React.ReactElement[]>>(
+        (widgets, comment) => {
+          const change = hunks.reduce((prev, hunk) => {
+            const res = hunk.changes.find(change => {
+              if(comment.thread?.diffSide === "RIGHT") {
+                return change.type === "insert" && change.lineNumber === comment.line;
+              } else {
+                return change.type === "delete" && change.lineNumber === comment.line;
+              }
+            });
+            if (res) {
+              return res;
+            }
+            return prev;
+          }, null as ChangeData | null);
+
+          if (!change) return widgets;
+          const changeKey = getChangeKey(change);
+          if (!widgets[changeKey]) {
+            widgets[changeKey] = [];
           }
-          return prev;
-        }, null);
-        if (!change) return widgets;
-        const changeKey = getChangeKey(change);
-        if (!widgets[changeKey]) {
-          // eslint-disable-next-line no-param-reassign
-          widgets[changeKey] = [];
+          widgets[changeKey].push(
+            <div key={comment.thread.id} className="p-2 border-b border border-input">
+              <PullRequestThread data={comment.thread} />
+            </div>
+          );
+
+          return widgets;
+        },
+        {} as Record<string, React.ReactElement[]>
+      );
+
+      // Add the new comment form if we're commenting
+      if (commentingChange) {
+        const { changeKey } = commentingChange;
+        if (!widgetsMap[changeKey]) {
+          widgetsMap[changeKey] = [];
         }
-        widgets[changeKey].push(
-          <div className="p-2 border-b border border-input">
-            <PullRequestThread key={comment.thread.id} data={comment.thread} />
+
+        widgetsMap[changeKey].push(
+          <div key="new-comment" className="p-2 border-b border border-input">
+            <Card className="p-3 border border-input">
+              <CommentForm onSubmit={handleCommentSubmit} autoFocus handleClose={() => setCommentingChange(null)}>
+                <Button type="button" variant="ghost" onClick={() => setCommentingChange(null)}>Cancel</Button>
+              </CommentForm>
+            </Card>
           </div>
         );
+      }
 
-        return widgets;
-      },
-      {} as Record<string, React.ReactElement[]>
-    ),
-    [comments]
+      return widgetsMap;
+    },
+    [comments, hunks, commentingChange, handleCommentSubmit]
   );
 
   return (
@@ -209,24 +290,6 @@ function File({
       {
         isOpen && (
           <>
-            {isCommenting && selectedChanges.size > 0 && (
-              <div className="p-4 border-b border-input">
-                <CommentForm
-                  onSubmit={async (body) => {
-                    const sortedChanges = selectedChanges.toArray();
-                    const lastChangeId = sortedChanges[sortedChanges.length - 1];
-                    const line = parseInt(lastChangeId.split('-')[1], 10);
-
-                    await createReviewThread({
-                      body,
-                      line,
-                    });
-                    setSelectedChanges(new SortedSet());
-                    setIsCommenting(false);
-                  }}
-                />
-              </div>
-            )}
             <DiffView
               key={oldRevision + '-' + newRevision}
               viewType="split"
@@ -256,10 +319,10 @@ function File({
   )
 }
 
-function Diff({ data }: { data: PullRequest }) {
+function Diff({ data }: { data: NonNullable<NonNullable<IssueTimelineQuery['repository']>['pullRequest']> }) {
   const { data: diff } = usePRDiffQuery(data.repository!.owner.login, data.repository!.name, data.number)
 
-  const threadsById = useMemo(() => getThreadsByIdMap(data), [data.reviewThreads.nodes]);
+  const threadsById = useMemo(() => getThreadsByIdMap(data as PullRequest), [data.reviewThreads.nodes]);
 
   const comments = useMemo(() => {
     const commentsByFilePath = new Map<string, (PullRequestReviewComment & { thread: PullRequestReviewThread })[]>();
@@ -299,13 +362,14 @@ function RouteComponent() {
   const { owner, repo, number } = useParams({ from: Route.id })
   const { data } = usePRQuery(owner, repo, Number(number))
 
-  if (!data) {
+
+  if (!data || !data.repository?.pullRequest) {
     return null
   }
 
   return (
     <div>
-      <Diff data={data.repository?.pullRequest as PullRequest} />
+      <Diff data={data.repository?.pullRequest} />
     </div>
   )
 }

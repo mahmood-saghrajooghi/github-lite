@@ -32,12 +32,11 @@ import { useRef, useState } from 'react'
 import { Button, ButtonIcon } from './ui/button'
 import { cn } from '@/lib/utils'
 import { usePRsQuery } from '@/hooks/api/use-prs-query'
-import { getQueryKey, usePRQuery } from '@/hooks/api/use-pr-query'
+import { usePRQuery } from '@/hooks/api/use-pr-query'
 import { useRepoMembers } from '@/hooks/api/use-repo-members'
 import { prSearchSchema } from '@/lib/pr-search.scema'
 import { z } from 'zod'
 import isHotkey from 'is-hotkey'
-import { queryClient } from '@/query-client'
 
 type PullRequest =
   RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][0]

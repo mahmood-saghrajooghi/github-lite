@@ -1,15 +1,11 @@
 import { GitPullRequestClosedIcon } from '@primer/octicons-react';
-import { github } from "@/lib/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useRef, useState, forwardRef   } from "react";
+import { useRef, useState, forwardRef } from "react";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { queryClient } from '@/query-client';
-import { getQueryKey } from '@/hooks/api/use-pr-query';
-import { useUser } from '@/hooks/api/use-user';
 import { isHotkey } from 'is-hotkey';
 import {
   Command,
@@ -27,30 +23,14 @@ import {
 import { composeRefs } from '@/lib/compose-refs';
 import { Issue, PullRequest } from '@/generated/graphql';
 
-type IssueCommentFormProps = {
+type IssueCommentFormProps = Omit<React.HTMLAttributes<HTMLFormElement>, 'onSubmit'> & {
   issue: Issue | PullRequest,
-} & React.HTMLAttributes<HTMLFormElement>
+  onSubmit: (comment: string) => Promise<void>,
+}
 
 export const IssueCommentForm = forwardRef<HTMLFormElement, IssueCommentFormProps>(({ issue, ...props }, ref) => {
-  const { data: user } = useUser();
-
-  const onSubmit = async (comment: string) => {
-    optimisticallyUpdatePullRequest({ owner: issue.repository.owner.login, repo: issue.repository.name, number: issue.number, user, values: { comment } });
-
-    await github.issues.createComment({
-      owner: issue.repository.owner.login,
-      repo: issue.repository.name,
-      issue_number: issue.number,
-      body: comment
-    });
-
-    queryClient.invalidateQueries({ queryKey: getQueryKey(issue.repository.owner.login, issue.repository.name, issue.number) });
-  };
-
   return (
     <CommentForm
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onSubmit={onSubmit as any}
       {...props}
       ref={ref}
     >
@@ -66,41 +46,14 @@ export const IssueCommentForm = forwardRef<HTMLFormElement, IssueCommentFormProp
 
 IssueCommentForm.displayName = 'IssueCommentForm';
 
-function optimisticallyUpdatePullRequest({ owner, repo, number, user, values }: { owner: string, repo: string, number: number, user: any, values: any }) {
-  queryClient.setQueryData(getQueryKey(owner, repo, number), (data: any) => {
-    return {
-      ...data,
-      repository: {
-        ...data.repository,
-        pullRequest: {
-          ...data.repository.pullRequest,
-          timelineItems: {
-            nodes: [
-              ...data.repository.pullRequest.timelineItems.nodes,
-              {
-                __typename: "IssueComment",
-                author: { login: user?.login, avatarUrl: user?.avatar_url, url: user?.url },
-                body: values.comment,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                url: `https://github.com/${owner}/${repo}/issues/${number}/comments`,
-                id: "1",
-                reactionGroups: data.repository.pullRequest.reactionGroups
-              }
-            ]
-          }
-        }
-      }
-    }
-  });
-}
 
 type CommentFormProps = Omit<React.HTMLAttributes<HTMLFormElement>, 'onSubmit'> & {
   onSubmit?: (comment: string) => Promise<void>,
+  handleClose?: () => void,
 }
 
 
-export const CommentForm = forwardRef<HTMLFormElement, CommentFormProps>(({ children, className, onSubmit, ...props }, ref) => {
+export const CommentForm = forwardRef<HTMLFormElement, CommentFormProps>(({ children, className, onSubmit, handleClose, autoFocus, ...props }, ref) => {
   const [open, setOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lastCursorPosition = useRef(0);
@@ -132,6 +85,20 @@ export const CommentForm = forwardRef<HTMLFormElement, CommentFormProps>(({ chil
       event.stopPropagation();
       lastCursorPosition.current = event.currentTarget.selectionStart;
       setOpen(true);
+    }
+
+    // Close the form when Escape is pressed and the textarea is empty
+    if (event.key === 'Escape' && !form.getValues('comment')) {
+      event.preventDefault();
+      if (handleClose) {
+        handleClose();
+      }
+    }
+
+    if (isHotkey('mod+enter', event)) {
+      event.preventDefault();
+      event.stopPropagation();
+      handleSubmit(form.getValues());
     }
   }
 
@@ -191,7 +158,8 @@ export const CommentForm = forwardRef<HTMLFormElement, CommentFormProps>(({ chil
                       onKeyDown={handleKeyDown}
                       ref={composeRefs(ref, textareaRef)}
                       onFocus={() => setFocused(true)}
-                      onBlur={() => { onBlur(); setFocused(false); } }
+                      onBlur={() => { onBlur(); setFocused(false); }}
+                      autoFocus={autoFocus}
                     />
                   </FormControl>
                 </FormItem>

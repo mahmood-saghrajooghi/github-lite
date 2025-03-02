@@ -23,7 +23,6 @@ export const useSelection = (hunks: HunkData[], filePath: string) => {
     const [currentHunks, setCurrentHunks] = useState(hunks);
     const select = useCallback(
         ({change}: ChangeEventArgs, e: MouseEvent<HTMLElement>) => {
-            console.log(change);
             if (!change) {
                 return;
             }
