@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-// import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import { routeTree } from './routeTree.gen'
 
@@ -26,7 +26,7 @@ createRoot(document.getElementById('root')!).render(
     <PersistQueryClientProvider client={queryClient} persistOptions={{ persister: asyncStoragePersister }}>
       <HotkeyProvider>
         <RouterProvider router={router} />
-        {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+        <ReactQueryDevtools initialIsOpen={false} />
       </HotkeyProvider>
     </PersistQueryClientProvider>
   </StrictMode>,

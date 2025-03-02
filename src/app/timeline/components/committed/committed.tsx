@@ -5,7 +5,6 @@ import { CommitLink } from '../commit-link/commit-link';
 import { Icon, Avatar, Status } from '@/app/components';
 
 export function Committed({ data }: { data: CommittedEventFragmentFragment }) {
-  console.log(data)
   return (
     <div className="flex gap-2 items-center">
       <Icon className="text-zinc-300 bg-background h-5"><GitCommitIcon /></Icon>

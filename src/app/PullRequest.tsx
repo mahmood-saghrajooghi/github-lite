@@ -5,7 +5,7 @@ import { Button, } from '@/components/ui/button';
 import { Card, Status } from '@/app/components';
 import { User } from '@/components/user/user';
 import { PullRequest } from '@/generated/graphql';
-
+import { getThreadsByIdMap } from '@/lib/pull-request';
 type PullRequestContextType = {
   pr: PullRequest,
   threadsById: Map<string, PullRequestReviewThread>
@@ -14,16 +14,8 @@ export const PullRequestContext = createContext<PullRequestContextType | null>(n
 
 export function PullRequestContextProvider({ children, pr }: { children: React.ReactNode, pr: PullRequest }) {
 
-  const threadsById = useMemo(() => {
-    const res = new Map();
-    if (!pr?.reviewThreads.nodes) {
-      return res;
-    }
-    for (const thread of pr.reviewThreads.nodes) {
-      res.set(thread?.comments.nodes?.[0]?.id, thread);
-    }
-    return res;
-  }, [pr.reviewThreads.nodes]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const threadsById = useMemo(() => getThreadsByIdMap(pr), [pr.reviewThreads.nodes]);
 
   return <PullRequestContext.Provider value={{ pr, threadsById }}>{children}</PullRequestContext.Provider>
 }
