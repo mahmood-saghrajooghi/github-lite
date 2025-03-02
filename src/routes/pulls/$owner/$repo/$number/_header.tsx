@@ -14,6 +14,7 @@ import { CommentDiscussionIcon, FileDiffIcon } from '@primer/octicons-react'
 import { AppHeader } from '@/components/app-header'
 import { TabLink, TabLinkIcon } from '@/components/tab-link'
 import { Link } from '@/components/link'
+import { PullRequestCommands } from '@/components/pull-request-commands'
 
 export const Route = createFileRoute('/pulls/$owner/$repo/$number/_header')({
   component: RouteComponent,
@@ -30,7 +31,7 @@ function RouteComponent() {
           <BreadcrumbList className="gap-2 sm:gap-2">
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link to={'/pulls'} hotKey="g p g p">Pull requests</Link>
+                <Link to={'/pulls'} hotKey="g p">Pull requests</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -55,7 +56,6 @@ function RouteComponent() {
             search={{}}
             hotKey="g c"
           >
-
             <TabLinkIcon>
               <CommentDiscussionIcon className="!w-3.5 !h-3.5 " />
             </TabLinkIcon>
@@ -73,7 +73,9 @@ function RouteComponent() {
             </TabLinkIcon>
             Files changed
           </TabLink>
+
         </div>
+        <PullRequestCommands owner={owner} repo={repo} number={number} />
       </AppHeader>
       <Outlet />
     </>
