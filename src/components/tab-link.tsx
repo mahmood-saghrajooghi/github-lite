@@ -13,22 +13,16 @@ interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
 export const LinkImplementation = forwardRef<HTMLAnchorElement, LinkProps>(({
   hotKey,
   href,
+  params,
   className,
   children,
   ...props
 }, ref) => {
-  const navigate = useNavigate()
-  const internalRef = useRef<HTMLAnchorElement>(null)
-
-  useRegisterHotkey(hotKey, () => {
-    navigate({ to: href })
-    internalRef.current?.focus()
-  }, [href])
 
   return (
     <a
       href={href}
-      ref={composeRefs(ref, internalRef)}
+      ref={composeRefs(ref)}
       className={clsx(
         'flex items-center gap-1.5 h-7 px-2 rounded-md border border-transparent hover:border-input data-[status=active]:border-input shadow-sm text-muted-foreground hover:bg-accent/50 data-[status=active]:bg-accent/50 hover:text-accent-foreground data-[status=active]:text-foreground group duration-200 outline-none',
         className,
@@ -43,6 +37,12 @@ export const LinkImplementation = forwardRef<HTMLAnchorElement, LinkProps>(({
 const CreatedLinkComponent = createLink(LinkImplementation)
 
 export const TabLink: LinkComponent<typeof LinkImplementation> = (props) => {
+  const navigate = useNavigate()
+
+  useRegisterHotkey(props.hotKey, () => {
+    navigate({ to: props.href })
+  }, [props.href, props.params])
+
   return <CreatedLinkComponent preload={'intent'} {...props} />
 }
 

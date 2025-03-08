@@ -11,6 +11,7 @@ import { Leaf, Trie } from './trie'
 import { SequenceTracker } from './sequence'
 import type { NormalizedHotkeyString } from './hotkey-utils'
 import { isFormField } from './hotkey-utils'
+import type { DependencyList } from 'react'
 
 type HotkeyContextType = {
   isMetaKeyPressed: boolean
@@ -107,7 +108,7 @@ export function useHotkey() {
 export function useRegisterHotkey(
   hotkey?: string,
   callback?: (event?: KeyboardEvent) => void,
-  deps: (string | number)[] = [],
+  deps: DependencyList = [],
 ) {
   const { registerHotkey, unregisterHotkey } = useHotkey()
 
