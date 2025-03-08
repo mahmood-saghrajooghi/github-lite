@@ -21,6 +21,7 @@ import { Route as PullsOwnerRepoNumberHeaderConversationImport } from './routes/
 
 // Create Virtual Routes
 
+const LoginLazyImport = createFileRoute('/login')()
 const AboutLazyImport = createFileRoute('/about')()
 const IndexLazyImport = createFileRoute('/')()
 const PullsOwnerRepoNumberImport = createFileRoute(
@@ -28,6 +29,12 @@ const PullsOwnerRepoNumberImport = createFileRoute(
 )()
 
 // Create/Update Routes
+
+const LoginLazyRoute = LoginLazyImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/login.lazy').then((d) => d.Route))
 
 const AboutLazyRoute = AboutLazyImport.update({
   id: '/about',
@@ -96,6 +103,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginLazyImport
       parentRoute: typeof rootRoute
     }
     '/pulls/': {
@@ -177,6 +191,7 @@ const PullsOwnerRepoNumberRouteWithChildren =
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/about': typeof AboutLazyRoute
+  '/login': typeof LoginLazyRoute
   '/pulls': typeof PullsIndexRoute
   '/pulls/$owner/$repo': typeof PullsOwnerRepoIndexRoute
   '/pulls/$owner/$repo/$number': typeof PullsOwnerRepoNumberHeaderRouteWithChildren
@@ -187,6 +202,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
   '/about': typeof AboutLazyRoute
+  '/login': typeof LoginLazyRoute
   '/pulls': typeof PullsIndexRoute
   '/pulls/$owner/$repo': typeof PullsOwnerRepoIndexRoute
   '/pulls/$owner/$repo/$number': typeof PullsOwnerRepoNumberHeaderRouteWithChildren
@@ -198,6 +214,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexLazyRoute
   '/about': typeof AboutLazyRoute
+  '/login': typeof LoginLazyRoute
   '/pulls/': typeof PullsIndexRoute
   '/pulls/$owner/$repo/': typeof PullsOwnerRepoIndexRoute
   '/pulls/$owner/$repo/$number': typeof PullsOwnerRepoNumberRouteWithChildren
@@ -211,6 +228,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/login'
     | '/pulls'
     | '/pulls/$owner/$repo'
     | '/pulls/$owner/$repo/$number'
@@ -220,6 +238,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/login'
     | '/pulls'
     | '/pulls/$owner/$repo'
     | '/pulls/$owner/$repo/$number'
@@ -229,6 +248,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/login'
     | '/pulls/'
     | '/pulls/$owner/$repo/'
     | '/pulls/$owner/$repo/$number'
@@ -241,6 +261,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   AboutLazyRoute: typeof AboutLazyRoute
+  LoginLazyRoute: typeof LoginLazyRoute
   PullsIndexRoute: typeof PullsIndexRoute
   PullsOwnerRepoIndexRoute: typeof PullsOwnerRepoIndexRoute
   PullsOwnerRepoNumberRoute: typeof PullsOwnerRepoNumberRouteWithChildren
@@ -249,6 +270,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   AboutLazyRoute: AboutLazyRoute,
+  LoginLazyRoute: LoginLazyRoute,
   PullsIndexRoute: PullsIndexRoute,
   PullsOwnerRepoIndexRoute: PullsOwnerRepoIndexRoute,
   PullsOwnerRepoNumberRoute: PullsOwnerRepoNumberRouteWithChildren,
@@ -266,6 +288,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/about",
+        "/login",
         "/pulls/",
         "/pulls/$owner/$repo/",
         "/pulls/$owner/$repo/$number"
@@ -276,6 +299,9 @@ export const routeTree = rootRoute
     },
     "/about": {
       "filePath": "about.lazy.tsx"
+    },
+    "/login": {
+      "filePath": "login.lazy.tsx"
     },
     "/pulls/": {
       "filePath": "pulls/index.tsx"

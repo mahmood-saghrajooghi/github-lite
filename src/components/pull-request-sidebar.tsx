@@ -76,6 +76,17 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
     <SidebarProvider
       style={{ '--sidebar-width': '360px' } as React.CSSProperties}
       className="min-h-[unset]"
+      onKeyDown={(event) => {
+        if (isHotkey(['meta+l', 'arrowRight'], event)) {
+          event.preventDefault()
+          const commentCard = document.querySelector('[data-quick-focus]')
+          if (commentCard) {
+            ref.current?.blur();
+            (commentCard as HTMLElement).focus();
+            (commentCard as HTMLElement).scrollIntoView();
+          }
+        }
+      }}
     >
       <Command className="bg-color-unset rounded-none">
         <Sidebar collapsible="none" className="bg-color-unset border-r">
@@ -84,21 +95,6 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
               placeholder="Search pull requests"
               wrapperClassName="w-full h-full"
               ref={ref}
-              onKeyDown={(event) => {
-                if (isHotkey(['meta+l', 'arrowRight'], event)) {
-                  event.preventDefault()
-                  const commentCard = document.querySelector('[data-quick-focus]')
-                  if (commentCard) {
-                    ref.current?.blur();
-                    (commentCard as HTMLElement).focus();
-                    (commentCard as HTMLElement).scrollIntoView();
-                  }
-                }
-
-                if (isHotkey('esc', event)) {
-                  ref.current?.blur()
-                }
-              }}
             />
           </SidebarHeader>
           <SidebarContent className="p-2">
