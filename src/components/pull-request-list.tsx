@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import { motion } from 'motion/react'
 import { Link, useNavigate, } from '@tanstack/react-router'
 import { SidebarMenuItem } from '@/components/ui/sidebar'
@@ -37,10 +37,11 @@ export function PullRequestsList() {
   const navigate = useNavigate()
   const { isMetaKeyPressed } = useHotkey()
 
-  useRegisterHotkey('/', (event) => {
-    event?.preventDefault()
+  const callback = useCallback(() => {
     ref.current?.focus()
-  })
+  }, [ref])
+
+  useRegisterHotkey('/', callback)
 
   return (
     <Command className="bg-color-unset">

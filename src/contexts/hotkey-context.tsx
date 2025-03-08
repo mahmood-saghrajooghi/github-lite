@@ -6,6 +6,7 @@ import {
   useEffect,
   useCallback,
   useSyncExternalStore,
+  useMemo,
 } from 'react'
 import { Leaf, Trie } from './trie'
 import { SequenceTracker } from './sequence'
@@ -84,14 +85,16 @@ export function HotkeyProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+
+  const memoizedValue = useMemo(() => ({
+    isMetaKeyPressed,
+    sequenceTrackerState,
+    registerHotkey,
+    unregisterHotkey,
+  }), [isMetaKeyPressed, registerHotkey, sequenceTrackerState, unregisterHotkey])
+
   return (
-    <HotkeyContext.Provider
-      value={{
-        isMetaKeyPressed,
-        sequenceTrackerState,
-        registerHotkey,
-        unregisterHotkey,
-      }}>
+    <HotkeyContext.Provider value={memoizedValue}>
       {children}
     </HotkeyContext.Provider>
   )
@@ -117,6 +120,9 @@ export function useRegisterHotkey(
     if (!hotkey || !callback) {
       return
     }
+
+    console.log('registerHotkey', hotkey);
+
 
     registerHotkey(hotkey, callback)
 

@@ -28,7 +28,7 @@ import { CircleCheck, X, Clock3, User, Check, Loader, ListFilterIcon } from 'luc
 import { GitPullRequestDraftIcon, GitPullRequestIcon } from '@primer/octicons-react'
 import { Avatar } from '@/app/components'
 import { useRegisterHotkey } from '@/contexts/hotkey-context'
-import { useRef, useState } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { Button, ButtonIcon } from './ui/button'
 import { cn } from '@/lib/utils'
 import { usePRsQuery } from '@/hooks/api/use-prs-query'
@@ -67,10 +67,11 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
   const { data, isLoading } = usePRsQuery(owner, repo, { author, state, sort })
   const ref = useRef<HTMLInputElement>(null)
 
-  useRegisterHotkey('/', (event) => {
-    event?.preventDefault()
+  const callback = useCallback(() => {
     ref.current?.focus()
-  })
+  }, [ref])
+
+  useRegisterHotkey('/', callback)
 
   return (
     <SidebarProvider
@@ -208,10 +209,12 @@ export function AuthorFilter({ value, onChange, owner, repo }: { value: string |
   const listRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false)
 
-  useRegisterHotkey('u', (event) => {
+  const callback = useCallback((event?: KeyboardEvent) => {
     event?.preventDefault()
     setOpen(true)
-  })
+  }, [])
+
+  useRegisterHotkey('u', callback)
 
   const { data } = useRepoCollaborators(owner, repo)
 
@@ -273,10 +276,11 @@ export function StateFilter({ value, onChange }: { value: string | undefined, on
   const listRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false)
 
-  useRegisterHotkey('s t', (event) => {
-    event?.preventDefault()
+  const callback = useCallback(() => {
     setOpen(true)
-  })
+  }, [])
+
+  useRegisterHotkey('s t', callback)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -398,10 +402,11 @@ function SortFilter({ value, onChange }: { value: string | undefined, onChange: 
   const listRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false)
 
-  useRegisterHotkey('s b', (event) => {
-    event?.preventDefault()
+  const callback = useCallback(() => {
     setOpen(true)
-  })
+  }, [])
+
+  useRegisterHotkey('s b', callback)
 
 
   return (
