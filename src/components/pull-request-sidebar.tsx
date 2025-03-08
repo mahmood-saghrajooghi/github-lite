@@ -95,6 +95,11 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
               placeholder="Search pull requests"
               wrapperClassName="w-full h-full"
               ref={ref}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') {
+                  ref.current?.blur();
+                }
+              }}
             />
           </SidebarHeader>
           <SidebarContent className="p-2">
