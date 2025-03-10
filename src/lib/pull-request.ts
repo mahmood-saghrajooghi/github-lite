@@ -4,7 +4,7 @@ export function getPrURL(item: { repository_url: string, pull_request: { url: st
   const repoURL = item.repository_url;
   const [owner, repo] = repoURL.split('/').slice(-2);
   const number = item.pull_request?.url?.split('/').pop();
-  return `/pulls/${owner}/${repo}/${number}/conversation`;
+  return `/${owner}/${repo}/pulls/${number}/conversation`;
 }
 
 export function getThreadsByIdMap(pr: PullRequest) {

@@ -32712,6 +32712,23 @@ type ActorFragment_User_Fragment = { __typename?: 'User', avatarUrl: any, url: a
 
 export type ActorFragmentFragment = ActorFragment_Bot_Fragment | ActorFragment_EnterpriseUserAccount_Fragment | ActorFragment_Mannequin_Fragment | ActorFragment_Organization_Fragment | ActorFragment_User_Fragment;
 
+export type RepoCommitsQueryVariables = Exact<{
+  owner: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  branchName: Scalars['String']['input'];
+}>;
+
+
+export type RepoCommitsQuery = { __typename?: 'Query', repository?: { __typename?: 'Repository', ref?: { __typename?: 'Ref', target?: { __typename?: 'Blob' } | { __typename?: 'Commit', history: { __typename?: 'CommitHistoryConnection', nodes?: Array<{ __typename?: 'Commit', id: string, messageHeadline: string, committedDate: any, oid: any, url: any, associatedPullRequests?: { __typename?: 'PullRequestConnection', nodes?: Array<{ __typename?: 'PullRequest', number: number } | null> | null } | null, author?: { __typename?: 'GitActor', name?: string | null, avatarUrl: any, user?: { __typename?: 'User', login: string } | null } | null } | null> | null } } | { __typename?: 'Tag' } | { __typename?: 'Tree' } | null } | null } | null };
+
+export type RepoDefaultBranchQueryVariables = Exact<{
+  owner: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type RepoDefaultBranchQuery = { __typename?: 'Query', repository?: { __typename?: 'Repository', defaultBranchRef?: { __typename?: 'Ref', name: string } | null } | null };
+
 export type RepoCollaboratorsQueryVariables = Exact<{
   owner: Scalars['String']['input'];
   name: Scalars['String']['input'];
@@ -32719,3 +32736,11 @@ export type RepoCollaboratorsQueryVariables = Exact<{
 
 
 export type RepoCollaboratorsQuery = { __typename?: 'Query', repository?: { __typename?: 'Repository', collaborators?: { __typename?: 'RepositoryCollaboratorConnection', nodes?: Array<{ __typename?: 'User', login: string, avatarUrl: any, name?: string | null } | null> | null } | null } | null };
+
+export type RepoReadmeQueryVariables = Exact<{
+  owner: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type RepoReadmeQuery = { __typename?: 'Query', repository?: { __typename?: 'Repository', object?: { __typename?: 'Blob', text?: string | null } | { __typename?: 'Commit' } | { __typename?: 'Tag' } | { __typename?: 'Tree' } | null } | null };

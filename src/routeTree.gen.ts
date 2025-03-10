@@ -13,19 +13,19 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as PullsIndexImport } from './routes/pulls/index'
-import { Route as PullsOwnerRepoIndexImport } from './routes/pulls/$owner/$repo/index'
-import { Route as PullsOwnerRepoNumberHeaderImport } from './routes/pulls/$owner/$repo/$number/_header'
-import { Route as PullsOwnerRepoNumberHeaderFileChangesImport } from './routes/pulls/$owner/$repo/$number/_header/file-changes'
-import { Route as PullsOwnerRepoNumberHeaderConversationImport } from './routes/pulls/$owner/$repo/$number/_header/conversation'
+import { Route as MyPrsIndexImport } from './routes/my-prs/index'
+import { Route as OwnerRepoIndexImport } from './routes/$owner/$repo/index'
+import { Route as OwnerRepoPullsNumberHeaderImport } from './routes/$owner/$repo/pulls/$number/_header'
+import { Route as OwnerRepoPullsNumberHeaderFileChangesImport } from './routes/$owner/$repo/pulls/$number/_header/file-changes'
+import { Route as OwnerRepoPullsNumberHeaderConversationImport } from './routes/$owner/$repo/pulls/$number/_header/conversation'
 
 // Create Virtual Routes
 
 const LoginLazyImport = createFileRoute('/login')()
 const AboutLazyImport = createFileRoute('/about')()
 const IndexLazyImport = createFileRoute('/')()
-const PullsOwnerRepoNumberImport = createFileRoute(
-  '/pulls/$owner/$repo/$number',
+const OwnerRepoPullsNumberImport = createFileRoute(
+  '/$owner/$repo/pulls/$number',
 )()
 
 // Create/Update Routes
@@ -48,43 +48,43 @@ const IndexLazyRoute = IndexLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
 
-const PullsIndexRoute = PullsIndexImport.update({
-  id: '/pulls/',
-  path: '/pulls/',
+const MyPrsIndexRoute = MyPrsIndexImport.update({
+  id: '/my-prs/',
+  path: '/my-prs/',
   getParentRoute: () => rootRoute,
 } as any)
 
-const PullsOwnerRepoNumberRoute = PullsOwnerRepoNumberImport.update({
-  id: '/pulls/$owner/$repo/$number',
-  path: '/pulls/$owner/$repo/$number',
+const OwnerRepoIndexRoute = OwnerRepoIndexImport.update({
+  id: '/$owner/$repo/',
+  path: '/$owner/$repo/',
   getParentRoute: () => rootRoute,
 } as any)
 
-const PullsOwnerRepoIndexRoute = PullsOwnerRepoIndexImport.update({
-  id: '/pulls/$owner/$repo/',
-  path: '/pulls/$owner/$repo/',
+const OwnerRepoPullsNumberRoute = OwnerRepoPullsNumberImport.update({
+  id: '/$owner/$repo/pulls/$number',
+  path: '/$owner/$repo/pulls/$number',
   getParentRoute: () => rootRoute,
 } as any)
 
-const PullsOwnerRepoNumberHeaderRoute = PullsOwnerRepoNumberHeaderImport.update(
+const OwnerRepoPullsNumberHeaderRoute = OwnerRepoPullsNumberHeaderImport.update(
   {
     id: '/_header',
-    getParentRoute: () => PullsOwnerRepoNumberRoute,
+    getParentRoute: () => OwnerRepoPullsNumberRoute,
   } as any,
 )
 
-const PullsOwnerRepoNumberHeaderFileChangesRoute =
-  PullsOwnerRepoNumberHeaderFileChangesImport.update({
+const OwnerRepoPullsNumberHeaderFileChangesRoute =
+  OwnerRepoPullsNumberHeaderFileChangesImport.update({
     id: '/file-changes',
     path: '/file-changes',
-    getParentRoute: () => PullsOwnerRepoNumberHeaderRoute,
+    getParentRoute: () => OwnerRepoPullsNumberHeaderRoute,
   } as any)
 
-const PullsOwnerRepoNumberHeaderConversationRoute =
-  PullsOwnerRepoNumberHeaderConversationImport.update({
+const OwnerRepoPullsNumberHeaderConversationRoute =
+  OwnerRepoPullsNumberHeaderConversationImport.update({
     id: '/conversation',
     path: '/conversation',
-    getParentRoute: () => PullsOwnerRepoNumberHeaderRoute,
+    getParentRoute: () => OwnerRepoPullsNumberHeaderRoute,
   } as any)
 
 // Populate the FileRoutesByPath interface
@@ -112,102 +112,102 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginLazyImport
       parentRoute: typeof rootRoute
     }
-    '/pulls/': {
-      id: '/pulls/'
-      path: '/pulls'
-      fullPath: '/pulls'
-      preLoaderRoute: typeof PullsIndexImport
+    '/my-prs/': {
+      id: '/my-prs/'
+      path: '/my-prs'
+      fullPath: '/my-prs'
+      preLoaderRoute: typeof MyPrsIndexImport
       parentRoute: typeof rootRoute
     }
-    '/pulls/$owner/$repo/': {
-      id: '/pulls/$owner/$repo/'
-      path: '/pulls/$owner/$repo'
-      fullPath: '/pulls/$owner/$repo'
-      preLoaderRoute: typeof PullsOwnerRepoIndexImport
+    '/$owner/$repo/': {
+      id: '/$owner/$repo/'
+      path: '/$owner/$repo'
+      fullPath: '/$owner/$repo'
+      preLoaderRoute: typeof OwnerRepoIndexImport
       parentRoute: typeof rootRoute
     }
-    '/pulls/$owner/$repo/$number': {
-      id: '/pulls/$owner/$repo/$number'
-      path: '/pulls/$owner/$repo/$number'
-      fullPath: '/pulls/$owner/$repo/$number'
-      preLoaderRoute: typeof PullsOwnerRepoNumberImport
+    '/$owner/$repo/pulls/$number': {
+      id: '/$owner/$repo/pulls/$number'
+      path: '/$owner/$repo/pulls/$number'
+      fullPath: '/$owner/$repo/pulls/$number'
+      preLoaderRoute: typeof OwnerRepoPullsNumberImport
       parentRoute: typeof rootRoute
     }
-    '/pulls/$owner/$repo/$number/_header': {
-      id: '/pulls/$owner/$repo/$number/_header'
-      path: '/pulls/$owner/$repo/$number'
-      fullPath: '/pulls/$owner/$repo/$number'
-      preLoaderRoute: typeof PullsOwnerRepoNumberHeaderImport
-      parentRoute: typeof PullsOwnerRepoNumberRoute
+    '/$owner/$repo/pulls/$number/_header': {
+      id: '/$owner/$repo/pulls/$number/_header'
+      path: '/$owner/$repo/pulls/$number'
+      fullPath: '/$owner/$repo/pulls/$number'
+      preLoaderRoute: typeof OwnerRepoPullsNumberHeaderImport
+      parentRoute: typeof OwnerRepoPullsNumberRoute
     }
-    '/pulls/$owner/$repo/$number/_header/conversation': {
-      id: '/pulls/$owner/$repo/$number/_header/conversation'
+    '/$owner/$repo/pulls/$number/_header/conversation': {
+      id: '/$owner/$repo/pulls/$number/_header/conversation'
       path: '/conversation'
-      fullPath: '/pulls/$owner/$repo/$number/conversation'
-      preLoaderRoute: typeof PullsOwnerRepoNumberHeaderConversationImport
-      parentRoute: typeof PullsOwnerRepoNumberHeaderImport
+      fullPath: '/$owner/$repo/pulls/$number/conversation'
+      preLoaderRoute: typeof OwnerRepoPullsNumberHeaderConversationImport
+      parentRoute: typeof OwnerRepoPullsNumberHeaderImport
     }
-    '/pulls/$owner/$repo/$number/_header/file-changes': {
-      id: '/pulls/$owner/$repo/$number/_header/file-changes'
+    '/$owner/$repo/pulls/$number/_header/file-changes': {
+      id: '/$owner/$repo/pulls/$number/_header/file-changes'
       path: '/file-changes'
-      fullPath: '/pulls/$owner/$repo/$number/file-changes'
-      preLoaderRoute: typeof PullsOwnerRepoNumberHeaderFileChangesImport
-      parentRoute: typeof PullsOwnerRepoNumberHeaderImport
+      fullPath: '/$owner/$repo/pulls/$number/file-changes'
+      preLoaderRoute: typeof OwnerRepoPullsNumberHeaderFileChangesImport
+      parentRoute: typeof OwnerRepoPullsNumberHeaderImport
     }
   }
 }
 
 // Create and export the route tree
 
-interface PullsOwnerRepoNumberHeaderRouteChildren {
-  PullsOwnerRepoNumberHeaderConversationRoute: typeof PullsOwnerRepoNumberHeaderConversationRoute
-  PullsOwnerRepoNumberHeaderFileChangesRoute: typeof PullsOwnerRepoNumberHeaderFileChangesRoute
+interface OwnerRepoPullsNumberHeaderRouteChildren {
+  OwnerRepoPullsNumberHeaderConversationRoute: typeof OwnerRepoPullsNumberHeaderConversationRoute
+  OwnerRepoPullsNumberHeaderFileChangesRoute: typeof OwnerRepoPullsNumberHeaderFileChangesRoute
 }
 
-const PullsOwnerRepoNumberHeaderRouteChildren: PullsOwnerRepoNumberHeaderRouteChildren =
+const OwnerRepoPullsNumberHeaderRouteChildren: OwnerRepoPullsNumberHeaderRouteChildren =
   {
-    PullsOwnerRepoNumberHeaderConversationRoute:
-      PullsOwnerRepoNumberHeaderConversationRoute,
-    PullsOwnerRepoNumberHeaderFileChangesRoute:
-      PullsOwnerRepoNumberHeaderFileChangesRoute,
+    OwnerRepoPullsNumberHeaderConversationRoute:
+      OwnerRepoPullsNumberHeaderConversationRoute,
+    OwnerRepoPullsNumberHeaderFileChangesRoute:
+      OwnerRepoPullsNumberHeaderFileChangesRoute,
   }
 
-const PullsOwnerRepoNumberHeaderRouteWithChildren =
-  PullsOwnerRepoNumberHeaderRoute._addFileChildren(
-    PullsOwnerRepoNumberHeaderRouteChildren,
+const OwnerRepoPullsNumberHeaderRouteWithChildren =
+  OwnerRepoPullsNumberHeaderRoute._addFileChildren(
+    OwnerRepoPullsNumberHeaderRouteChildren,
   )
 
-interface PullsOwnerRepoNumberRouteChildren {
-  PullsOwnerRepoNumberHeaderRoute: typeof PullsOwnerRepoNumberHeaderRouteWithChildren
+interface OwnerRepoPullsNumberRouteChildren {
+  OwnerRepoPullsNumberHeaderRoute: typeof OwnerRepoPullsNumberHeaderRouteWithChildren
 }
 
-const PullsOwnerRepoNumberRouteChildren: PullsOwnerRepoNumberRouteChildren = {
-  PullsOwnerRepoNumberHeaderRoute: PullsOwnerRepoNumberHeaderRouteWithChildren,
+const OwnerRepoPullsNumberRouteChildren: OwnerRepoPullsNumberRouteChildren = {
+  OwnerRepoPullsNumberHeaderRoute: OwnerRepoPullsNumberHeaderRouteWithChildren,
 }
 
-const PullsOwnerRepoNumberRouteWithChildren =
-  PullsOwnerRepoNumberRoute._addFileChildren(PullsOwnerRepoNumberRouteChildren)
+const OwnerRepoPullsNumberRouteWithChildren =
+  OwnerRepoPullsNumberRoute._addFileChildren(OwnerRepoPullsNumberRouteChildren)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/about': typeof AboutLazyRoute
   '/login': typeof LoginLazyRoute
-  '/pulls': typeof PullsIndexRoute
-  '/pulls/$owner/$repo': typeof PullsOwnerRepoIndexRoute
-  '/pulls/$owner/$repo/$number': typeof PullsOwnerRepoNumberHeaderRouteWithChildren
-  '/pulls/$owner/$repo/$number/conversation': typeof PullsOwnerRepoNumberHeaderConversationRoute
-  '/pulls/$owner/$repo/$number/file-changes': typeof PullsOwnerRepoNumberHeaderFileChangesRoute
+  '/my-prs': typeof MyPrsIndexRoute
+  '/$owner/$repo': typeof OwnerRepoIndexRoute
+  '/$owner/$repo/pulls/$number': typeof OwnerRepoPullsNumberHeaderRouteWithChildren
+  '/$owner/$repo/pulls/$number/conversation': typeof OwnerRepoPullsNumberHeaderConversationRoute
+  '/$owner/$repo/pulls/$number/file-changes': typeof OwnerRepoPullsNumberHeaderFileChangesRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
   '/about': typeof AboutLazyRoute
   '/login': typeof LoginLazyRoute
-  '/pulls': typeof PullsIndexRoute
-  '/pulls/$owner/$repo': typeof PullsOwnerRepoIndexRoute
-  '/pulls/$owner/$repo/$number': typeof PullsOwnerRepoNumberHeaderRouteWithChildren
-  '/pulls/$owner/$repo/$number/conversation': typeof PullsOwnerRepoNumberHeaderConversationRoute
-  '/pulls/$owner/$repo/$number/file-changes': typeof PullsOwnerRepoNumberHeaderFileChangesRoute
+  '/my-prs': typeof MyPrsIndexRoute
+  '/$owner/$repo': typeof OwnerRepoIndexRoute
+  '/$owner/$repo/pulls/$number': typeof OwnerRepoPullsNumberHeaderRouteWithChildren
+  '/$owner/$repo/pulls/$number/conversation': typeof OwnerRepoPullsNumberHeaderConversationRoute
+  '/$owner/$repo/pulls/$number/file-changes': typeof OwnerRepoPullsNumberHeaderFileChangesRoute
 }
 
 export interface FileRoutesById {
@@ -215,12 +215,12 @@ export interface FileRoutesById {
   '/': typeof IndexLazyRoute
   '/about': typeof AboutLazyRoute
   '/login': typeof LoginLazyRoute
-  '/pulls/': typeof PullsIndexRoute
-  '/pulls/$owner/$repo/': typeof PullsOwnerRepoIndexRoute
-  '/pulls/$owner/$repo/$number': typeof PullsOwnerRepoNumberRouteWithChildren
-  '/pulls/$owner/$repo/$number/_header': typeof PullsOwnerRepoNumberHeaderRouteWithChildren
-  '/pulls/$owner/$repo/$number/_header/conversation': typeof PullsOwnerRepoNumberHeaderConversationRoute
-  '/pulls/$owner/$repo/$number/_header/file-changes': typeof PullsOwnerRepoNumberHeaderFileChangesRoute
+  '/my-prs/': typeof MyPrsIndexRoute
+  '/$owner/$repo/': typeof OwnerRepoIndexRoute
+  '/$owner/$repo/pulls/$number': typeof OwnerRepoPullsNumberRouteWithChildren
+  '/$owner/$repo/pulls/$number/_header': typeof OwnerRepoPullsNumberHeaderRouteWithChildren
+  '/$owner/$repo/pulls/$number/_header/conversation': typeof OwnerRepoPullsNumberHeaderConversationRoute
+  '/$owner/$repo/pulls/$number/_header/file-changes': typeof OwnerRepoPullsNumberHeaderFileChangesRoute
 }
 
 export interface FileRouteTypes {
@@ -229,32 +229,32 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/login'
-    | '/pulls'
-    | '/pulls/$owner/$repo'
-    | '/pulls/$owner/$repo/$number'
-    | '/pulls/$owner/$repo/$number/conversation'
-    | '/pulls/$owner/$repo/$number/file-changes'
+    | '/my-prs'
+    | '/$owner/$repo'
+    | '/$owner/$repo/pulls/$number'
+    | '/$owner/$repo/pulls/$number/conversation'
+    | '/$owner/$repo/pulls/$number/file-changes'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/login'
-    | '/pulls'
-    | '/pulls/$owner/$repo'
-    | '/pulls/$owner/$repo/$number'
-    | '/pulls/$owner/$repo/$number/conversation'
-    | '/pulls/$owner/$repo/$number/file-changes'
+    | '/my-prs'
+    | '/$owner/$repo'
+    | '/$owner/$repo/pulls/$number'
+    | '/$owner/$repo/pulls/$number/conversation'
+    | '/$owner/$repo/pulls/$number/file-changes'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/login'
-    | '/pulls/'
-    | '/pulls/$owner/$repo/'
-    | '/pulls/$owner/$repo/$number'
-    | '/pulls/$owner/$repo/$number/_header'
-    | '/pulls/$owner/$repo/$number/_header/conversation'
-    | '/pulls/$owner/$repo/$number/_header/file-changes'
+    | '/my-prs/'
+    | '/$owner/$repo/'
+    | '/$owner/$repo/pulls/$number'
+    | '/$owner/$repo/pulls/$number/_header'
+    | '/$owner/$repo/pulls/$number/_header/conversation'
+    | '/$owner/$repo/pulls/$number/_header/file-changes'
   fileRoutesById: FileRoutesById
 }
 
@@ -262,18 +262,18 @@ export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   AboutLazyRoute: typeof AboutLazyRoute
   LoginLazyRoute: typeof LoginLazyRoute
-  PullsIndexRoute: typeof PullsIndexRoute
-  PullsOwnerRepoIndexRoute: typeof PullsOwnerRepoIndexRoute
-  PullsOwnerRepoNumberRoute: typeof PullsOwnerRepoNumberRouteWithChildren
+  MyPrsIndexRoute: typeof MyPrsIndexRoute
+  OwnerRepoIndexRoute: typeof OwnerRepoIndexRoute
+  OwnerRepoPullsNumberRoute: typeof OwnerRepoPullsNumberRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   AboutLazyRoute: AboutLazyRoute,
   LoginLazyRoute: LoginLazyRoute,
-  PullsIndexRoute: PullsIndexRoute,
-  PullsOwnerRepoIndexRoute: PullsOwnerRepoIndexRoute,
-  PullsOwnerRepoNumberRoute: PullsOwnerRepoNumberRouteWithChildren,
+  MyPrsIndexRoute: MyPrsIndexRoute,
+  OwnerRepoIndexRoute: OwnerRepoIndexRoute,
+  OwnerRepoPullsNumberRoute: OwnerRepoPullsNumberRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -289,9 +289,9 @@ export const routeTree = rootRoute
         "/",
         "/about",
         "/login",
-        "/pulls/",
-        "/pulls/$owner/$repo/",
-        "/pulls/$owner/$repo/$number"
+        "/my-prs/",
+        "/$owner/$repo/",
+        "/$owner/$repo/pulls/$number"
       ]
     },
     "/": {
@@ -303,33 +303,33 @@ export const routeTree = rootRoute
     "/login": {
       "filePath": "login.lazy.tsx"
     },
-    "/pulls/": {
-      "filePath": "pulls/index.tsx"
+    "/my-prs/": {
+      "filePath": "my-prs/index.tsx"
     },
-    "/pulls/$owner/$repo/": {
-      "filePath": "pulls/$owner/$repo/index.tsx"
+    "/$owner/$repo/": {
+      "filePath": "$owner/$repo/index.tsx"
     },
-    "/pulls/$owner/$repo/$number": {
-      "filePath": "pulls/$owner/$repo/$number",
+    "/$owner/$repo/pulls/$number": {
+      "filePath": "$owner/$repo/pulls/$number",
       "children": [
-        "/pulls/$owner/$repo/$number/_header"
+        "/$owner/$repo/pulls/$number/_header"
       ]
     },
-    "/pulls/$owner/$repo/$number/_header": {
-      "filePath": "pulls/$owner/$repo/$number/_header.tsx",
-      "parent": "/pulls/$owner/$repo/$number",
+    "/$owner/$repo/pulls/$number/_header": {
+      "filePath": "$owner/$repo/pulls/$number/_header.tsx",
+      "parent": "/$owner/$repo/pulls/$number",
       "children": [
-        "/pulls/$owner/$repo/$number/_header/conversation",
-        "/pulls/$owner/$repo/$number/_header/file-changes"
+        "/$owner/$repo/pulls/$number/_header/conversation",
+        "/$owner/$repo/pulls/$number/_header/file-changes"
       ]
     },
-    "/pulls/$owner/$repo/$number/_header/conversation": {
-      "filePath": "pulls/$owner/$repo/$number/_header/conversation.tsx",
-      "parent": "/pulls/$owner/$repo/$number/_header"
+    "/$owner/$repo/pulls/$number/_header/conversation": {
+      "filePath": "$owner/$repo/pulls/$number/_header/conversation.tsx",
+      "parent": "/$owner/$repo/pulls/$number/_header"
     },
-    "/pulls/$owner/$repo/$number/_header/file-changes": {
-      "filePath": "pulls/$owner/$repo/$number/_header/file-changes.tsx",
-      "parent": "/pulls/$owner/$repo/$number/_header"
+    "/$owner/$repo/pulls/$number/_header/file-changes": {
+      "filePath": "$owner/$repo/pulls/$number/_header/file-changes.tsx",
+      "parent": "/$owner/$repo/pulls/$number/_header"
     }
   }
 }

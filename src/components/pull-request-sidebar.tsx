@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/popover"
 import { getPrURL } from '@/lib/pull-request'
 import { RestEndpointMethodTypes } from '@octokit/rest'
-import { CircleCheck, X, Clock3, User, Check, Loader, ListFilterIcon } from 'lucide-react'
+import { CircleCheck, X, Clock3, User, Check, Loader, ListFilterIcon, CircleDashed, CircleFadingArrowUp } from 'lucide-react'
 import { GitPullRequestDraftIcon, GitPullRequestIcon } from '@primer/octicons-react'
 import { Avatar } from '@/app/components'
 import { useRegisterHotkey } from '@/contexts/hotkey-context'
@@ -43,7 +43,7 @@ type PullRequest =
 
 type SearchParams = z.infer<typeof prSearchSchema>
 
-type Navigate = UseNavigateResult<"/pulls/$owner/$repo"> | UseNavigateResult<"/pulls/$owner/$repo/$number/conversation">
+type Navigate = UseNavigateResult<"/$owner/$repo"> | UseNavigateResult<"/$owner/$repo/$number/conversation">
 
 type Props = {
   owner: string
@@ -128,7 +128,7 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
                     asChild
                   >
                     {/* TODO: add bg when user has input */}
-                    <SidebarMenuItem className="p-0 data-[selected=true]:bg-accent/50">
+                    <SidebarMenuItem className="p-0 data-[selected=true]:bg-accent/50 rounded-md">
                       <PullRequestItem item={item} searchParams={searchParams} />
                     </SidebarMenuItem>
                   </CommandItem>
@@ -156,28 +156,30 @@ function PullRequestItem({ item, searchParams }: { item: PullRequest, searchPara
       id={getPrURL(item as { repository_url: string, pull_request: { url: string } })}
       to={getPrURL(item as { repository_url: string, pull_request: { url: string } })}
       search={searchParams}
-      className="overflow-hidden block flex-1 px-2 py-1.5"
+      className="overflow-hidden block flex-1 px-2 py-2"
     >
       <div className="flex flex-1 flex-col gap-1.5 w-full">
         <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="text-xs font-medium flex items-end gap-1 min-w-0">
-            <span className="text-muted-foreground shrink-0">
+            <div className="mr-1">
+              {item.draft ? (
+                <CircleDashed size={16} className="text-muted-foreground" />
+              ) : (
+                item.state === 'open' && (
+                  <CircleFadingArrowUp size={16} className="text-orange-500" />
+                )
+              )}
+            </div>
+            {/* <span className="text-muted-foreground shrink-0">
               #{item.url?.split('/').pop()}
-            </span>
+            </span> */}
             <span className="text-foreground truncate">{item.title}</span>
           </div>
           <div className="flex items-center gap-1 shrink-0">
             <Avatar src={item.user?.avatar_url ?? ''} size="s" />
-            {item.draft ? (
-              <GitPullRequestDraftIcon className="text-muted-foreground" />
-            ) : (
-              item.state === 'open' && (
-                <GitPullRequestIcon className="text-green-700" />
-              )
-            )}
           </div>
         </div>
-        <div className="text-xs text-muted-foreground truncate">
+        {/* <div className="text-xs text-muted-foreground truncate">
           <div className="flex items-center gap-1">
             {res?.repository?.pullRequest?.reviewDecision ===
               'REVIEW_REQUIRED' ? (
@@ -198,7 +200,7 @@ function PullRequestItem({ item, searchParams }: { item: PullRequest, searchPara
               </>
             ) : null}
           </div>
-        </div>
+        </div> */}
       </div>
     </Link>
   )

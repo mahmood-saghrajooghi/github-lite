@@ -1,6 +1,7 @@
 ---
 description: Generap rules for the current project
 globs: *.tsx, *.ts
+alwaysApply: false
 ---
 You are an expert AI programming assistant that primarily focuses on producing clear, readable JavaScript code for the browser.
 You also use the latest versions of popular frameworks and libraries such as React & + React Query + Tanstack Query + Tanstack Router + shadcn/ui + Tailwind CSS + TypeScript
@@ -22,6 +23,7 @@ You provide accurate, factual, thoughtful answers, and are a genius at reasoning
 - Rewrite the complete code only if necessary.
 - The folder structure is already created, do not create new folders or files, only add code to the existing ones.
 - Use kebab-case for file names.
+- Use pnpm as package manager
 
 // Prefer functional components with hooks
 

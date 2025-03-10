@@ -11,7 +11,11 @@ import { getQueryKey, usePRQuery } from '@/hooks/api/use-pr-query'
 import { prSearchSchema } from '@/lib/pr-search.scema'
 import { QuickFocus } from '@/components/quick-focus'
 import { ReplyTrap } from '@/components/ui/reply-trap'
-import { IssueTimelineQuery, PullRequest, PullRequestTimelineItems } from '@/generated/graphql'
+import {
+  IssueTimelineQuery,
+  PullRequest,
+  PullRequestTimelineItems,
+} from '@/generated/graphql'
 import { User } from '@octokit/graphql-schema'
 import { zodValidator } from '@tanstack/zod-adapter'
 import { github } from '@/lib/client'
@@ -20,7 +24,7 @@ import { queryClient } from '@/query-client'
 import { useUser } from '@/hooks/api/use-user'
 
 export const Route = createFileRoute(
-  '/pulls/$owner/$repo/$number/_header/conversation',
+  '/$owner/$repo/pulls/$number/_header/conversation',
 )({
   component: RouteComponent,
   validateSearch: zodValidator(prSearchSchema),
@@ -45,7 +49,6 @@ function RouteComponent() {
   )
 }
 
-
 function PullRequestContent({
   owner,
   repo,
@@ -57,7 +60,6 @@ function PullRequestContent({
 }) {
   const { data: res } = usePRQuery(owner, repo, Number(number))
 
-
   const navigate = Route.useNavigate()
   const searchParams = Route.useSearch()
 
@@ -65,33 +67,44 @@ function PullRequestContent({
 
   const { mutate: addComment } = useMutation({
     mutationFn: async (comment: string) => {
-      await github.graphql(/* GraphQL */`
-        mutation CreateIssueComment($input: AddCommentInput!) {
-          addComment(input: $input) {
-            commentEdge {
-              node {
-                ... on IssueComment {
-                  id
+      await github.graphql(
+        /* GraphQL */ `
+          mutation CreateIssueComment($input: AddCommentInput!) {
+            addComment(input: $input) {
+              commentEdge {
+                node {
+                  ... on IssueComment {
+                    id
+                  }
                 }
               }
             }
           }
-        }
-      `, {
-        input: {
-          body: comment,
-          subjectId: pr?.id
-        }
-      });
-    }
-  });
+        `,
+        {
+          input: {
+            body: comment,
+            subjectId: pr?.id,
+          },
+        },
+      )
+    },
+  })
 
-  const { data: user } = useUser();
+  const { data: user } = useUser()
 
   const handleSubmit = async (comment: string) => {
-    optimisticallyUpdatePullRequest({ owner: owner, repo: repo, number: Number(number), user, values: { comment } });
+    optimisticallyUpdatePullRequest({
+      owner: owner,
+      repo: repo,
+      number: Number(number),
+      user,
+      values: { comment },
+    })
     await addComment(comment)
-    queryClient.invalidateQueries({ queryKey: getQueryKey(owner, repo, Number(number)) });
+    queryClient.invalidateQueries({
+      queryKey: getQueryKey(owner, repo, Number(number)),
+    })
   }
 
   if (!pr) {
@@ -99,9 +112,7 @@ function PullRequestContent({
   }
 
   return (
-    <div
-      className="grid grid-cols-[auto_1fr] grid-rows-[1fr] overflow-hidden"
-    >
+    <div className="grid grid-cols-[auto_1fr] grid-rows-[1fr] overflow-hidden">
       <PullRequestsSidebar
         owner={owner}
         repo={repo}
@@ -111,8 +122,10 @@ function PullRequestContent({
       <div className="flex flex-col gap-4 relative overflow-y-auto">
         <PullRequestContextProvider pr={pr as PullRequest}>
           <Header data={pr as PullRequest} />
-          <main className="flex flex-col gap-4 px-4 pb-4
-          jj">
+          <main
+            className="flex flex-col gap-4 px-4 pb-4
+          jj"
+          >
             <div className="flex gap-2 items-center bg-muted/50 rounded-lg py-2 px-3">
               <div className="text-sm">
                 <IssueStatus data={pr as PullRequest} />
@@ -151,10 +164,15 @@ function PullRequestContent({
               <CommentCard data={pr as PullRequest} />
               <PullHeader data={pr as PullRequest} />
             </div>
-            <Timeline items={pr.timelineItems.nodes! as PullRequestTimelineItems[]} />
+            <Timeline
+              items={pr.timelineItems.nodes! as PullRequestTimelineItems[]}
+            />
             <ReplyTrap asChild>
               <QuickFocus asChild>
-                <IssueCommentForm issue={pr as PullRequest} onSubmit={handleSubmit} />
+                <IssueCommentForm
+                  issue={pr as PullRequest}
+                  onSubmit={handleSubmit}
+                />
               </QuickFocus>
             </ReplyTrap>
           </main>
@@ -164,35 +182,54 @@ function PullRequestContent({
   )
 }
 
-function optimisticallyUpdatePullRequest({ owner, repo, number, user, values }: { owner: string, repo: string, number: number, user: User | undefined, values: { comment: string } }) {
+function optimisticallyUpdatePullRequest({
+  owner,
+  repo,
+  number,
+  user,
+  values,
+}: {
+  owner: string
+  repo: string
+  number: number
+  user: User | undefined
+  values: { comment: string }
+}) {
   if (!user) {
     return
   }
 
-  queryClient.setQueryData(getQueryKey(owner, repo, number), (data: IssueTimelineQuery) => {
-    return {
-      ...data,
-      repository: {
-        ...data.repository,
-        pullRequest: {
-          ...data.repository?.pullRequest,
-          timelineItems: {
-            nodes: [
-              ...(data.repository?.pullRequest?.timelineItems.nodes ?? []),
-              {
-                __typename: "IssueComment",
-                author: { login: user?.login, avatarUrl: user?.avatarUrl, url: user?.url },
-                body: values.comment,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                url: `https://github.com/${owner}/${repo}/issues/${number}/comments`,
-                id: "1",
-                reactionGroups: data.repository?.pullRequest?.reactionGroups
-              }
-            ]
-          }
-        }
+  queryClient.setQueryData(
+    getQueryKey(owner, repo, number),
+    (data: IssueTimelineQuery) => {
+      return {
+        ...data,
+        repository: {
+          ...data.repository,
+          pullRequest: {
+            ...data.repository?.pullRequest,
+            timelineItems: {
+              nodes: [
+                ...(data.repository?.pullRequest?.timelineItems.nodes ?? []),
+                {
+                  __typename: 'IssueComment',
+                  author: {
+                    login: user?.login,
+                    avatarUrl: user?.avatarUrl,
+                    url: user?.url,
+                  },
+                  body: values.comment,
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
+                  url: `https://github.com/${owner}/${repo}/issues/${number}/comments`,
+                  id: '1',
+                  reactionGroups: data.repository?.pullRequest?.reactionGroups,
+                },
+              ],
+            },
+          },
+        },
       }
-    }
-  });
+    },
+  )
 }

@@ -1,4 +1,4 @@
-import { AppHeader } from '@/components/app-header'
+import { createFileRoute, Navigate } from '@tanstack/react-router'
 import { PullRequestsList } from '@/components/pull-request-list'
 import {
   Breadcrumb,
@@ -6,13 +6,22 @@ import {
   BreadcrumbList,
 } from '@/components/ui/breadcrumb'
 import { Link } from '@/components/link'
-import { createFileRoute } from '@tanstack/react-router'
+import { AppHeader } from '@/components/app-header'
 
-export const Route = createFileRoute('/pulls/')({
-  component: RouteComponent,
+export const Route = createFileRoute('/my-prs/')({
+  component: App,
 })
 
-function RouteComponent() {
+export default function App() {
+  // Check if token exists in localStorage
+  const hasToken =
+    typeof window !== 'undefined' && localStorage.getItem('token')
+
+  // If no token, redirect to login
+  if (!hasToken) {
+    return <Navigate to="/login" />
+  }
+
   return (
     <>
       <AppHeader>

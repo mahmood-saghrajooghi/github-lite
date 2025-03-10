@@ -13,7 +13,7 @@ function getQueryKey(owner: string, repo: string, params?: { author?: string, st
   return key
 }
 
-async function fetchRepoPullRequests(owner: string, repo: string, search?: { author?: string, state?: string, sort?: string }) {
+async function fetchRepoPullRequests(owner: string, repo: string, search?: { author?: string, state?: string, sort?: string, perPage?: number }) {
   try {
     let query = `is:pr repo:${owner}/${repo}`
 
@@ -23,7 +23,7 @@ async function fetchRepoPullRequests(owner: string, repo: string, search?: { aut
 
     if (search?.state) {
       if (search.state === 'open') {
-        query += ` is:open`
+        query += ` is:open draft:false`
       } else if (search.state === 'closed') {
         query += ` is:closed`
       } else if (search.state === 'merged') {
@@ -58,7 +58,7 @@ async function fetchRepoPullRequests(owner: string, repo: string, search?: { aut
 
     const res = await github.search.issuesAndPullRequests({
       q: query,
-      per_page: 200,
+      per_page: search?.perPage ?? 200,
       ...getSort(search?.sort),
     })
 
@@ -70,7 +70,7 @@ async function fetchRepoPullRequests(owner: string, repo: string, search?: { aut
 }
 
 
-export function usePRsQuery(owner: string, repo: string, search?: { author?: string, state?: string, sort?: string }) {
+export function usePRsQuery(owner: string, repo: string, search?: { author?: string, state?: string, sort?: string, perPage?: number }) {
   return useQuery({
     queryKey: [getQueryKey(owner, repo, search)],
     queryFn: () => fetchRepoPullRequests(owner, repo, search),

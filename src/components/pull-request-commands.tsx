@@ -72,8 +72,8 @@ export function PullRequestCommands({ owner, repo, number }: Props) {
   const activePage = pages[pages.length - 1]
   const isHome = activePage === 'home'
 
-  const searchParams = useSearch({ from: '/pulls/$owner/$repo/$number/_header' }) as SearchParams;
-  const navigate = useNavigate({ from: '/pulls/$owner/$repo/$number/conversation' })
+  const searchParams = useSearch({ from: '/$owner/$repo/pulls/$number/_header' }) as SearchParams;
+  const navigate = useNavigate({ from: '/$owner/$repo/pulls/$number/conversation' })
 
   const popPage = useCallback(() => {
     setPages((pages) => {

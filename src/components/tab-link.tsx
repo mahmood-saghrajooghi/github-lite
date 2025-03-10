@@ -1,36 +1,23 @@
-import { useRegisterHotkey } from '@/contexts/hotkey-context';
-import { createLink, useNavigate } from "@tanstack/react-router";
+import { createLink } from "@tanstack/react-router";
 import type { LinkComponent } from "@tanstack/react-router";
 import clsx from "clsx";
-import { forwardRef, useRef, useCallback } from 'react';
-import { composeRefs } from '@/lib/compose-refs';
+import { forwardRef } from 'react';
 
 interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-  hotKey?: string
   href: string
 }
 
 export const LinkImplementation = forwardRef<HTMLAnchorElement, LinkProps>(({
-  hotKey,
   href,
   className,
   children,
   ...props
 }, ref) => {
-  const navigate = useNavigate()
-  const internalRef = useRef<HTMLAnchorElement>(null)
-
-  const callback = useCallback(() => {
-    navigate({ to: href })
-    internalRef.current?.focus()
-  }, [href])
-
-  useRegisterHotkey(hotKey, callback, [href])
 
   return (
     <a
       href={href}
-      ref={composeRefs(ref, internalRef)}
+      ref={ref}
       className={clsx(
         'flex items-center gap-1.5 h-7 px-2 rounded-md border border-transparent hover:border-input data-[status=active]:border-input shadow-sm text-muted-foreground hover:bg-accent/50 data-[status=active]:bg-accent/50 hover:text-accent-foreground data-[status=active]:text-foreground group duration-200 outline-none',
         className,
