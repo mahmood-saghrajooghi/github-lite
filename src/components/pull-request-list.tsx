@@ -139,7 +139,7 @@ function PullRequestItem({ item, index, isMetaKeyPressed }: PullRequestItemProps
                   <PullRequestItemIcon item={item} />
                 </motion.div>
                 <motion.div
-                  initial={{ opacity: 1 }}
+                  initial={{ opacity: 0 }}
                   animate={isMetaKeyPressed ? { opacity: 1 } : { opacity: 0 }}
                   transition={{ duration: .1 }}
                   className="text-muted-foreground absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center"
