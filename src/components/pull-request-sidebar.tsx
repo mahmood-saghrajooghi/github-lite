@@ -24,15 +24,13 @@ import {
 } from "@/components/ui/popover"
 import { getPrURL } from '@/lib/pull-request'
 import { RestEndpointMethodTypes } from '@octokit/rest'
-import { CircleCheck, X, Clock3, User, Check, Loader, ListFilterIcon, CircleDashed, CircleFadingArrowUp } from 'lucide-react'
-import { GitPullRequestDraftIcon, GitPullRequestIcon } from '@primer/octicons-react'
+import { User, Check, Loader, ListFilterIcon, CircleDashed, CircleFadingArrowUp } from 'lucide-react'
 import { Avatar } from '@/app/components'
 import { useRegisterHotkey } from '@/contexts/hotkey-context'
 import { useRef, useState, useCallback } from 'react'
 import { Button, ButtonIcon } from './ui/button'
 import { cn } from '@/lib/utils'
 import { usePRsQuery } from '@/hooks/api/use-prs-query'
-import { usePRQuery } from '@/hooks/api/use-pr-query'
 import { useRepoCollaborators } from '@/hooks/api/use-repo-members'
 import { prSearchSchema } from '@/lib/pr-search.scema'
 import { z } from 'zod'
@@ -146,12 +144,6 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
 }
 
 function PullRequestItem({ item, searchParams }: { item: PullRequest, searchParams: SearchParams }) {
-  const repoURL = item.repository_url
-  const [owner, repo] = repoURL.split('/').slice(-2)
-  const number = Number(item.url.split('/').pop())
-
-  const { data: res } = usePRQuery(owner, repo, number);
-
   return (
     <Link
       id={getPrURL(item as { repository_url: string, pull_request: { url: string } })}

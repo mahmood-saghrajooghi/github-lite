@@ -7,18 +7,17 @@ import {
 } from '@/components/ui/breadcrumb'
 import { createFileRoute, useParams } from '@tanstack/react-router'
 import { Link } from '@/components/link'
-import { prSearchSchema } from '@/lib/pr-search.scema'
-import { zodValidator } from '@tanstack/zod-adapter'
 import { useRepoCommits } from '@/hooks/api/use-repo-commits'
 import { CommitList } from '@/components/commit-list'
 import { PRList } from '@/components/pr-list'
+
 export const Route = createFileRoute('/$owner/$repo/')({
   component: RouteComponent,
-  validateSearch: zodValidator(prSearchSchema),
 })
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePRsQuery } from '@/hooks/api/use-prs-query'
+import { RepoCommitsQuery } from '@/generated/graphql'
 function RouteComponent() {
   const { owner, repo } = useParams({ from: Route.id })
   const { data: commitsData, error: commitsError } = useRepoCommits(owner, repo);
@@ -27,7 +26,14 @@ function RouteComponent() {
     perPage: 5,
   })
 
-  const commits = commitsData?.repository?.ref?.target?.history?.nodes
+  type Target = NonNullable<NonNullable<RepoCommitsQuery['repository']>['ref']>['target'] & { __typename: 'Commit' };
+
+  const target = commitsData?.repository?.ref?.target;
+  let commits: NonNullable<Target['history']>['nodes'] = [];
+
+  if (target?.__typename === 'Commit') {
+    commits = target.history.nodes;
+  }
 
   return (
     <>
@@ -57,7 +63,7 @@ function RouteComponent() {
               <CardTitle className="text-sm font-medium text-muted-foreground">In progress</CardTitle>
               <Link
                 className="text-xs text-muted-foreground hover:text-foreground duration-200"
-                to="/$owner/$repo/pulls"
+                to="/$owner/$repo"
                 params={{ owner, repo }}
               >
                 See all
@@ -78,7 +84,7 @@ function RouteComponent() {
               <CardTitle className="text-sm font-medium text-muted-foreground">Merged</CardTitle>
               <Link
                 className="text-xs text-muted-foreground hover:text-foreground duration-200"
-                to="/$owner/$repo/pull-requests"
+                to="/$owner/$repo"
                 params={{ owner, repo }}
               >
                 See all

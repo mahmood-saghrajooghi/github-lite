@@ -7,7 +7,7 @@ import { Route } from '@/routes/$owner/$repo/index'
 import type { RepoCommitsQuery } from '@/generated/graphql'
 
 type Target = NonNullable<NonNullable<NonNullable<RepoCommitsQuery['repository']>['ref']>['target']> & { __typename: 'Commit' };
-type Commits = NonNullable<NonNullable<Target['history']>['nodes']>;
+type Commits = NonNullable<Target['history']>['nodes'];
 
 interface CommitListProps {
   commits: Commits;

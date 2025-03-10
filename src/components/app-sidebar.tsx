@@ -1,5 +1,5 @@
 import * as React from "react"
-import { MarkGithubIcon, GitPullRequestIcon, RepoIcon } from "@primer/octicons-react"
+import { MarkGithubIcon, GitPullRequestIcon } from "@primer/octicons-react"
 import { Link } from "@tanstack/react-router"
 import { NavUser } from "@/components/nav-user"
 import {

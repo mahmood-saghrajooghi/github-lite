@@ -5,7 +5,6 @@ import {
   BreadcrumbItem,
   BreadcrumbList,
 } from '@/components/ui/breadcrumb'
-import { Link } from '@/components/link'
 import { AppHeader } from '@/components/app-header'
 
 export const Route = createLazyFileRoute('/')({
@@ -27,7 +26,7 @@ export default function App() {
         <Breadcrumb>
           <BreadcrumbList className="gap-2 sm:gap-2">
             <BreadcrumbItem className="text-foreground">
-              <Link to="/pulls">Pull Requests</Link>
+              Pull Requests
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
