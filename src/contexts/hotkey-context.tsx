@@ -121,9 +121,6 @@ export function useRegisterHotkey(
       return
     }
 
-    console.log('registerHotkey', hotkey);
-
-
     registerHotkey(hotkey, callback)
 
     return () => {

@@ -67,7 +67,8 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
   const { data, isLoading } = usePRsQuery(owner, repo, { author, state, sort })
   const ref = useRef<HTMLInputElement>(null)
 
-  const callback = useCallback(() => {
+  const callback = useCallback((event?: KeyboardEvent) => {
+    event?.preventDefault()
     ref.current?.focus()
   }, [ref])
 
@@ -278,7 +279,8 @@ export function StateFilter({ value, onChange }: { value: string | undefined, on
   const listRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false)
 
-  const callback = useCallback(() => {
+  const callback = useCallback((event?: KeyboardEvent) => {
+    event?.preventDefault()
     setOpen(true)
   }, [])
 
@@ -404,7 +406,8 @@ function SortFilter({ value, onChange }: { value: string | undefined, onChange: 
   const listRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false)
 
-  const callback = useCallback(() => {
+  const callback = useCallback((event?: KeyboardEvent) => {
+    event?.preventDefault()
     setOpen(true)
   }, [])
 
