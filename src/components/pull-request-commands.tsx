@@ -19,15 +19,18 @@ import {
 import { MarkGithubIcon } from '@primer/octicons-react'
 import { usePRQuery } from '@/hooks/api/use-pr-query'
 import { useRepoCollaborators } from '@/hooks/api/use-repo-members'
+import { useUserRepositories } from '@/hooks/api/use-user-repos'
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { omit } from 'lodash'
-import { prSearchSchema } from '@/lib/pr-search.scema'
+import { prSearchSchema } from '@/lib/pr-search.schema'
 import { z } from 'zod'
 import isHotkey from 'is-hotkey'
 import { useRegisterHotkey } from '@/contexts/hotkey-context'
 import { Kbd } from './ui/kbd'
+import { BoxIcon } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 
 type Props = {
   owner: string
@@ -73,7 +76,7 @@ export function PullRequestCommands({ owner, repo, number }: Props) {
   const isHome = activePage === 'home'
 
   const searchParams = useSearch({ from: '/$owner/$repo/pulls/$number/_header' }) as SearchParams;
-  const navigate = useNavigate({ from: '/$owner/$repo/pulls/$number/conversation' })
+  const navigate = useNavigate({ from: '/$owner/$repo/pulls/$number/_header' })
 
   const popPage = useCallback(() => {
     setPages((pages) => {
@@ -220,6 +223,19 @@ export function PullRequestCommands({ owner, repo, number }: Props) {
                     <Kbd>N</Kbd>
                   </div>
                 </CommandItem>
+                <CommandItem
+                  onSelect={() => {
+                    setPages([...pages, 'repositories'])
+                    bounce()
+                  }}
+                >
+                  <MarkGithubIcon className="mr-2 h-4 w-4" />
+                  <span>Switch repository</span>
+                  <div className="ml-auto flex gap-1">
+                    <Kbd>S</Kbd>
+                    <Kbd>R</Kbd>
+                  </div>
+                </CommandItem>
               </CommandGroup>
               <CommandGroup heading="Filter Options">
                 <CommandItem
@@ -295,6 +311,16 @@ export function PullRequestCommands({ owner, repo, number }: Props) {
               onSelect={(sort) => {
                 onSearchChange('sort', sort)
                 popPage()
+                setIsOpen(false)
+              }}
+            />
+          )}
+
+          {activePage === 'repositories' && (
+            <RepositoriesPage
+              onSelect={(owner, repo) => {
+                navigate({ to: '/$owner/$repo', params: { owner, repo } })
+                resetPages()
                 setIsOpen(false)
               }}
             />
@@ -396,6 +422,46 @@ function SortPage({ selectedSort, onSelect }: SortPageProps) {
               selectedSort === option.value ? "opacity-100" : "opacity-0"
             )}
           />
+        </CommandItem>
+      ))}
+    </CommandGroup>
+  )
+}
+
+type RepositoriesPageProps = {
+  onSelect: (owner: string, repo: string) => void
+}
+
+function RepositoriesPage({ onSelect }: RepositoriesPageProps) {
+  const { data: reposData, isLoading } = useUserRepositories()
+
+  if (isLoading) {
+    return (
+      <CommandGroup heading="Repositories">
+        <CommandItem disabled>
+          <BoxIcon className="mr-2 h-4 w-4" />
+          <span>Loading repositories...</span>
+        </CommandItem>
+      </CommandGroup>
+    )
+  }
+
+  return (
+    <CommandGroup heading="Repositories">
+      {reposData?.viewer.repositories.nodes.map((repo) => (
+        <CommandItem
+          key={repo.id}
+          value={repo.name}
+          onSelect={() => {
+            onSelect(repo.owner.login, repo.name)
+          }}
+          className="overflow-hidden text-ellipsis whitespace-nowrap"
+        >
+          <BoxIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+          <span className="truncate">{repo.name}</span>
+          {repo.isPrivate && (
+            <Badge variant="outline" className="ml-2 text-xs">Private</Badge>
+          )}
         </CommandItem>
       ))}
     </CommandGroup>

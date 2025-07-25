@@ -8,7 +8,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { IssueStatus } from '@/app/components'
 // import { PullRequestsSidebar } from '@/components/pull-request-sidebar'
 import { getQueryKey, usePRQuery } from '@/hooks/api/use-pr-query'
-import { prSearchSchema } from '@/lib/pr-search.scema'
+import { prSearchSchema } from '@/lib/pr-search.schema'
 import { QuickFocus } from '@/components/quick-focus'
 import { ReplyTrap } from '@/components/ui/reply-trap'
 import {

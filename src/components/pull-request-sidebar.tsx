@@ -32,7 +32,7 @@ import { Button, ButtonIcon } from './ui/button'
 import { cn } from '@/lib/utils'
 import { usePRsQuery } from '@/hooks/api/use-prs-query'
 import { useRepoCollaborators } from '@/hooks/api/use-repo-members'
-import { prSearchSchema } from '@/lib/pr-search.scema'
+import { prSearchSchema } from '@/lib/pr-search.schema'
 import { z } from 'zod'
 import isHotkey from 'is-hotkey'
 
