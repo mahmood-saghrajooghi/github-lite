@@ -6,7 +6,7 @@ import { IssueCommentForm } from '@/app/CommentForm'
 import { Header } from '@/app/Issue'
 import { ErrorBoundary } from 'react-error-boundary'
 import { IssueStatus } from '@/app/components'
-import { PullRequestsSidebar } from '@/components/pull-request-sidebar'
+// import { PullRequestsSidebar } from '@/components/pull-request-sidebar'
 import { getQueryKey, usePRQuery } from '@/hooks/api/use-pr-query'
 import { prSearchSchema } from '@/lib/pr-search.scema'
 import { QuickFocus } from '@/components/quick-focus'
@@ -112,20 +112,17 @@ function PullRequestContent({
   }
 
   return (
-    <div className="grid grid-cols-[auto_1fr] grid-rows-[1fr] overflow-hidden">
-      <PullRequestsSidebar
+    <div className="">
+      {/* <PullRequestsSidebar
         owner={owner}
         repo={repo}
         searchParams={searchParams}
         navigate={navigate}
-      />
+      /> */}
       <div className="flex flex-col gap-4 relative overflow-y-auto">
         <PullRequestContextProvider pr={pr as PullRequest}>
           <Header data={pr as PullRequest} />
-          <main
-            className="flex flex-col gap-4 px-4 pb-4
-          jj"
-          >
+          <main className="flex flex-col gap-4 px-4 pb-4 max-w-5xl mx-auto w-full">
             <div className="flex gap-2 items-center bg-muted/50 rounded-lg py-2 px-3">
               <div className="text-sm">
                 <IssueStatus data={pr as PullRequest} />
@@ -160,10 +157,8 @@ function PullRequestContent({
                 </a>
               </span>
             </div>
-            <div className="grid grid-cols-[1fr_300px] gap-4">
-              <CommentCard data={pr as PullRequest} />
-              <PullHeader data={pr as PullRequest} />
-            </div>
+            <CommentCard data={pr as PullRequest} />
+            <PullHeader data={pr as PullRequest} />
             <Timeline
               items={pr.timelineItems.nodes! as PullRequestTimelineItems[]}
             />

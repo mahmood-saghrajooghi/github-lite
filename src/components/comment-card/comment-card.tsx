@@ -57,7 +57,7 @@ export const CommentCard = forwardRef<React.ElementRef<typeof Primitive.div>, Co
 
 export function CommentBody({ children }: { children: string }) {
   return (
-    <Markdown className="[word-break:break-word]" options={{
+    <Markdown className="[word-break:break-word] p-4" options={{
       overrides: {
         img: { props: { style: { maxWidth: '100%' } } },
         pre: {

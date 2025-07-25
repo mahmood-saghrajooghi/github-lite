@@ -35,7 +35,7 @@ export function PullHeader({ data }: { data: PullRequest }) {
         <Reviews data={data} />
         <hr className="border-daw-gray-200" />
         <Checks data={data} />
-        {data.state === 'OPEN' && <>
+        {data.state === 'OPEN' && data.mergeable !== 'MERGEABLE' && <>
           <hr className="border-daw-gray-200" />
           <Merge data={data} />
         </>}

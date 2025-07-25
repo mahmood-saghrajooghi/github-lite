@@ -11,7 +11,7 @@ import { FileIcon } from '@primer/octicons-react'
 import { ChevronDownIcon, PlusIcon } from 'lucide-react'
 import { usePRDiffQuery } from '@/hooks/api/use-pr-diff-query'
 import { usePRQuery } from '@/hooks/api/use-pr-query'
-import { useMemo, useState, useCallback } from 'react'
+import { useMemo, useState, useCallback, useEffect } from 'react'
 import refractor from 'refractor'
 import type {
   IssueTimelineQuery,
@@ -24,6 +24,7 @@ import { useMutation } from '@tanstack/react-query'
 import { github } from '@/lib/client'
 import { getThreadsByIdMap } from '@/lib/pull-request'
 import { useSelection } from '@/hooks/diff-viewer/use-selection'
+import { diffWorkerClient } from '@/lib/diff-worker-client'
 // import { Command, CommandEmpty, CommandInput } from '@/components/ui/command'
 // import { CommandItem as CommandItemPrimitive, CommandList, CommandList as CommandListPrimitive } from 'cmdk'
 
@@ -123,10 +124,42 @@ function File({
     side: string
   } | null>(null)
 
-  const tokens = useMemo(
-    () => tokenize(hunks, { highlight: true, language: 'tsx', refractor }),
-    [hunks],
-  )
+  const [tokens, setTokens] = useState<any>(null)
+  const [isTokenizing, setIsTokenizing] = useState(false)
+
+  useEffect(() => {
+    if (!hunks?.length) return
+    
+    setIsTokenizing(true)
+    
+    // Try to use service worker first, fallback to main thread
+    const processTokens = async () => {
+      try {
+        // Convert hunks to diff format for worker processing
+        const diffContent = hunks.map(hunk => hunk.content).join('\n')
+        const result = await diffWorkerClient.processDiff(diffContent, 'tsx')
+        
+        // Extract tokens for this specific file
+        const fileTokens = result.tokens[newPath]
+        if (fileTokens) {
+          setTokens(fileTokens)
+        } else {
+          // Fallback to main thread tokenization
+          const fallbackTokens = tokenize(hunks, { highlight: true, language: 'tsx', refractor })
+          setTokens(fallbackTokens)
+        }
+      } catch (error) {
+        console.warn('Service worker tokenization failed, falling back to main thread:', error)
+        // Fallback to main thread tokenization
+        const fallbackTokens = tokenize(hunks, { highlight: true, language: 'tsx', refractor })
+        setTokens(fallbackTokens)
+      } finally {
+        setIsTokenizing(false)
+      }
+    }
+    
+    processTokens()
+  }, [hunks, newPath])
 
   const { mutate: addComment } = useMutation({
     mutationFn: async ({
@@ -360,26 +393,36 @@ function File({
       </div>
       {isOpen && (
         <>
-          <DiffView
-            key={oldRevision + '-' + newRevision}
-            viewType="split"
-            diffType={type}
-            hunks={hunks}
-            renderToken={renderToken}
-            tokens={tokens}
-            widgets={widgets}
-            codeClassName="border-r border-input"
-            {...diffProps}
-          >
-            {(hunks) =>
-              hunks.map((hunk, index) => (
-                <>
-                  <HunkSpacer key={`spacer-${index}`} content={hunk.content} />
-                  <Hunk key={hunk.content} hunk={hunk} />
-                </>
-              ))
-            }
-          </DiffView>
+          {isTokenizing ? (
+            <div className="p-4 text-muted-foreground text-xs">
+              Processing syntax highlighting...
+            </div>
+          ) : tokens ? (
+            <DiffView
+              key={oldRevision + '-' + newRevision}
+              viewType="split"
+              diffType={type}
+              hunks={hunks}
+              renderToken={renderToken}
+              tokens={tokens}
+              widgets={widgets}
+              codeClassName="border-r border-input"
+              {...diffProps}
+            >
+              {(hunks) =>
+                hunks.map((hunk, index) => (
+                  <>
+                    <HunkSpacer key={`spacer-${index}`} content={hunk.content} />
+                    <Hunk key={hunk.content} hunk={hunk} />
+                  </>
+                ))
+              }
+            </DiffView>
+          ) : (
+            <div className="p-4 text-muted-foreground text-xs">
+              Loading diff view...
+            </div>
+          )}
         </>
       )}
     </div>
@@ -398,6 +441,9 @@ function Diff({
     data.repository!.name,
     data.number,
   )
+
+  const [files, setFiles] = useState<ReturnType<typeof parseDiff> | null>(null)
+  const [isProcessingDiff, setIsProcessingDiff] = useState(false)
 
   const threadsById = useMemo(
     () => getThreadsByIdMap(data as PullRequest),
@@ -428,11 +474,39 @@ function Diff({
     return commentsByFilePath
   }, [data.reviewThreads.nodes, threadsById])
 
-  if (!diff) {
-    return null
-  }
+  useEffect(() => {
+    if (!diff) {
+      setFiles(null)
+      return
+    }
 
-  const files = parseDiff(diff)
+    setIsProcessingDiff(true)
+    
+    // Try to use service worker first, fallback to main thread
+    const processDiff = async () => {
+      try {
+        const result = await diffWorkerClient.processDiff(diff, 'tsx')
+        setFiles(result.files)
+      } catch (error) {
+        console.warn('Service worker diff processing failed, falling back to main thread:', error)
+        // Fallback to main thread processing
+        const parsedFiles = parseDiff(diff)
+        setFiles(parsedFiles)
+      } finally {
+        setIsProcessingDiff(false)
+      }
+    }
+    
+    processDiff()
+  }, [diff])
+
+  if (!diff || !files) {
+    return isProcessingDiff ? (
+      <div className="text-xs font-mono p-2 text-muted-foreground">
+        Processing diff...
+      </div>
+    ) : null
+  }
 
   return (
     <div className="text-xs font-mono p-2 flex flex-col gap-2">
