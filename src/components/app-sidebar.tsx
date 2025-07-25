@@ -17,6 +17,7 @@ import { useUserRepositories } from "@/hooks/api/use-user-repos"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { BoxIcon, HomeIcon } from 'lucide-react'
+import { Avatar } from '@/components/avatar/avatar'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: reposData, isLoading } = useUserRepositories()
