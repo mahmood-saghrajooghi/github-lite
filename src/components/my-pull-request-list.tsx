@@ -48,6 +48,7 @@ export function PullRequestsList() {
       <CommandInput
         placeholder="Search pull requests"
         ref={ref}
+        autoFocus
         onKeyDown={(e) => {
           if (e.key >= '0' && e.key <= '9') {
             e.preventDefault();

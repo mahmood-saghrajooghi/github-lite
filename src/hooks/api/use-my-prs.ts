@@ -21,5 +21,6 @@ export function useMyPRs() {
   return useQuery({
     queryKey: ['my-pull-requests'],
     queryFn: fetchIssues,
+    staleTime: 5 * 60 * 1000
   })
 }

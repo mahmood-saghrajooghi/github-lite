@@ -1,5 +1,5 @@
 import { createFileRoute, Navigate } from '@tanstack/react-router'
-import { PullRequestsList } from '@/components/pull-request-list'
+import { PullRequestsList } from '@/components/my-pull-request-list'
 import {
   Breadcrumb,
   BreadcrumbItem,

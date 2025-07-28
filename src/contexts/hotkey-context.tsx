@@ -43,12 +43,12 @@ export function HotkeyProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   function handleKeyDown(event: KeyboardEvent) {
-    if (isFormField(event.target as Node)) {
-      return
-    }
-
     if (event.metaKey) {
       setIsMetaKeyPressed(true)
+    }
+
+    if (isFormField(event.target as Node)) {
+      return
     }
 
     if (event.target instanceof HTMLInputElement) {

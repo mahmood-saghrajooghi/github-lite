@@ -1,8 +1,10 @@
 import { createLazyFileRoute, Navigate } from '@tanstack/react-router';
-import { PullRequestsList } from '@/components/pull-request-list'
+import { PullRequestsList } from '@/components/my-pull-request-list'
+import { Link } from '@/components/link'
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
   BreadcrumbList,
 } from '@/components/ui/breadcrumb'
 import { AppHeader } from '@/components/app-header'
@@ -25,8 +27,12 @@ export default function App() {
       <AppHeader>
         <Breadcrumb>
           <BreadcrumbList className="gap-2 sm:gap-2">
-            <BreadcrumbItem className="text-foreground">
-              Pull Requests
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/">
+                  Pull Requests
+                </Link>
+              </BreadcrumbLink>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
