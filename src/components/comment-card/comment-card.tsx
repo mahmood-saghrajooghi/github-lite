@@ -43,7 +43,7 @@ export const CommentCard = forwardRef<React.ElementRef<typeof Primitive.div>, Co
           {formatDate(data.createdAt)}
         </span>
       </div>
-      <div className="text-sm">
+      <div className="text-sm -mx-4 -my-4">
         <CommentBody>{data.body}</CommentBody>
       </div>
       {data.reactionGroups && (
