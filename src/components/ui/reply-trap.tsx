@@ -5,21 +5,15 @@ import { forwardRef, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { composeRefs } from '@/lib/compose-refs'
 
-type ReplyTrapProps = React.ComponentPropsWithoutRef<typeof Primitive.div> & {
-  toggleExpanded: () => void
-}
+type ReplyTrapProps = React.ComponentPropsWithoutRef<typeof Primitive.div>;
 
-const ReplyTrap = forwardRef<React.ElementRef<typeof Primitive.div>, ReplyTrapProps>(({ children, onKeyDown: onKeyDownProp, className, toggleExpanded, ...props }, ref) => {
+const ReplyTrap = forwardRef<React.ElementRef<typeof Primitive.div>, ReplyTrapProps>(({ children, onKeyDown: onKeyDownProp, className, ...props }, ref) => {
   const replyTrapRef = useRef<HTMLDivElement>(null)
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (isHotkey('r', event)) {
       event.preventDefault();
       (event.target as HTMLElement).querySelector('textarea')?.focus();
-    }
-    if (isHotkey('f', event) && !event.shiftKey) {
-      event.preventDefault();
-      toggleExpanded();
     }
     onKeyDownProp?.(event);
   }
