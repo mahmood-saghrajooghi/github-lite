@@ -7,9 +7,9 @@ import { CommitLink } from '../commit-link/commit-link';
 
 export function ForcePushed({ data }: { data: HeadRefForcePushedEvent }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex gap-2">
       <Icon className="bg-accent text-muted-foreground"><RepoPushIcon className="w-4 h-4" /></Icon>
-      <span className="text-muted-foreground">
+      <span className="text-muted-foreground mt-1">
         <User actor={data.actor!} /> force-pushed the {data.ref && <BranchName>{data.ref.name}</BranchName>} branch from <CommitLink commit={data.beforeCommit!} /> to <CommitLink commit={data.afterCommit!} />
       </span>
     </div>

@@ -4,10 +4,10 @@ import { DOMAttributes, ReactNode, cloneElement } from 'react';
 import type { PullRequest, Issue } from '@/generated/graphql';
 
 const avatarSizes = {
-  xs: 'w-4',
-  s: 'w-5',
-  m: 'w-8',
-  l: 'w-10'
+  xs: 'w-4 h-4',
+  s: 'w-5 h-5',
+  m: 'w-8 h-8',
+  l: 'w-10 h-10'
 }
 
 export function Avatar({ src, size = 's', className }: { size?: keyof typeof avatarSizes, src: string, className?: string }) {
@@ -119,7 +119,7 @@ export function Card({ children, gridArea, ...otherProps }: CardProps) {
 }
 
 export function Icon({ className, children }: { className: string, children: ReactNode }) {
-  return <div className={`rounded-full px-1.5 aspect-square flex items-center ${className}`}>{children}</div>
+  return <div className={`rounded-full px-1.5 w-7 h-7 aspect-square flex items-center ${className}`}>{children}</div>
 }
 
 export function GithubLabel({ color, children }: { color: string, children: ReactNode }) {

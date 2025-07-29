@@ -6,9 +6,9 @@ import { BranchName } from '@/app/components';
 
 export function BaseChanged({ data }: { data: AutomaticBaseChangeSucceededEvent }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex gap-2">
       <Icon className="bg-green-600 text-white"><GitBranchIcon /></Icon>
-      <span className="text-muted-foreground">
+      <span className="text-muted-foreground mt-1">
         Base automatically changed from <BranchName>{data.oldBase}</BranchName> to <BranchName>{data.newBase}</BranchName>
       </span>
     </div>

@@ -200,7 +200,7 @@ function CollapsedTimelineItems({ items }: { items: (IssueTimelineItems | PullRe
             <Card className="p-3">
               <div className="w-full flex justify-between items-center">
                 <span className="text-xs">
-                  {eventDescriptions}${items.length > 3 ? '...' : ''}
+                  {eventDescriptions} {items.length > 3 ? '...' : ''}
                 </span>
                 <div className="flex items-center gap-2">
                   {isFocused && (
@@ -230,7 +230,7 @@ function CollapsedTimelineItems({ items }: { items: (IssueTimelineItems | PullRe
               {isExpanded && (
                 <div className="mt-3 pt-3 border-t border-border">
                   <div className="relative">
-                    <div className="h-[calc(100%-40px)] w-[1px] bg-zinc-600 absolute left-3.5 top-[20px]" />
+                    <div className="h-[calc(100%-60px)] w-[1px] bg-zinc-600 absolute left-3.5 top-[20px]" />
                     <div className="flex flex-col gap-4 relative">
                       {items.map((item, i) => renderTimelineItem(item, i))}
                     </div>
@@ -267,7 +267,7 @@ export function Timeline({ items }: { items: (IssueTimelineItems | PullRequestTi
 
   return (
     <div className="relative">
-      <div className="h-[calc(100%-30px)] w-[1px] bg-zinc-600 absolute left-3.5 top-[10px]" />
+      <div className="h-[calc(100%-50px)] w-[1px] bg-zinc-600 absolute left-3.5 top-[10px]" />
       <div className="z-10 flex flex-col gap-6 text-sm relative">
         {groupedItems.map((group, groupIndex) => {
           if (group.type === 'important') {

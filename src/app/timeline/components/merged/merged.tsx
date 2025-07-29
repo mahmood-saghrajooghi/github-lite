@@ -8,9 +8,9 @@ import { BranchName } from '@/app/components';
 
 export function Merged({ data }: { data: MergedEvent }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex gap-2">
       <Icon className="bg-purple-600 text-white"><GitMergeIcon /></Icon>
-      <span><User actor={data.actor!} /> merged commit <CommitLink commit={data.commit!} /> into <BranchName>{data.mergeRefName}</BranchName></span>
+      <span className="text-muted-foreground mt-1"><User actor={data.actor!} /> merged commit <CommitLink commit={data.commit!} /> into <BranchName>{data.mergeRefName}</BranchName></span>
     </div>
   );
 }

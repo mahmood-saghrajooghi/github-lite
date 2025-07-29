@@ -7,9 +7,9 @@ import { User } from '@/components/user/user';
 
 export function CommentDeleted({ data }: { data: CommentDeletedEvent }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex gap-2">
       <Icon className="bg-accent text-muted-foreground"><XIcon /></Icon>
-      <span className="text-muted-foreground">
+      <span className="text-muted-foreground mt-1">
         <User actor={data.actor!} /> deleted a comment from <Link to={data.deletedCommentAuthor!.url} target="_blank" className="hover:underline font-semibold text-foreground">{data.deletedCommentAuthor!.login}</Link>
       </span>
     </div>

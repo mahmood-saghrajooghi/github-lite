@@ -8,7 +8,7 @@ import { User } from '@/components/user/user';
 export function Referenced({ data }: { data: ReferencedEventFragmentFragment  }) {
   return (
     <div
-      className="grid items-center gap-2"
+      className="grid gap-2"
       style={{
         gridTemplateAreas: `
           "icon description"
@@ -17,7 +17,7 @@ export function Referenced({ data }: { data: ReferencedEventFragmentFragment  })
         gridTemplateColumns: 'min-content 1fr'
       }}>
       <Icon className="bg-accent text-muted-foreground"><CrossReferenceIcon /></Icon>
-      <span className="text-muted-foreground">
+      <span className="text-muted-foreground mt-1">
         <User actor={data.actor!} /> referenced this pull request
       </span>
       <div style={{ gridArea: 'commit' }} className="flex gap-2">

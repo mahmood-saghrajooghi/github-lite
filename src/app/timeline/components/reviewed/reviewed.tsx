@@ -13,7 +13,7 @@ export function Reviewed({ data, style, className, ...props }: { data: PullReque
   const { threadsById } = usePullRequest();
   return (
     <div
-      className="grid items-center gap-2"
+      className="grid gap-2"
       style={{
         gridTemplateAreas: `
           "icon description"
@@ -27,7 +27,7 @@ export function Reviewed({ data, style, className, ...props }: { data: PullReque
         : data.state === 'APPROVED'
           ? <Icon className="bg-green-600 text-white"><CheckCircleIcon /></Icon>
           : <Icon className="bg-accent text-muted-foreground"><EyeIcon /></Icon>}
-      <div style={{ gridArea: 'description' }}><User actor={data.author!} />  {data.state === 'CHANGES_REQUESTED' ? 'requested changes' : data.state === 'APPROVED' ? 'approved' : 'reviewed'}</div>
+      <div style={{ gridArea: 'description' }} className="text-muted-foreground mt-1"><User actor={data.author!} />  {data.state === 'CHANGES_REQUESTED' ? 'requested changes' : data.state === 'APPROVED' ? 'approved' : 'reviewed'}</div>
       {(data.body || !!data.comments?.nodes?.length) && (
         <div style={{ gridArea: 'issue' }}>
           <div

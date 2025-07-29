@@ -7,13 +7,13 @@ import { User } from '@/components/user/user';
 
 export function Closed({ data }: { data: ClosedEvent }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex gap-2">
       {data.stateReason === "NOT_PLANNED" ? (
         <Icon className="bg-accent text-muted-foreground"><SkipIcon /></Icon>
       ) : (
         <Icon className="bg-purple-600 text-white"><IssueClosedIcon /></Icon>
       )}
-      <span><User actor={data.actor!} /> closed this as {data.stateReason?.toLowerCase()}</span>
+      <span className="text-muted-foreground mt-1"><User actor={data.actor!} /> closed this as {data.stateReason?.toLowerCase()}</span>
     </div>
   );
 }

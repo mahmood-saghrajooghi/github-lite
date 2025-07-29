@@ -8,7 +8,7 @@ import { User } from '@/components/user/user';
 export function CrossReferenced({ data }: { data: CrossReferencedEvent }) {
   return (
     <div
-      className="grid items-center gap-2"
+      className="grid gap-2"
       style={{
         gridTemplateAreas: `
           "icon description"
@@ -17,7 +17,7 @@ export function CrossReferenced({ data }: { data: CrossReferencedEvent }) {
         gridTemplateColumns: 'min-content 1fr'
       }}>
       <Icon className="bg-accent text-muted-foreground"><CrossReferenceIcon /></Icon>
-      <span><User actor={data.actor!} /> referenced this</span>
+      <span className="text-muted-foreground mt-1"><User actor={data.actor!} /> referenced this</span>
       <Card style={{ gridArea: 'issue' }}>
         <div className="flex gap-1 items-center">
           <div className="flex flex-col gap-1 flex-1">

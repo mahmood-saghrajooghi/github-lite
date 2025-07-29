@@ -10,7 +10,7 @@ import { User } from '@/components/user/user';
 export function ReviewDismissed({ data }: { data: ReviewDismissedEvent }) {
   return (
     <div
-      className="grid items-center gap-2"
+      className="grid gap-2"
       style={{
         gridTemplateAreas: `
           "icon description"
@@ -19,7 +19,7 @@ export function ReviewDismissed({ data }: { data: ReviewDismissedEvent }) {
         gridTemplateColumns: 'min-content 1fr'
       }}>
       <Icon className="bg-accent text-muted-foreground"><XIcon /></Icon>
-      <span><User actor={data.actor!} /> dismissed <Link to={data.review!.author!.url} target="_blank" className="font-semibold hover:underline">{data.review!.author!.login}</Link>'s stale review {data.pullRequestCommit && <>via <CommitLink commit={data.pullRequestCommit.commit} /></>}</span>
+      <span className="text-muted-foreground mt-1"><User actor={data.actor!} /> dismissed <Link to={data.review!.author!.url} target="_blank" className="font-semibold hover:underline">{data.review!.author!.login}</Link>'s stale review {data.pullRequestCommit && <>via <CommitLink commit={data.pullRequestCommit.commit} /></>}</span>
       {data.dismissalMessage && (
         <Card style={{ gridArea: 'issue' }}>
           <CommentBody>{data.dismissalMessage}</CommentBody>
