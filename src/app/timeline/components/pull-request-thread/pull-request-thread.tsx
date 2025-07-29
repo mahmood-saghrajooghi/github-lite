@@ -18,6 +18,8 @@ import { queryClient } from '@/query-client';
 import { getQueryKey } from '@/hooks/api/use-pr-query';
 import { useUser } from '@/hooks/api/use-user';
 import { IssueTimelineQuery, PullRequestReviewComment, ReactionGroup } from '@/generated/graphql'
+import { useState } from 'react';
+import { FoldVertical, UnfoldVertical } from 'lucide-react';
 
 function optimisticallyAddPullRequestReviewThreadReply({ reviewThread, user, values }: { reviewThread: PullRequestReviewThread, user: User | undefined, values: { body: string } }) {
   const owner = reviewThread.repository.owner.login;
@@ -76,6 +78,8 @@ function optimisticallyAddPullRequestReviewThreadReply({ reviewThread, user, val
 export function PullRequestThread({ data }: { data: PullRequestReviewThread }) {
   const { isFocused, handleFocus, handleBlur } = useIsFocused();
   const { data: user } = useUser();
+  const [isExpanded, setIsExpanded] = useState(!data.isResolved);
+
   const formatDate = (date: string) => {
     return new Date(date).toLocaleString(undefined, {
       year: 'numeric',
@@ -85,7 +89,6 @@ export function PullRequestThread({ data }: { data: PullRequestReviewThread }) {
       minute: 'numeric'
     });
   };
-
 
   const { mutate } = useMutation({
     mutationFn: async (body: string) => {
@@ -110,51 +113,104 @@ export function PullRequestThread({ data }: { data: PullRequestReviewThread }) {
   const onSubmit = async (body: string): Promise<void> => {
     return mutate(body);
   };
+
+  const toggleExpanded = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
-    <ReplyTrap asChild onFocus={handleFocus} onBlur={handleBlur}>
+    <ReplyTrap
+      asChild
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      toggleExpanded={toggleExpanded}
+    >
       <QuickFocus asChild>
         <Card>
-          <div className="text-sm cursor-default p-3">
-            {data.path}
-          </div>
-          <div>
-            <div className="flex flex-col gap-3 p-3 border-t border-input">
-              {data.comments.nodes?.map((comment: PullRequestReviewComment | null) => (
-                <div className="flex gap-2">
-                  <div>
-                    <span className="inline-flex items-center align-bottom">
-                      <Avatar src={comment!.author!.avatarUrl} className="inline mr-2" />
-                    </span>
-                  </div>
-                  <div key={comment!.id} className="flex-1 flex flex-col gap-2">
-                    <div>
-                      <Link href={comment!.author!.url} target="_blank" className="font-semibold hover:underline">{comment!.author!.login}</Link>
-                      {comment && (
-                        <span className="text-xs text-muted-foreground" style={{ gridArea: 'date' }}>
-                          {' • '}
-                          {formatDate(comment!.createdAt)}
-                        </span>
-                      )}
+          <div className="text-sm cursor-default p-3 flex items-center justify-between">
+            <span>{data.path}</span>
+            <div className="flex items-center gap-2">
+
+              {isFocused && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground bg-neutral-900 border border-border rounded-md px-1.5 py-0.5 select-none">
+                  {isExpanded && (
+                    <div className="flex items-center gap-1">
+                      <Kbd className="text-[11px] min-w-[18px] w-auto px-[4px] h-[18px] rounded-sm">R</Kbd> reply
                     </div>
-                    <div>
-                      <CommentBody>{comment!.body}</CommentBody>
+                  )}
+                  {isExpanded && (
+                    <div className="flex items-center gap-1">
+                      <Kbd className="text-[11px] min-w-[18px] w-auto px-[4px] h-[18px] rounded-sm">F</Kbd> fold
                     </div>
-                    {comment!.reactionGroups && <Reactions id={comment!.id} data={comment!.reactionGroups} />}
-                  </div>
+                  )}
+                  {!isExpanded && (
+                    <div className="flex items-center gap-1">
+                      <Kbd className="text-[11px] min-w-[18px] w-auto px-[4px] h-[18px] rounded-sm">F</Kbd> unfold
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-            <div className="p-3 border-t border-input">
-              <CommentForm onSubmit={onSubmit}>
-                {data.viewerCanResolve &&
-                  <Button className="flex-shrink-0 px-4 py-2 rounded-md bg-accent pressed:bg-accent/80 border border-accent pressed:border-accent/80 text-foreground text-sm font-medium cursor-default outline-none focus-visible:ring-2 ring-offset-2 ring-blue-600">
-                    Resolve conversation
-                  </Button>
-                }
-              </CommentForm>
+              )}
+
+              {data.isResolved && (
+                <span className="text-xs text-muted-foreground">
+                  Resolved
+                </span>
+              )}
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleExpanded}
+                className="h-6 w-6 p-0 hover:bg-muted"
+              >
+                {isExpanded ? (
+                  <FoldVertical className="h-4 w-4" />
+                ) : (
+                  <UnfoldVertical className="h-4 w-4" />
+                )}
+              </Button>
             </div>
           </div>
-          {isFocused && (
+          {isExpanded && (
+            <div>
+              <div className="flex flex-col gap-3 p-3 border-t border-input">
+                {data.comments.nodes?.map((comment: PullRequestReviewComment | null) => (
+                  <div className="flex gap-2" key={comment!.id}>
+                    <div>
+                      <span className="inline-flex items-center align-bottom">
+                        <Avatar src={comment!.author!.avatarUrl} className="inline mr-2" />
+                      </span>
+                    </div>
+                    <div className="flex-1 flex flex-col gap-2">
+                      <div>
+                        <Link href={comment!.author!.url} target="_blank" className="font-semibold hover:underline">{comment!.author!.login}</Link>
+                        {comment && (
+                          <span className="text-xs text-muted-foreground" style={{ gridArea: 'date' }}>
+                            {' • '}
+                            {formatDate(comment!.createdAt)}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <CommentBody>{comment!.body}</CommentBody>
+                      </div>
+                      {comment!.reactionGroups && <Reactions id={comment!.id} data={comment!.reactionGroups} />}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="p-3 border-t border-input">
+                <CommentForm onSubmit={onSubmit}>
+                  {data.viewerCanResolve &&
+                    <Button className="flex-shrink-0 px-4 py-2 rounded-md bg-accent pressed:bg-accent/80 border border-accent pressed:border-accent/80 text-foreground text-sm font-medium cursor-default outline-none focus-visible:ring-2 ring-offset-2 ring-blue-600">
+                      Resolve conversation
+                    </Button>
+                  }
+                </CommentForm>
+              </div>
+            </div>
+          )}
+          {isFocused && isExpanded && (
             <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
               Press <Kbd className="text-[11px] w-[18px] h-[18px] rounded-sm">R</Kbd> to reply
             </div>

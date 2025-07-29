@@ -151,6 +151,7 @@ export function PullRequestCommands({ owner, repo, number }: Props) {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isHotkey('mod+k', e)) {
+        setInputValue('')
         setIsOpen((isOpen) => !isOpen)
       }
     }
@@ -210,6 +211,17 @@ export function PullRequestCommands({ owner, repo, number }: Props) {
                   <div className="ml-auto flex gap-1">
                     <Kbd>O</Kbd>
                     <Kbd>G</Kbd>
+                  </div>
+                </CommandItem>
+                <CommandItem onSelect={() => {
+                  navigator.clipboard.writeText((pr?.repository?.pullRequest?.headRef?.name ?? '').replace('/', '-'))
+                  setIsOpen(false)
+                }}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  <span>Copy branch name for bamboo</span>
+                  <div className="ml-auto flex gap-1">
+                    <Kbd>C</Kbd>
+                    <Kbd>N</Kbd>
                   </div>
                 </CommandItem>
                 <CommandItem onSelect={() => {

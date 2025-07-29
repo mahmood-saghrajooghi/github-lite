@@ -43,7 +43,7 @@ function RouteComponent() {
     })
   }, [navigate, number, owner, repo])
 
-  useRegisterHotkey('g f', goToFileChanges)
+  useRegisterHotkey('g f', goToFileChanges, [number, owner, repo])
 
   return (
     <>

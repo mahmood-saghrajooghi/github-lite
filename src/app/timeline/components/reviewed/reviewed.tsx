@@ -32,7 +32,7 @@ export function Reviewed({ data, style, className, ...props }: { data: PullReque
         <div style={{ gridArea: 'issue' }}>
           <div
             style={style}
-            className={cn("flex flex-col gap-8 rounded-md", className)}
+            className={cn("flex flex-col gap-2 rounded-md", className)}
             {...props}
           >
             {data.body &&

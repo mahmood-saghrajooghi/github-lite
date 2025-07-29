@@ -53,6 +53,7 @@ export class Trie {
   setCurrentNode(node: Node | Leaf) {
     this._currentNode = node;
     this.emit()
+    // this.render()
   }
 
   add(path: string, callback: (event?: KeyboardEvent) => void) {
@@ -61,6 +62,7 @@ export class Trie {
     for (const [index, char] of chars.entries()) {
       if (!node.children[char]) {
         if (index === chars.length - 1) {
+          console.log('adding leaf', char)
           node.children[char] = new Leaf(char, node, callback)
         } else {
           node.children[char] = new Node(char, node)
@@ -80,7 +82,7 @@ export class Trie {
 
   find(path: string): Node | Leaf | undefined {
     let node: Node | Leaf | undefined = this._root
-    for (const char of path) {
+    for (const char of path.split(' ')) {
       const nextNode: Node | Leaf | undefined = node?.children[char]
       if (!nextNode) {
         return undefined;
@@ -144,8 +146,8 @@ export class Trie {
       console.log(`${prefix}${connector}${coloredText}`)
 
       const children = Object.entries(node.children)
-      children.forEach(([_, child], index) => {  // Changed 'key' to '_' since it's unused
-        renderNode(child, prefix + childPrefix, index === children.length - 1)
+      children.forEach((child, index) => {
+        renderNode(child[1], prefix + childPrefix, index === children.length - 1)
       })
     }
 
