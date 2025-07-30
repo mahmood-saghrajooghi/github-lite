@@ -6,6 +6,7 @@ import {
   Check,
   ListFilter as ListFilterIcon,
 } from "lucide-react"
+import { toast } from "sonner"
 
 import {
   Command,
@@ -169,11 +170,15 @@ export function PullRequestCommands({ owner, repo, number }: Props) {
   }, [owner, repo, number])
 
   const copyBranchName = useCallback(() => {
-    navigator.clipboard.writeText(pr?.repository?.pullRequest?.headRef?.name ?? '')
+    const branchName = pr?.repository?.pullRequest?.headRef?.name ?? ''
+    navigator.clipboard.writeText(branchName)
+    toast.success(`Copied branch name: ${branchName}`)
   }, [pr])
 
   const copyBranchNameForBamboo = useCallback(() => {
-    navigator.clipboard.writeText((pr?.repository?.pullRequest?.headRef?.name ?? '').replace('/', '-'))
+    const branchName = (pr?.repository?.pullRequest?.headRef?.name ?? '').replace('/', '-')
+    navigator.clipboard.writeText(branchName)
+    toast.success(`Copied branch name for bamboo: ${branchName}`)
   }, [pr])
 
   useRegisterHotkey('o g', openPRInGithub, { 'o': 'Open', 'o g': 'Open PR in GitHub' })
@@ -219,7 +224,9 @@ export function PullRequestCommands({ owner, repo, number }: Props) {
                   </div>
                 </CommandItem>
                 <CommandItem onSelect={() => {
-                  navigator.clipboard.writeText((pr?.repository?.pullRequest?.headRef?.name ?? '').replace('/', '-'))
+                  const branchName = (pr?.repository?.pullRequest?.headRef?.name ?? '').replace('/', '-')
+                  navigator.clipboard.writeText(branchName)
+                  toast.success(`Copied branch name for bamboo: ${branchName}`)
                   setIsOpen(false)
                 }}>
                   <Copy className="mr-2 h-4 w-4" />
@@ -230,7 +237,9 @@ export function PullRequestCommands({ owner, repo, number }: Props) {
                   </div>
                 </CommandItem>
                 <CommandItem onSelect={() => {
-                  navigator.clipboard.writeText(pr?.repository?.pullRequest?.headRef?.name ?? '')
+                  const branchName = pr?.repository?.pullRequest?.headRef?.name ?? ''
+                  navigator.clipboard.writeText(branchName)
+                  toast.success(`Copied branch name: ${branchName}`)
                   setIsOpen(false)
                 }}>
                   <Copy className="mr-2 h-4 w-4" />

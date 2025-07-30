@@ -1,5 +1,6 @@
 import { ThemeProvider } from '@/components/theme-provider';
 import { AppSidebar } from "@/components/app-sidebar"
+import { Toaster } from "@/components/ui/sonner"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { useNavigate } from '@tanstack/react-router'
 import { useRegisterHotkey } from '@/contexts/hotkey-context'
@@ -22,6 +23,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           {children}
         </SidebarInset>
       </SidebarProvider>
+      <Toaster />
     </ThemeProvider>
   )
 }
