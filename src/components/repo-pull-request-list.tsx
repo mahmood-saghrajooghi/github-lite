@@ -47,7 +47,7 @@ export function RepoPullRequestsList({ owner, repo, search }: PullRequestsListPr
     ref.current?.focus()
   }, [ref])
 
-  useRegisterHotkey('/', callback)
+  useRegisterHotkey('/', callback, { '/': 'Focus search' })
 
   return (
     <Command className="bg-color-unset">

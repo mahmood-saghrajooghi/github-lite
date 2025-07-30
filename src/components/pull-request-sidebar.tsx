@@ -70,7 +70,7 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
     ref.current?.focus()
   }, [ref])
 
-  useRegisterHotkey('/', callback)
+  useRegisterHotkey('/', callback, { '/': 'Focus search' })
 
   return (
     <SidebarProvider
@@ -209,7 +209,7 @@ export function AuthorFilter({ value, onChange, owner, repo }: { value: string |
     setOpen(true)
   }, [])
 
-  useRegisterHotkey('u', callback)
+  useRegisterHotkey('u', callback, { 'u': 'Filter by user' })
 
   const { data } = useRepoCollaborators(owner, repo)
 
@@ -276,7 +276,7 @@ export function StateFilter({ value, onChange }: { value: string | undefined, on
     setOpen(true)
   }, [])
 
-  useRegisterHotkey('s t', callback)
+  useRegisterHotkey('s t', callback, { 's': 'Settings', 's t': 'Filter by state' })
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -403,7 +403,7 @@ function SortFilter({ value, onChange }: { value: string | undefined, onChange: 
     setOpen(true)
   }, [])
 
-  useRegisterHotkey('s b', callback)
+  useRegisterHotkey('s b', callback, { 's': 'Settings', 's b': 'Sort by' })
 
 
   return (

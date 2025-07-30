@@ -27,9 +27,10 @@ export class Node {
 export class Leaf extends Node {
   callback: ((event?: KeyboardEvent) => void) | undefined;
 
-  constructor(key: string, parent: Node, callback: (event?: KeyboardEvent) => void) {
+  constructor(key: string, parent: Node, callback: (event?: KeyboardEvent) => void, description?: string) {
     super(key, parent)
     this.callback = callback
+    this.description = description
   }
 
   getCallback() {
@@ -56,16 +57,30 @@ export class Trie {
     // this.render()
   }
 
-  add(path: string, callback: (event?: KeyboardEvent) => void) {
+  add(path: string, callback: (event?: KeyboardEvent) => void, descriptions?: Record<string, string>) {
     let node: Node | Leaf = this._root
     const chars = path.split(' ');
     for (const [index, char] of chars.entries()) {
       if (!node.children[char]) {
         if (index === chars.length - 1) {
           console.log('adding leaf', char)
-          node.children[char] = new Leaf(char, node, callback)
+          const leafDescription = descriptions?.[path]
+          node.children[char] = new Leaf(char, node, callback, leafDescription)
         } else {
+          // Check if we have a description for this intermediate path
+          const pathSoFar = chars.slice(0, index + 1).join(' ')
+          const nodeDescription = descriptions?.[pathSoFar]
           node.children[char] = new Node(char, node)
+          if (nodeDescription) {
+            node.children[char].description = nodeDescription
+          }
+        }
+      } else if (index < chars.length - 1) {
+        // Update intermediate node description if provided
+        const pathSoFar = chars.slice(0, index + 1).join(' ')
+        const nodeDescription = descriptions?.[pathSoFar]
+        if (nodeDescription && !node.children[char].description) {
+          node.children[char].description = nodeDescription
         }
       }
       node = node.children[char]
@@ -127,6 +142,27 @@ export class Trie {
 
   emit = () => {
     this._subscribers.forEach(cb => cb())
+  }
+
+  getAllHotkeys(): Array<{ sequence: string; description?: string }> {
+    const hotkeys: Array<{ sequence: string; description?: string }> = []
+
+    const traverse = (node: Node | Leaf, path: string[] = []) => {
+      if (node.isLeaf()) {
+        const leaf = node as Leaf
+        hotkeys.push({
+          sequence: path.join(' '),
+          description: leaf.description
+        })
+      }
+
+      Object.entries(node.children).forEach(([key, child]) => {
+        traverse(child, [...path, key])
+      })
+    }
+
+    traverse(this._root)
+    return hotkeys.sort((a, b) => a.sequence.localeCompare(b.sequence))
   }
 
   render() {

@@ -34,7 +34,7 @@ function RouteComponent() {
     })
   }, [navigate, number, owner, repo])
 
-  useRegisterHotkey('g c', goToConversation)
+  useRegisterHotkey('g c', goToConversation, { 'g': 'Go to', 'g c': 'Go to conversation' })
 
   const goToFileChanges = useCallback(() => {
     navigate({
@@ -43,7 +43,7 @@ function RouteComponent() {
     })
   }, [navigate, number, owner, repo])
 
-  useRegisterHotkey('g f', goToFileChanges, [number, owner, repo])
+  useRegisterHotkey('g f', goToFileChanges, { 'g': 'Go to', 'g f': 'Go to file changes' }, [number, owner, repo])
 
   return (
     <>

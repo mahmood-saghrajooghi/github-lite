@@ -41,7 +41,7 @@ export function PullRequestsList() {
     ref.current?.focus()
   }, [ref])
 
-  useRegisterHotkey('/', callback)
+  useRegisterHotkey('/', callback, { '/': 'Focus search' })
 
   return (
     <Command className="bg-color-unset">

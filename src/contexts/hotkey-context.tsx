@@ -13,38 +13,90 @@ import { SequenceTracker } from './sequence'
 import type { NormalizedHotkeyString } from './hotkey-utils'
 import { isFormField } from './hotkey-utils'
 import type { DependencyList } from 'react'
+import { HotkeyVisualizer } from '../components/hotkey-visualizer'
+import { HotkeyReference } from '../components/hotkey-reference'
+
+type HotkeyInfo = {
+  key: string
+  description?: string
+}
 
 type HotkeyContextType = {
   isMetaKeyPressed: boolean
-  registerHotkey: (hotkey: string, callback: (event?: KeyboardEvent) => void) => void
+  registerHotkey: (hotkey: string, callback: (event?: KeyboardEvent) => void, descriptions?: Record<string, string>) => void
   unregisterHotkey: (hotkey: string) => void
   sequenceTrackerState: readonly NormalizedHotkeyString[]
+  isVisualizerOpen: boolean
+  toggleVisualizer: () => void
+  getAvailableHotkeys: () => HotkeyInfo[]
+  currentTrieState: ReturnType<Trie['getCurrentNode']>
+  getCurrentNodeDescription: () => string | undefined
+  isReferenceOpen: boolean
+  toggleReference: () => void
+  getAllHotkeys: () => Array<{ sequence: string; description?: string }>
 }
 
 const HotkeyContext = createContext<HotkeyContextType | null>(null)
 
 export function HotkeyProvider({ children }: { children: React.ReactNode }) {
   const [isMetaKeyPressed, setIsMetaKeyPressed] = useState(false)
+  const [isVisualizerOpen, setIsVisualizerOpen] = useState(false)
+  const [isReferenceOpen, setIsReferenceOpen] = useState(false)
   const trie = useRef<Trie>(new Trie())
   const sequenceTracker = useRef<SequenceTracker>(new SequenceTracker({
     onReset: () => {
       trie.current.reset()
+      setIsVisualizerOpen(false)
     }
   }))
 
   const sequenceTrackerState = useSyncExternalStore(sequenceTracker.current.subscribe, () => sequenceTracker.current.path)
+  const currentTrieState = useSyncExternalStore(trie.current.subscribe, () => trie.current.getCurrentNode())
 
-  const registerHotkey = useCallback((hotkey: string, callback: (event?: KeyboardEvent) => void) => {
-    trie.current.add(hotkey, callback)
+  const registerHotkey = useCallback((hotkey: string, callback: (event?: KeyboardEvent) => void, descriptions?: Record<string, string>) => {
+    trie.current.add(hotkey, callback, descriptions)
   }, [])
 
   const unregisterHotkey = useCallback((hotkey: string) => {
     trie.current.remove(hotkey)
   }, [])
 
+  const toggleVisualizer = useCallback(() => {
+    setIsVisualizerOpen(prev => !prev)
+  }, [])
+
+  const toggleReference = useCallback(() => {
+    setIsReferenceOpen(prev => !prev)
+  }, [])
+
+  const getAvailableHotkeys = useCallback((): HotkeyInfo[] => {
+    const currentNode = trie.current.getCurrentNode()
+    return Object.entries(currentNode.children)
+      .map(([key, node]) => ({
+        key,
+        description: node.description
+      }))
+      .sort((a, b) => a.key.localeCompare(b.key))
+  }, [currentTrieState])
+
+  const getAllHotkeys = useCallback(() => {
+    return trie.current.getAllHotkeys()
+  }, [])
+
+  const getCurrentNodeDescription = useCallback(() => {
+    return trie.current.getCurrentNode().description
+  }, [currentTrieState])
+
   function handleKeyDown(event: KeyboardEvent) {
     if (event.metaKey) {
       setIsMetaKeyPressed(true)
+    }
+
+    // Toggle reference with Shift+'?' key (when not in form fields)
+    if (event.key === 'r' && !isFormField(event.target as Node)) {
+      event.preventDefault()
+      toggleReference()
+      return
     }
 
     if (isFormField(event.target as Node)) {
@@ -57,6 +109,13 @@ export function HotkeyProvider({ children }: { children: React.ReactNode }) {
 
     if (event.key === 'Escape') {
       sequenceTracker.current.reset()
+      // Also close visualizer and reference on Escape
+      if (isVisualizerOpen) {
+        setIsVisualizerOpen(false)
+      }
+      if (isReferenceOpen) {
+        setIsReferenceOpen(false)
+      }
       return
     }
 
@@ -66,8 +125,19 @@ export function HotkeyProvider({ children }: { children: React.ReactNode }) {
     // trie.current.render()
 
     if (node?.isLeaf()) {
-      (node as Leaf).getCallback()?.(event)
-      sequenceTracker.current.reset()
+      // When the callback navigates to a page that has an input with autofocus, the key press is
+      // registered in the input and it's value changes which is not intended. So we need to wait
+      // for the next tick to make sure that all the events related to the key press are processed
+      // before the callback is called.
+      setTimeout(() => {
+        (node as Leaf).getCallback()?.(event)
+        sequenceTracker.current.reset()
+      }, 0)
+      // Close visualizer when we reach a leaf
+      setIsVisualizerOpen(false)
+    } else if (node) {
+      // We have an intermediate node with children, show the visualizer
+      setIsVisualizerOpen(true)
     }
   }
 
@@ -83,7 +153,7 @@ export function HotkeyProvider({ children }: { children: React.ReactNode }) {
     return () => {
       controller.abort()
     }
-  }, [])
+  }, [isVisualizerOpen, toggleVisualizer, isReferenceOpen, toggleReference])
 
 
   const memoizedValue = useMemo(() => ({
@@ -91,11 +161,21 @@ export function HotkeyProvider({ children }: { children: React.ReactNode }) {
     sequenceTrackerState,
     registerHotkey,
     unregisterHotkey,
-  }), [isMetaKeyPressed, registerHotkey, sequenceTrackerState, unregisterHotkey])
+    isVisualizerOpen,
+    toggleVisualizer,
+    getAvailableHotkeys,
+    currentTrieState,
+    getCurrentNodeDescription,
+    isReferenceOpen,
+    toggleReference,
+    getAllHotkeys,
+  }), [isMetaKeyPressed, registerHotkey, sequenceTrackerState, unregisterHotkey, isVisualizerOpen, toggleVisualizer, getAvailableHotkeys, currentTrieState, getCurrentNodeDescription, isReferenceOpen, toggleReference, getAllHotkeys])
 
   return (
     <HotkeyContext.Provider value={memoizedValue}>
       {children}
+      <HotkeyVisualizer />
+      <HotkeyReference />
     </HotkeyContext.Provider>
   )
 }
@@ -111,6 +191,7 @@ export function useHotkey() {
 export function useRegisterHotkey(
   hotkey?: string,
   callback?: (event?: KeyboardEvent) => void,
+  descriptions?: Record<string, string>,
   deps: DependencyList = [],
 ) {
   const { registerHotkey, unregisterHotkey } = useHotkey()
@@ -121,11 +202,11 @@ export function useRegisterHotkey(
       return
     }
 
-    registerHotkey(hotkey, callback)
+    registerHotkey(hotkey, callback, descriptions)
 
     return () => {
       unregisterHotkey(hotkey)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [registerHotkey, unregisterHotkey, hotkey, callback, ...deps])
+  }, [registerHotkey, unregisterHotkey, hotkey, callback, descriptions, ...deps])
 }

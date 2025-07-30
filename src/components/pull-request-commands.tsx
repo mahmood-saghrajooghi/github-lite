@@ -172,8 +172,8 @@ export function PullRequestCommands({ owner, repo, number }: Props) {
     navigator.clipboard.writeText(pr?.repository?.pullRequest?.headRef?.name ?? '')
   }, [pr])
 
-  useRegisterHotkey('o g', openPRInGithub)
-  useRegisterHotkey('c n', copyBranchName)
+  useRegisterHotkey('o g', openPRInGithub, { 'o': 'Open', 'o g': 'Open PR in GitHub' })
+  useRegisterHotkey('c n', copyBranchName, { 'c': 'Copy', 'c n': 'Copy branch name' })
 
   if (!isOpen) {
     return null
