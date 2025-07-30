@@ -172,8 +172,13 @@ export function PullRequestCommands({ owner, repo, number }: Props) {
     navigator.clipboard.writeText(pr?.repository?.pullRequest?.headRef?.name ?? '')
   }, [pr])
 
+  const copyBranchNameForBamboo = useCallback(() => {
+    navigator.clipboard.writeText((pr?.repository?.pullRequest?.headRef?.name ?? '').replace('/', '-'))
+  }, [pr])
+
   useRegisterHotkey('o g', openPRInGithub, { 'o': 'Open', 'o g': 'Open PR in GitHub' })
   useRegisterHotkey('c n', copyBranchName, { 'c': 'Copy', 'c n': 'Copy branch name' })
+  useRegisterHotkey('c b', copyBranchNameForBamboo, { 'c': 'Copy', 'c b': 'Copy branch name for bamboo' })
 
   if (!isOpen) {
     return null
@@ -221,7 +226,7 @@ export function PullRequestCommands({ owner, repo, number }: Props) {
                   <span>Copy branch name for bamboo</span>
                   <div className="ml-auto flex gap-1">
                     <Kbd>C</Kbd>
-                    <Kbd>N</Kbd>
+                    <Kbd>B</Kbd>
                   </div>
                 </CommandItem>
                 <CommandItem onSelect={() => {
