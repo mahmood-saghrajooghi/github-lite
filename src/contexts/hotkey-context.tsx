@@ -93,7 +93,7 @@ export function HotkeyProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Toggle reference with Shift+'?' key (when not in form fields)
-    if (event.key === 'r' && !isFormField(event.target as Node)) {
+    if (event.key === '?' && event.shiftKey && !isFormField(event.target as Node)) {
       event.preventDefault()
       toggleReference()
       return
