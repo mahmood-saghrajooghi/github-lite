@@ -129,16 +129,16 @@ function File({
 
   useEffect(() => {
     if (!hunks?.length) return
-    
+
     setIsTokenizing(true)
-    
+
     // Try to use service worker first, fallback to main thread
     const processTokens = async () => {
       try {
         // Convert hunks to diff format for worker processing
         const diffContent = hunks.map(hunk => hunk.content).join('\n')
         const result = await diffWorkerClient.processDiff(diffContent, 'tsx')
-        
+
         // Extract tokens for this specific file
         const fileTokens = result.tokens[newPath]
         if (fileTokens) {
@@ -157,7 +157,7 @@ function File({
         setIsTokenizing(false)
       }
     }
-    
+
     processTokens()
   }, [hunks, newPath])
 
@@ -290,6 +290,9 @@ function File({
     // Start with existing comments
     const widgetsMap = comments.reduce<Record<string, React.ReactElement[]>>(
       (widgets, comment) => {
+        // Skip comments without a thread
+        if (!comment.thread) return widgets
+
         const change = hunks.reduce(
           (prev, hunk) => {
             const res = hunk.changes.find((change) => {
@@ -481,7 +484,7 @@ function Diff({
     }
 
     setIsProcessingDiff(true)
-    
+
     // Try to use service worker first, fallback to main thread
     const processDiff = async () => {
       try {
@@ -496,7 +499,7 @@ function Diff({
         setIsProcessingDiff(false)
       }
     }
-    
+
     processDiff()
   }, [diff])
 

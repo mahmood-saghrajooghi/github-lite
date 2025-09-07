@@ -10,6 +10,8 @@ import { useMutation } from '@tanstack/react-query';
 import { CommentBody } from '@/components/comment-card/comment-body';
 import { Reactions } from '@/components/comment-card/reactions';
 import { AddPullRequestReviewThreadReplyMutation } from './add-pull-request-review-thread-reply.mutation';
+import { ResolveReviewThreadMutation } from './resolve-review-thread.mutation';
+import { UnresolveReviewThreadMutation } from './unresolve-review-thread.mutation';
 import { useIsFocused } from '@/hooks/use-is-focused';
 import { Kbd } from '@/components/ui/kbd';
 import { ReplyTrap } from '@/components/ui/reply-trap';
@@ -18,7 +20,7 @@ import { QuickFocus } from '@/components/quick-focus';
 import { queryClient } from '@/query-client';
 import { getQueryKey } from '@/hooks/api/use-pr-query';
 import { useUser } from '@/hooks/api/use-user';
-import { IssueTimelineQuery, PullRequestReviewComment, ReactionGroup } from '@/generated/graphql'
+import { IssueTimelineQuery, PullRequestReviewComment, ReactionGroup, ResolveReviewThreadInput, UnresolveReviewThreadInput } from '@/generated/graphql'
 import { useState } from 'react';
 import { FoldVertical, UnfoldVertical } from 'lucide-react';
 
@@ -75,6 +77,40 @@ function optimisticallyAddPullRequestReviewThreadReply({ reviewThread, user, val
   });
 }
 
+function optimisticallyUpdateReviewThreadResolution({ reviewThread, isResolved, user }: { reviewThread: PullRequestReviewThread, isResolved: boolean, user: User | undefined | null }) {
+  const owner = reviewThread.repository.owner.login;
+  const repo = reviewThread.repository.name;
+  const number = reviewThread.pullRequest.number;
+  const threadId = reviewThread.id;
+  const queryKey = getQueryKey(owner, repo, number);
+
+  queryClient.setQueryData(queryKey, (data: IssueTimelineQuery) => {
+    const updatedThreadNodes = data?.repository?.pullRequest?.reviewThreads.nodes?.map(thread => {
+      if (thread?.id === threadId) {
+        return {
+          ...thread,
+          isResolved,
+          resolvedBy: isResolved ? user : null
+        }
+      }
+      return thread;
+    });
+
+    return {
+      ...data,
+      repository: {
+        ...data.repository,
+        pullRequest: {
+          ...data.repository?.pullRequest,
+          reviewThreads: {
+            nodes: updatedThreadNodes
+          }
+        }
+      }
+    }
+  });
+}
+
 
 export function PullRequestThread({ data }: { data: PullRequestReviewThread }) {
   const { isFocused, handleFocus, handleBlur } = useIsFocused();
@@ -111,8 +147,50 @@ export function PullRequestThread({ data }: { data: PullRequestReviewThread }) {
     }
   });
 
+  const { mutate: resolveThread } = useMutation({
+    mutationFn: async () => {
+      optimisticallyUpdateReviewThreadResolution({
+        reviewThread: data,
+        isResolved: true,
+        user: user
+      });
+      await github.graphql(ResolveReviewThreadMutation, {
+        input: {
+          clientMutationId: '1',
+          threadId: data.id,
+        } as ResolveReviewThreadInput
+      });
+      queryClient.invalidateQueries({ queryKey: getQueryKey(data.repository.owner.login, data.repository.name, data.pullRequest.number) });
+    }
+  });
+
+  const { mutate: unresolveThread } = useMutation({
+    mutationFn: async () => {
+             optimisticallyUpdateReviewThreadResolution({
+         reviewThread: data,
+         isResolved: false,
+         user: undefined
+       });
+      await github.graphql(UnresolveReviewThreadMutation, {
+        input: {
+          clientMutationId: '1',
+          threadId: data.id,
+        } as UnresolveReviewThreadInput
+      });
+      queryClient.invalidateQueries({ queryKey: getQueryKey(data.repository.owner.login, data.repository.name, data.pullRequest.number) });
+    }
+  });
+
   const onSubmit = async (body: string): Promise<void> => {
     return mutate(body);
+  };
+
+  const handleResolve = () => {
+    resolveThread();
+  };
+
+  const handleUnresolve = () => {
+    unresolveThread();
   };
 
   const toggleExpanded = () => {
@@ -202,11 +280,23 @@ export function PullRequestThread({ data }: { data: PullRequestReviewThread }) {
                 </div>
                 <div className="p-3 border-t border-input">
                   <CommentForm onSubmit={onSubmit}>
-                    {data.viewerCanResolve &&
-                      <Button className="flex-shrink-0 px-4 py-2 rounded-md bg-accent pressed:bg-accent/80 border border-accent pressed:border-accent/80 text-foreground text-sm font-medium cursor-default outline-none focus-visible:ring-2 ring-offset-2 ring-blue-600">
+                    {!data.isResolved && data.viewerCanResolve && (
+                      <Button
+                        onClick={handleResolve}
+                        className="flex-shrink-0 px-4 py-2 rounded-md bg-accent pressed:bg-accent/80 border border-accent pressed:border-accent/80 text-foreground text-sm font-medium cursor-pointer outline-none focus-visible:ring-2 ring-offset-2 ring-blue-600 hover:bg-accent/90"
+                      >
                         Resolve conversation
                       </Button>
-                    }
+                    )}
+                    {data.isResolved && data.viewerCanUnresolve && (
+                      <Button
+                        onClick={handleUnresolve}
+                        variant="outline"
+                        className="flex-shrink-0 px-4 py-2 rounded-md text-sm font-medium cursor-pointer outline-none focus-visible:ring-2 ring-offset-2 ring-blue-600"
+                      >
+                        Unresolve conversation
+                      </Button>
+                    )}
                   </CommentForm>
                 </div>
               </div>

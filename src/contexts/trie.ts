@@ -63,7 +63,6 @@ export class Trie {
     for (const [index, char] of chars.entries()) {
       if (!node.children[char]) {
         if (index === chars.length - 1) {
-          console.log('adding leaf', char)
           const leafDescription = descriptions?.[path]
           node.children[char] = new Leaf(char, node, callback, leafDescription)
         } else {

@@ -50,7 +50,7 @@ export function PullRequestsList() {
         ref={ref}
         autoFocus
         onKeyDown={(e) => {
-          if (e.key >= '0' && e.key <= '9') {
+          if (e.key >= '0' && e.key <= '9' && isMetaKeyPressed) {
             e.preventDefault();
             e.stopPropagation();
             navigate({
