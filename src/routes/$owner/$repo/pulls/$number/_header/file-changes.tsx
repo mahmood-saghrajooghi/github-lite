@@ -25,6 +25,9 @@ import { github } from '@/lib/client'
 import { getThreadsByIdMap } from '@/lib/pull-request'
 import { useSelection } from '@/hooks/diff-viewer/use-selection'
 import { diffWorkerClient } from '@/lib/diff-worker-client'
+import { useDiffMode } from '@/contexts/diff-mode-context'
+import { useDifftasticDiff } from '@/hooks/api/use-difftastic-diff'
+import { DifftasticDiffView } from '@/components/difftastic-diff-view'
 // import { Command, CommandEmpty, CommandInput } from '@/components/ui/command'
 // import { CommandItem as CommandItemPrimitive, CommandList, CommandList as CommandListPrimitive } from 'cmdk'
 
@@ -34,6 +37,7 @@ import './github-token-colors.css'
 import { Button } from '@/components/ui/button'
 import { PullRequestThread } from '@/app/timeline/components/pull-request-thread/pull-request-thread'
 import { Card } from '@/components/ui/card'
+import { Toggle } from '@/components/ui/toggle'
 
 export const Route = createFileRoute(
   '/$owner/$repo/pulls/$number/_header/file-changes',
@@ -87,6 +91,8 @@ type FileProps = {
     NonNullable<IssueTimelineQuery['repository']>['pullRequest']
   >
   comments: (PullRequestReviewComment & { thread: PullRequestReviewThread })[]
+  owner: string
+  repo: string
 }
 
 function HunkSpacer({ content }: { content: string }) {
@@ -110,9 +116,12 @@ function File({
   newPath,
   pullRequest,
   comments,
+  owner,
+  repo,
 }: FileProps) {
   const pullRequestId = pullRequest.id
   const [isOpen, setIsOpen] = useState(true)
+  const { mode, toggleMode } = useDiffMode()
   // const [selectedChanges, toggleChangeSelection] = useChangeSelect(hunks, {
   //   multiple: true,
   // });
@@ -124,8 +133,58 @@ function File({
     side: string
   } | null>(null)
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [tokens, setTokens] = useState<any>(null)
   const [isTokenizing, setIsTokenizing] = useState(false)
+  const [fileContents, setFileContents] = useState<{
+    oldContent: string
+    newContent: string
+  } | null>(null)
+  const [isFetchingContents, setIsFetchingContents] = useState(false)
+
+  // Fetch file contents for structural diff
+  useEffect(() => {
+    if (mode !== 'structural') return
+
+    const fetchFileContents = async () => {
+      setIsFetchingContents(true)
+      try {
+        // Fetch old content (base)
+        const oldContentResponse = await fetch(
+          `https://raw.githubusercontent.com/${owner}/${repo}/${oldRevision}/${oldPath}`
+        )
+        const oldContent = oldContentResponse.ok ? await oldContentResponse.text() : ''
+
+        // Fetch new content (head)
+        const newContentResponse = await fetch(
+          `https://raw.githubusercontent.com/${owner}/${repo}/${newRevision}/${newPath}`
+        )
+        const newContent = newContentResponse.ok ? await newContentResponse.text() : ''
+
+        setFileContents({ oldContent, newContent })
+      } catch (error) {
+        console.error('Failed to fetch file contents:', error)
+        setFileContents(null)
+      } finally {
+        setIsFetchingContents(false)
+      }
+    }
+
+    fetchFileContents()
+  }, [mode, owner, repo, oldRevision, newRevision, oldPath, newPath])
+
+  // Difftastic diff query (only enabled in structural mode)
+  const {
+    data: difftasticDiff,
+    isLoading: isDifftasticLoading,
+    error: difftasticError,
+  } = useDifftasticDiff({
+    oldContent: fileContents?.oldContent || '',
+    newContent: fileContents?.newContent || '',
+    oldPath,
+    newPath,
+    enabled: mode === 'structural' && !!fileContents,
+  })
 
   useEffect(() => {
     if (!hunks?.length) return
@@ -366,24 +425,37 @@ function File({
 
   return (
     <div className="border border-input rounded-lg">
-      <div className="grid grid-cols-[1fr_1fr] gap-2 pl-8 pr-4 py-2 relative">
-        {oldPath === newPath ? (
-          <div className="flex items-center gap-2">
-            <FileIcon className="!w-3.5 !h-3.5 text-muted-foreground" />
-            {oldPath}
-          </div>
-        ) : (
-          <>
-            <div className="flex gap-2">
+      <div className="flex items-center justify-between pl-8 pr-4 py-2 relative">
+        <div className="flex-1 grid grid-cols-[1fr_1fr] gap-2">
+          {oldPath === newPath ? (
+            <div className="flex items-center gap-2">
               <FileIcon className="!w-3.5 !h-3.5 text-muted-foreground" />
               {oldPath}
             </div>
-            <div className="flex gap-2">
-              <FileIcon className="!w-3.5 !h-3.5 text-muted-foreground" />
-              {newPath}
-            </div>
-          </>
-        )}
+          ) : (
+            <>
+              <div className="flex gap-2">
+                <FileIcon className="!w-3.5 !h-3.5 text-muted-foreground" />
+                {oldPath}
+              </div>
+              <div className="flex gap-2">
+                <FileIcon className="!w-3.5 !h-3.5 text-muted-foreground" />
+                {newPath}
+              </div>
+            </>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Toggle
+            size="sm"
+            pressed={mode === 'structural'}
+            onPressedChange={toggleMode}
+            aria-label="Toggle structural diff"
+            className="text-xs"
+          >
+            {mode === 'structural' ? 'Structural' : 'Traditional'}
+          </Toggle>
+        </div>
         <Button
           variant="ghost"
           className="w-6 h-6 !px-0 !py-0 absolute left-1 top-1/2 -translate-y-1/2"
@@ -396,35 +468,66 @@ function File({
       </div>
       {isOpen && (
         <>
-          {isTokenizing ? (
-            <div className="p-4 text-muted-foreground text-xs">
-              Processing syntax highlighting...
-            </div>
-          ) : tokens ? (
-            <DiffView
-              key={oldRevision + '-' + newRevision}
-              viewType="split"
-              diffType={type}
-              hunks={hunks}
-              renderToken={renderToken}
-              tokens={tokens}
-              widgets={widgets}
-              codeClassName="border-r border-input"
-              {...diffProps}
-            >
-              {(hunks) =>
-                hunks.map((hunk, index) => (
-                  <>
-                    <HunkSpacer key={`spacer-${index}`} content={hunk.content} />
-                    <Hunk key={hunk.content} hunk={hunk} />
-                  </>
-                ))
-              }
-            </DiffView>
+          {mode === 'structural' ? (
+            // Structural diff view (difftastic)
+            <>
+              {isFetchingContents || isDifftasticLoading ? (
+                <div className="p-4 text-muted-foreground text-xs">
+                  {isFetchingContents
+                    ? 'Fetching file contents...'
+                    : 'Processing structural diff...'}
+                </div>
+              ) : difftasticError ? (
+                <div className="p-4 text-red-500 text-xs">
+                  Error: {difftasticError instanceof Error ? difftasticError.message : 'Failed to generate structural diff'}
+                  <div className="mt-2">
+                    <Button size="sm" variant="outline" onClick={toggleMode}>
+                      Switch to traditional diff
+                    </Button>
+                  </div>
+                </div>
+              ) : difftasticDiff ? (
+                <DifftasticDiffView diff={difftasticDiff} />
+              ) : (
+                <div className="p-4 text-muted-foreground text-xs">
+                  Loading structural diff...
+                </div>
+              )}
+            </>
           ) : (
-            <div className="p-4 text-muted-foreground text-xs">
-              Loading diff view...
-            </div>
+            // Traditional diff view (react-diff-view)
+            <>
+              {isTokenizing ? (
+                <div className="p-4 text-muted-foreground text-xs">
+                  Processing syntax highlighting...
+                </div>
+              ) : tokens ? (
+                <DiffView
+                  key={oldRevision + '-' + newRevision}
+                  viewType="split"
+                  diffType={type}
+                  hunks={hunks}
+                  renderToken={renderToken}
+                  tokens={tokens}
+                  widgets={widgets}
+                  codeClassName="border-r border-input"
+                  {...diffProps}
+                >
+                  {(hunks) =>
+                    hunks.map((hunk, index) => (
+                      <>
+                        <HunkSpacer key={`spacer-${index}`} content={hunk.content} />
+                        <Hunk key={hunk.content} hunk={hunk} />
+                      </>
+                    ))
+                  }
+                </DiffView>
+              ) : (
+                <div className="p-4 text-muted-foreground text-xs">
+                  Loading diff view...
+                </div>
+              )}
+            </>
           )}
         </>
       )}
@@ -434,10 +537,14 @@ function File({
 
 function Diff({
   data,
+  owner,
+  repo,
 }: {
   data: NonNullable<
     NonNullable<IssueTimelineQuery['repository']>['pullRequest']
   >
+  owner: string
+  repo: string
 }) {
   const { data: diff } = usePRDiffQuery(
     data.repository!.owner.login,
@@ -450,7 +557,7 @@ function Diff({
 
   const threadsById = useMemo(
     () => getThreadsByIdMap(data as PullRequest),
-    [data.reviewThreads.nodes],
+    [data],
   )
 
   const comments = useMemo(() => {
@@ -519,6 +626,8 @@ function Diff({
           {...file}
           pullRequest={data}
           comments={comments.get(file.newPath) ?? []}
+          owner={owner}
+          repo={repo}
         />
       ))}
     </div>
@@ -535,7 +644,7 @@ function RouteComponent() {
 
   return (
     <div>
-      <Diff data={data.repository?.pullRequest} />
+      <Diff data={data.repository?.pullRequest} owner={owner} repo={repo} />
     </div>
   )
 }

@@ -7,7 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    TanStackRouterVite(), 
+    TanStackRouterVite(),
     react(),
     VitePWA({
       strategies: 'injectManifest',
@@ -15,7 +15,11 @@ export default defineConfig({
       filename: 'diff-worker.ts',
       registerType: 'autoUpdate',
       injectManifest: {
-        injectionPoint: undefined
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}']
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module'
       }
     })
   ],
