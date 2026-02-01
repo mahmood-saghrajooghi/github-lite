@@ -20,9 +20,6 @@ import { Route as OwnerRepoPullsNumberHeaderConversationRouteImport } from './ro
 const LoginLazyRouteImport = createFileRoute('/login')()
 const AboutLazyRouteImport = createFileRoute('/about')()
 const IndexLazyRouteImport = createFileRoute('/')()
-const OwnerRepoPullsNumberRouteImport = createFileRoute(
-  '/$owner/$repo/pulls/$number',
-)()
 
 const LoginLazyRoute = LoginLazyRouteImport.update({
   id: '/login',
@@ -49,15 +46,11 @@ const OwnerRepoIndexRoute = OwnerRepoIndexRouteImport.update({
   path: '/$owner/$repo/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OwnerRepoPullsNumberRoute = OwnerRepoPullsNumberRouteImport.update({
-  id: '/$owner/$repo/pulls/$number',
-  path: '/$owner/$repo/pulls/$number',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const OwnerRepoPullsNumberHeaderRoute =
   OwnerRepoPullsNumberHeaderRouteImport.update({
-    id: '/_header',
-    getParentRoute: () => OwnerRepoPullsNumberRoute,
+    id: '/$owner/$repo/pulls/$number/_header',
+    path: '/$owner/$repo/pulls/$number',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const OwnerRepoPullsNumberHeaderFileChangesRoute =
   OwnerRepoPullsNumberHeaderFileChangesRouteImport.update({
@@ -76,8 +69,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/about': typeof AboutLazyRoute
   '/login': typeof LoginLazyRoute
-  '/my-prs': typeof MyPrsIndexRoute
-  '/$owner/$repo': typeof OwnerRepoIndexRoute
+  '/my-prs/': typeof MyPrsIndexRoute
+  '/$owner/$repo/': typeof OwnerRepoIndexRoute
   '/$owner/$repo/pulls/$number': typeof OwnerRepoPullsNumberHeaderRouteWithChildren
   '/$owner/$repo/pulls/$number/conversation': typeof OwnerRepoPullsNumberHeaderConversationRoute
   '/$owner/$repo/pulls/$number/file-changes': typeof OwnerRepoPullsNumberHeaderFileChangesRoute
@@ -99,7 +92,6 @@ export interface FileRoutesById {
   '/login': typeof LoginLazyRoute
   '/my-prs/': typeof MyPrsIndexRoute
   '/$owner/$repo/': typeof OwnerRepoIndexRoute
-  '/$owner/$repo/pulls/$number': typeof OwnerRepoPullsNumberRouteWithChildren
   '/$owner/$repo/pulls/$number/_header': typeof OwnerRepoPullsNumberHeaderRouteWithChildren
   '/$owner/$repo/pulls/$number/_header/conversation': typeof OwnerRepoPullsNumberHeaderConversationRoute
   '/$owner/$repo/pulls/$number/_header/file-changes': typeof OwnerRepoPullsNumberHeaderFileChangesRoute
@@ -110,8 +102,8 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/login'
-    | '/my-prs'
-    | '/$owner/$repo'
+    | '/my-prs/'
+    | '/$owner/$repo/'
     | '/$owner/$repo/pulls/$number'
     | '/$owner/$repo/pulls/$number/conversation'
     | '/$owner/$repo/pulls/$number/file-changes'
@@ -132,7 +124,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/my-prs/'
     | '/$owner/$repo/'
-    | '/$owner/$repo/pulls/$number'
     | '/$owner/$repo/pulls/$number/_header'
     | '/$owner/$repo/pulls/$number/_header/conversation'
     | '/$owner/$repo/pulls/$number/_header/file-changes'
@@ -144,7 +135,7 @@ export interface RootRouteChildren {
   LoginLazyRoute: typeof LoginLazyRoute
   MyPrsIndexRoute: typeof MyPrsIndexRoute
   OwnerRepoIndexRoute: typeof OwnerRepoIndexRoute
-  OwnerRepoPullsNumberRoute: typeof OwnerRepoPullsNumberRouteWithChildren
+  OwnerRepoPullsNumberHeaderRoute: typeof OwnerRepoPullsNumberHeaderRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -173,22 +164,15 @@ declare module '@tanstack/react-router' {
     '/my-prs/': {
       id: '/my-prs/'
       path: '/my-prs'
-      fullPath: '/my-prs'
+      fullPath: '/my-prs/'
       preLoaderRoute: typeof MyPrsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$owner/$repo/': {
       id: '/$owner/$repo/'
       path: '/$owner/$repo'
-      fullPath: '/$owner/$repo'
+      fullPath: '/$owner/$repo/'
       preLoaderRoute: typeof OwnerRepoIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/$owner/$repo/pulls/$number': {
-      id: '/$owner/$repo/pulls/$number'
-      path: '/$owner/$repo/pulls/$number'
-      fullPath: '/$owner/$repo/pulls/$number'
-      preLoaderRoute: typeof OwnerRepoPullsNumberRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$owner/$repo/pulls/$number/_header': {
@@ -196,7 +180,7 @@ declare module '@tanstack/react-router' {
       path: '/$owner/$repo/pulls/$number'
       fullPath: '/$owner/$repo/pulls/$number'
       preLoaderRoute: typeof OwnerRepoPullsNumberHeaderRouteImport
-      parentRoute: typeof OwnerRepoPullsNumberRoute
+      parentRoute: typeof rootRouteImport
     }
     '/$owner/$repo/pulls/$number/_header/file-changes': {
       id: '/$owner/$repo/pulls/$number/_header/file-changes'
@@ -233,24 +217,13 @@ const OwnerRepoPullsNumberHeaderRouteWithChildren =
     OwnerRepoPullsNumberHeaderRouteChildren,
   )
 
-interface OwnerRepoPullsNumberRouteChildren {
-  OwnerRepoPullsNumberHeaderRoute: typeof OwnerRepoPullsNumberHeaderRouteWithChildren
-}
-
-const OwnerRepoPullsNumberRouteChildren: OwnerRepoPullsNumberRouteChildren = {
-  OwnerRepoPullsNumberHeaderRoute: OwnerRepoPullsNumberHeaderRouteWithChildren,
-}
-
-const OwnerRepoPullsNumberRouteWithChildren =
-  OwnerRepoPullsNumberRoute._addFileChildren(OwnerRepoPullsNumberRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   AboutLazyRoute: AboutLazyRoute,
   LoginLazyRoute: LoginLazyRoute,
   MyPrsIndexRoute: MyPrsIndexRoute,
   OwnerRepoIndexRoute: OwnerRepoIndexRoute,
-  OwnerRepoPullsNumberRoute: OwnerRepoPullsNumberRouteWithChildren,
+  OwnerRepoPullsNumberHeaderRoute: OwnerRepoPullsNumberHeaderRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
