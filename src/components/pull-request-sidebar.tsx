@@ -89,7 +89,7 @@ export function PullRequestsSidebar({ owner, repo, searchParams, navigate }: Pro
       }}
     >
       <Command className="bg-color-unset rounded-none">
-        <Sidebar collapsible="none" className="bg-color-unset border-r">
+        <Sidebar collapsible="none" className="bg-color-unset border-r" >
           <SidebarHeader className="text-sm flex flex-row items-center h-12 p-0">
             <CommandInput
               placeholder="Search pull requests"
