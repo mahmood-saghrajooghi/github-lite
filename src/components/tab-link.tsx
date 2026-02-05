@@ -19,7 +19,7 @@ export const LinkImplementation = forwardRef<HTMLAnchorElement, LinkProps>(({
       href={href}
       ref={ref}
       className={clsx(
-        'flex items-center gap-1.5 h-7 px-2 rounded-md border border-transparent hover:border-input data-[status=active]:border-input shadow-sm text-muted-foreground hover:bg-accent/50 data-[status=active]:bg-accent/50 hover:text-accent-foreground data-[status=active]:text-foreground group duration-200 outline-none',
+        'flex items-center gap-1.5 h-6 px-2 rounded-md data-[status=active]:bg-muted shadow-sm text-muted-foreground hover:bg-muted hover:text-accent-foreground data-[status=active]:text-foreground group duration-200 outline-none',
         className,
       )}
       {...props}

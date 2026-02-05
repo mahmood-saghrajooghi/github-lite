@@ -133,6 +133,7 @@ const SidebarProvider = React.forwardRef<
       <SidebarContext.Provider value={contextValue}>
         <TooltipProvider delayDuration={0}>
           <div
+            data-pull-request-page="true"
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH,

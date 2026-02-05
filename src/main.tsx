@@ -6,7 +6,8 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import { routeTree } from './routeTree.gen'
 
-import './main.css'
+import './styles/globals.css'
+import './styles/pull-request.css'
 import { HotkeyProvider } from './contexts/hotkey-context'
 import { queryClient, asyncStoragePersister } from './query-client'
 

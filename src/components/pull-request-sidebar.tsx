@@ -223,9 +223,9 @@ export function AuthorFilter({ value, onChange, owner, repo }: { value: string |
           aria-expanded={open}
           className="max-w-[200px] justify-between"
         >
-          <ButtonIcon>
+          <Button size="icon">
             <User className="h-4 w-4 shrink-0" />
-          </ButtonIcon>
+          </Button>
           {value ? value : "Author"}
         </Button>
       </PopoverTrigger>
@@ -288,9 +288,9 @@ export function StateFilter({ value, onChange }: { value: string | undefined, on
           aria-expanded={open}
           className="max-w-[200px] justify-between"
         >
-          <ButtonIcon>
+          <Button size="icon">
             <ListFilterIcon className="h-4 w-4 shrink-0" />
-          </ButtonIcon>
+          </Button>
           {value ? value : "State"}
         </Button>
       </PopoverTrigger>
@@ -416,9 +416,9 @@ function SortFilter({ value, onChange }: { value: string | undefined, onChange: 
           aria-expanded={open}
           className="max-w-[200px] justify-between"
         >
-          <ButtonIcon>
+          <Button size="icon">
             <ListFilterIcon className="h-4 w-4 shrink-0" />
-          </ButtonIcon>
+          </Button>
           {value ? value : "Sort by"}
         </Button>
       </PopoverTrigger>

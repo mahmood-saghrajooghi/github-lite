@@ -57,9 +57,9 @@ export function Reactions({ id, data: initialData }: { id: string, data: Reactio
       <Popover>
         <PopoverTrigger asChild>
           <Button variant="ghost" size="icon" className="h-8 w-8">
-            <ButtonIcon>
+            <Button size="icon">
               <SmileyIcon />
-            </ButtonIcon>
+            </Button>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="flex gap-2 p-1.5 w-auto" align="start">
